@@ -2,66 +2,79 @@
     "produce": {
         "color": "green",
         "icon": "leaf",
-        "label": "PRODUCE"
+        "label_en": "Produce",
+        "label_es": "Productos Frescos"
     },
     "dairy": {
         "color": "blue",
         "icon": "milk",
-        "label": "DAIRY"
+        "label_en": "Dairy",
+        "label_es": "Lácteos"
     },
     "bev_alc": {
         "color": "amber",
         "icon": "beer",
-        "label": "BEV-ALC"
+        "label_en": "Alcohol",
+        "label_es": "Alcohol"
     },
     "bev_bib": {
         "color": "indigo",
         "icon": "cup-soda",
-        "label": "BEV-BIB"
+        "label_en": "Fountain Beverages",
+        "label_es": "Bebidas de Fuente"
     },
     "bev_rtd": {
         "color": "cyan",
         "icon": "bottle-water",
-        "label": "BEV-RTD"
+        "label_en": "Bottled Beverages",
+        "label_es": "Bebidas Embotelladas"
     },
     "cleaning": {
         "color": "teal",
         "icon": "spray-can",
-        "label": "CLEANING"
+        "label_en": "Cleaning",
+        "label_es": "Limpieza"
     },
     "disposables": {
         "color": "rose",
         "icon": "utensils",
-        "label": "DISPOSABLES"
+        "label_en": "Disposables",
+        "label_es": "Desechables"
     },
     "frozen.ref": {
         "color": "sky",
         "icon": "snowflake",
-        "label": "FROZEN.REF"
+        "label_en": "Frozen/Refrigerated",
+        "label_es": "Congelados/Refrigerados"
     },
     "grocery_dry": {
         "color": "yellow",
         "icon": "wheat",
-        "label": "GROCERY DRY"
+        "label_en": "Dry Grocery",
+        "label_es": "Abarrotes Secos"
     },
     "meats": {
         "color": "red",
         "icon": "beef",
-        "label": "MEATS"
+        "label_en": "Meats",
+        "label_es": "Carnes"
     },
     "prepared": {
         "color": "orange",
         "icon": "chef-hat",
-        "label": "PREPARED"
+        "label_en": "Prepared",
+        "label_es": "Preparados"
     },
     "smallwares": {
         "color": "gray",
         "icon": "cooking-pot",
-        "label": "SMALLWARES"
+        "label_en": "Smallwares",
+        "label_es": "Utensilios"
     },
     "bakery": {
         "color": "yellow",
         "icon": "croissant",
-        "label": "BAKERY"
+        "label_en": "Bakery",
+        "label_es": "Panadería"
     }
 }

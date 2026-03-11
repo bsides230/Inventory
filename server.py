@@ -134,7 +134,8 @@ async def get_categories():
             cat_config = config.get(cat_id, {})
             categories.append({
                 "id": cat_id,
-                "label": cat_config.get("label", cat_data["label"]),
+                "label_en": cat_config.get("label_en", cat_config.get("label", cat_data["label"])),
+                "label_es": cat_config.get("label_es", cat_config.get("label", cat_data["label"])),
                 "icon": cat_config.get("icon", "box"),
                 "color": cat_config.get("color", "gray")
             })

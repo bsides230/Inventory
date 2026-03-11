@@ -68,13 +68,24 @@ def convert_excel_to_json():
                     config[cat_id] = {
                         "color": fallback_colors[icon_idx % len(fallback_colors)],
                         "icon": fallback_icons[icon_idx % len(fallback_icons)],
-                        "label": sheet_name
+                        "label_en": sheet_name,
+                        "label_es": sheet_name
                     }
                     config_updated = True
                     icon_idx += 1
-                elif "label" not in config[cat_id]:
-                    config[cat_id]["label"] = sheet_name
-                    config_updated = True
+                else:
+                    needs_update = False
+                    if "label_en" not in config[cat_id]:
+                        config[cat_id]["label_en"] = config[cat_id].get("label", sheet_name)
+                        needs_update = True
+                    if "label_es" not in config[cat_id]:
+                        config[cat_id]["label_es"] = config[cat_id].get("label", sheet_name)
+                        needs_update = True
+                    if "label" in config[cat_id] and "label_en" in config[cat_id] and "label_es" in config[cat_id]:
+                        del config[cat_id]["label"]
+                        needs_update = True
+                    if needs_update:
+                        config_updated = True
 
                 category_data = {
                     "label": sheet_name,

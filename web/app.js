@@ -126,6 +126,10 @@ function applyLanguage() {
 
     // If we're logged in, re-render to update dynamic text
     if (state.currentCategory) {
+        const catConfig = state.categories.find(c => c.id === state.currentCategory);
+        if (catConfig) {
+            DOM.categoryTitle.textContent = state.lang === 'es' ? catConfig.label_es : catConfig.label_en;
+        }
         renderCategory(state.currentCategory);
     } else {
         renderDashboard();
@@ -145,12 +149,14 @@ function renderDashboard() {
         const btn = document.createElement('button');
         btn.className = 'category-btn';
 
+        const displayLabel = state.lang === 'es' ? cat.label_es : cat.label_en;
+
         // Custom styling for category colors
         btn.innerHTML = `
             <div class="category-icon-container bg-${cat.color}-900 border-${cat.color}-700">
                 <i data-lucide="${cat.icon}" class="category-icon text-${cat.color}-400"></i>
             </div>
-            <span class="category-title">${cat.label}</span>
+            <span class="category-title">${displayLabel}</span>
         `;
         btn.onclick = () => loadCategory(cat.id);
         DOM.dashboardView.appendChild(btn);
@@ -174,7 +180,7 @@ async function loadCategory(categoryId) {
 
     const t = translations[state.lang];
     const catConfig = state.categories.find(c => c.id === categoryId);
-    DOM.categoryTitle.textContent = catConfig ? catConfig.label : categoryId;
+    DOM.categoryTitle.textContent = catConfig ? (state.lang === 'es' ? catConfig.label_es : catConfig.label_en) : categoryId;
 
     // Show loading state
     DOM.itemList.innerHTML = '<div class="text-center py-8 text-gray-400"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i>Loading...</div>';
