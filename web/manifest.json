@@ -1,7 +1,7 @@
 {
-  "name": "Falcone's Inventory",
+  "name": "Falcones Inventory",
   "short_name": "Inventory",
-  "description": "Inventory management app for Falcone's Pizza",
+  "description": "Inventory management app for Falcones Pizza",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

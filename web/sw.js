@@ -1,4 +1,4 @@
-const CACHE_NAME = 'falcones-inventory-v1';
+const CACHE_NAME = 'falcones-inventory-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -39,32 +39,22 @@ self.addEventListener('fetch', (event) => {
   // Don't cache API calls
   if (event.request.url.includes('/api/')) return;
 
+  // Network First Strategy
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Return cached response if found
-        if (response) {
-          return response;
+        // If the network response is valid, update the cache
+        if (response && response.status === 200 && response.type === 'basic') {
+          var responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-
-        // Otherwise fetch from network
-        return fetch(event.request).then(
-          (response) => {
-            // Check if we received a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response and cache it
-            var responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          }
-        );
+        return response;
+      })
+      .catch(() => {
+        // If network fails, fall back to cache
+        return caches.match(event.request);
       })
   );
 });
