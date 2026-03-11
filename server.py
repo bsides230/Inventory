@@ -96,5 +96,14 @@ async def get_inventory(category: str):
 # --- Static Files ---
 app.mount("/", StaticFiles(directory="web", html=True), name="web")
 
+def get_port():
+    try:
+        with open("port.txt", "r") as f:
+            port = int(f.read().strip())
+            return port
+    except (FileNotFoundError, ValueError):
+        return 8030
+
 if __name__ == "__main__":
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+    port = get_port()
+    uvicorn.run("server:app", host="0.0.0.0", port=port, reload=True)
