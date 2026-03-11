@@ -75,7 +75,7 @@ async function initApp() {
     try {
         const res = await fetch(`${API_BASE}/status`);
         const data = await res.json();
-        const loc = data.location || "Falcone's Pizza";
+        const loc = data.location || "Falcones Pizza";
         DOM.htmlTitle.textContent = `${loc} Inventory`;
 
         // Update translation logic for title based on location

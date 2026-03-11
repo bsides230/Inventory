@@ -11,9 +11,13 @@ import uvicorn
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 
+import logging
+from update_inventory_data import check_and_update
+
 # --- Initialization ---
 LOCATION_FILE = Path("location.txt")
 CATEGORIES_FILE = Path("categories.json")
+INVENTORY_DATA_FILE = Path("inventory_data.json")
 ITEM_MASTER_DIR = Path("item master")
 ORDERS_DIR = Path("orders")
 
@@ -21,7 +25,7 @@ def get_location_name():
     if LOCATION_FILE.exists():
         with open(LOCATION_FILE, "r") as f:
             return f.read().strip()
-    return "Falcone's Pizza"
+    return "Falcones Pizza"
 
 app = FastAPI(title=f"{get_location_name()} Inventory")
 
@@ -32,6 +36,9 @@ WEB_DIR.mkdir(exist_ok=True)
 FLAGS_DIR.mkdir(exist_ok=True)
 ITEM_MASTER_DIR.mkdir(exist_ok=True)
 ORDERS_DIR.mkdir(exist_ok=True)
+
+# Run initial inventory data conversion check
+check_and_update()
 
 # Add CORS middleware
 app.add_middleware(
@@ -53,64 +60,16 @@ def save_categories_config(config: Dict[str, dict]):
     with open(CATEGORIES_FILE, "w") as f:
         json.dump(config, f, indent=4)
 
-def get_master_excel_file() -> Optional[Path]:
-    for file in ITEM_MASTER_DIR.iterdir():
-        if file.suffix == ".xlsx" and not file.name.startswith("~"):
-            return file
-    return None
-
-def parse_master_data():
-    excel_file = get_master_excel_file()
-    if not excel_file:
-        return {}
-
-    try:
-        xls = pd.ExcelFile(excel_file)
-        data = {}
-        config = load_categories_config()
-        config_updated = False
-
-        # Random fallback icons if a new category is found
-        fallback_icons = ["box", "package", "shopping-cart", "archive", "layers"]
-        fallback_colors = ["gray", "zinc", "neutral", "stone"]
-
-        icon_idx = 0
-
-        for sheet_name in xls.sheet_names:
-            df = pd.read_excel(xls, sheet_name=sheet_name, header=None)
-            if df.empty or len(df.columns) == 0:
-                continue
-
-            # First column contains items
-            items = df[0].dropna().astype(str).tolist()
-            if items:
-                cat_id = sheet_name.lower().replace(" ", "_").replace("-", "_")
-
-                # Check if category exists in config
-                if cat_id not in config:
-                    config[cat_id] = {
-                        "color": fallback_colors[icon_idx % len(fallback_colors)],
-                        "icon": fallback_icons[icon_idx % len(fallback_icons)],
-                        "label": sheet_name
-                    }
-                    config_updated = True
-                    icon_idx += 1
-                elif "label" not in config[cat_id]:
-                    config[cat_id]["label"] = sheet_name
-                    config_updated = True
-
-                data[cat_id] = {
-                    "label": sheet_name,
-                    "items": [{"id": f"{cat_id}_{i}", "name": item} for i, item in enumerate(items)]
-                }
-
-        if config_updated:
-            save_categories_config(config)
-
-        return data
-    except Exception as e:
-        print(f"Error parsing master Excel file: {e}")
-        return {}
+def get_inventory_data():
+    check_and_update()
+    if INVENTORY_DATA_FILE.exists():
+        try:
+            with open(INVENTORY_DATA_FILE, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            logging.error(f"Error reading inventory data json: {e}", exc_info=True)
+            return {}
+    return {}
 
 # --- State Management ---
 STATE_FILE = Path("inventory_state.json")
@@ -141,6 +100,10 @@ class SubmitOrderRequest(BaseModel):
     is_rush: bool
     needed_by: Optional[str] = None
 
+# Configure logging for the backend debug system
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 # --- API Endpoints ---
 @app.get("/api/status")
 async def get_status():
@@ -148,7 +111,8 @@ async def get_status():
 
 @app.get("/api/categories")
 async def get_categories():
-    master_data = parse_master_data()
+    logger.info("Handling /api/categories request")
+    master_data = get_inventory_data()
     config = load_categories_config()
     categories = []
 
@@ -164,7 +128,8 @@ async def get_categories():
 
 @app.get("/api/inventory/{category}")
 async def get_inventory(category: str):
-    master_data = parse_master_data()
+    logger.info(f"Handling /api/inventory/{category} request")
+    master_data = get_inventory_data()
     category_lower = category.lower()
 
     if category_lower in master_data:
@@ -181,6 +146,7 @@ async def get_inventory(category: str):
 
 @app.post("/api/inventory/{category}/update")
 async def update_inventory(category: str, request: UpdateItemRequest):
+    logger.info(f"Handling /api/inventory/{category}/update request for item {request.id}")
     INVENTORY_STATE[request.id] = {
         "qty": request.qty,
         "unit": request.unit
@@ -190,7 +156,8 @@ async def update_inventory(category: str, request: UpdateItemRequest):
 
 @app.post("/api/submit_order")
 async def submit_order(request: SubmitOrderRequest):
-    master_data = parse_master_data()
+    logger.info(f"Handling /api/submit_order request")
+    master_data = get_inventory_data()
     order_items = []
 
     for cat_id, cat_data in master_data.items():
@@ -231,9 +198,10 @@ async def submit_order(request: SubmitOrderRequest):
         INVENTORY_STATE.clear()
         save_inventory_state(INVENTORY_STATE)
 
+        logger.info(f"Order successfully saved to {filepath}")
         return {"success": True, "message": "Order submitted successfully", "filename": filename}
     except Exception as e:
-        print(f"Error saving order: {e}")
+        logger.error(f"Error saving order: {e}", exc_info=True)
         return {"success": False, "message": f"Error saving order: {str(e)}"}
 
 # --- Static Files ---

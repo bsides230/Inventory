@@ -1,0 +1,927 @@
+{
+    "bev_alc": {
+        "label": "BEV-ALC",
+        "items": [
+            {
+                "id": "bev_alc_0",
+                "name": "Stella Artois 6pk"
+            },
+            {
+                "id": "bev_alc_1",
+                "name": "Yuengling Flight 6pk"
+            },
+            {
+                "id": "bev_alc_2",
+                "name": "Bud Light 6pk"
+            },
+            {
+                "id": "bev_alc_3",
+                "name": "Modelo Negra 6pk"
+            },
+            {
+                "id": "bev_alc_4",
+                "name": "F5 IPA 6pk"
+            },
+            {
+                "id": "bev_alc_5",
+                "name": "Corona 6pk"
+            },
+            {
+                "id": "bev_alc_6",
+                "name": "Modelo 6pk."
+            }
+        ]
+    },
+    "bev_bib": {
+        "label": "BEV-BIB",
+        "items": [
+            {
+                "id": "bev_bib_0",
+                "name": "BIB Coca-Cola"
+            },
+            {
+                "id": "bev_bib_1",
+                "name": "BIB Coke Zero"
+            },
+            {
+                "id": "bev_bib_2",
+                "name": "BIB Diet Coke"
+            },
+            {
+                "id": "bev_bib_3",
+                "name": "BIB Diet Dr. Pepper"
+            },
+            {
+                "id": "bev_bib_4",
+                "name": "BIB Dr.Pepper"
+            },
+            {
+                "id": "bev_bib_5",
+                "name": "BIB Lemonade"
+            },
+            {
+                "id": "bev_bib_6",
+                "name": "BIB Root Beer"
+            },
+            {
+                "id": "bev_bib_7",
+                "name": "BIB Sprite"
+            }
+        ]
+    },
+    "bev_rtd": {
+        "label": "BEV-RTD",
+        "items": [
+            {
+                "id": "bev_rtd_0",
+                "name": "Tea automatic brew 32/3.5oz."
+            },
+            {
+                "id": "bev_rtd_1",
+                "name": "Jarritos Asst Flavors cs."
+            },
+            {
+                "id": "bev_rtd_2",
+                "name": "Mexican Coca-Cola cs"
+            },
+            {
+                "id": "bev_rtd_3",
+                "name": "Mexican Sprite cs"
+            }
+        ]
+    },
+    "cleaning": {
+        "label": "CLEANING",
+        "items": [
+            {
+                "id": "cleaning_0",
+                "name": "Bleach"
+            },
+            {
+                "id": "cleaning_1",
+                "name": "Dish Detergent (dawn) "
+            },
+            {
+                "id": "cleaning_2",
+                "name": "Floor cleaner (fabuloso purple)"
+            },
+            {
+                "id": "cleaning_3",
+                "name": "Scrubber Stainless Steel 12/1 ct."
+            },
+            {
+                "id": "cleaning_4",
+                "name": "Dining Room Sanitizer"
+            }
+        ]
+    },
+    "dairy": {
+        "label": "DAIRY",
+        "items": [
+            {
+                "id": "dairy_0",
+                "name": "Butter European 36/1lb."
+            },
+            {
+                "id": "dairy_1",
+                "name": "Butter Unsalted 36/1lb."
+            },
+            {
+                "id": "dairy_2",
+                "name": "Buttermilk 1cs."
+            },
+            {
+                "id": "dairy_3",
+                "name": "Cream Cheese 10/3lb."
+            },
+            {
+                "id": "dairy_4",
+                "name": "Eggs 15 doz."
+            },
+            {
+                "id": "dairy_5",
+                "name": "Heavy Cream cs."
+            },
+            {
+                "id": "dairy_6",
+                "name": "Mozzarella BelGioioso Fresh 2/1lb."
+            },
+            {
+                "id": "dairy_7",
+                "name": "Mozzarella Loaf 8/6lb."
+            },
+            {
+                "id": "dairy_8",
+                "name": "Mozzarella Shredded 5lb."
+            },
+            {
+                "id": "dairy_9",
+                "name": "Parmesan Grated 5lb."
+            },
+            {
+                "id": "dairy_10",
+                "name": "Parmesan Shredded 5lb."
+            },
+            {
+                "id": "dairy_11",
+                "name": "Ricotta Cheese 6/3lb."
+            },
+            {
+                "id": "dairy_12",
+                "name": "Sour Cream 4/5lb."
+            },
+            {
+                "id": "dairy_13",
+                "name": "Sour Cream packets"
+            },
+            {
+                "id": "dairy_14",
+                "name": "Provolone sliced pkg."
+            },
+            {
+                "id": "dairy_15",
+                "name": "American Cheese Sliced Yellow pkg."
+            },
+            {
+                "id": "dairy_16",
+                "name": "American Cheese Sliced White pkg."
+            }
+        ]
+    },
+    "disposables": {
+        "label": "DISPOSABLES",
+        "items": [
+            {
+                "id": "disposables_0",
+                "name": "08\" Ultra Lunch Paper Plate"
+            },
+            {
+                "id": "disposables_1",
+                "name": "10\" Ultra Lunch Paper Plate"
+            },
+            {
+                "id": "disposables_2",
+                "name": "16 oz. Foam Cup"
+            },
+            {
+                "id": "disposables_3",
+                "name": "16 oz. Foam Lid"
+            },
+            {
+                "id": "disposables_4",
+                "name": "2 oz. Clear portion cup"
+            },
+            {
+                "id": "disposables_5",
+                "name": "2 oz. Clear Portion Lid"
+            },
+            {
+                "id": "disposables_6",
+                "name": "4 oz. Foam Portion Cup"
+            },
+            {
+                "id": "disposables_7",
+                "name": "4 oz. Foam Portion Lid"
+            },
+            {
+                "id": "disposables_8",
+                "name": "6x6 Clear Plastic togo"
+            },
+            {
+                "id": "disposables_9",
+                "name": "8x8 Clear togo boxes cs"
+            },
+            {
+                "id": "disposables_10",
+                "name": "6x6 White Foam togo"
+            },
+            {
+                "id": "disposables_11",
+                "name": "8x8 White Foam togo"
+            },
+            {
+                "id": "disposables_12",
+                "name": "9x9 White Foam togo"
+            },
+            {
+                "id": "disposables_13",
+                "name": "Aluminum Foil Roll"
+            },
+            {
+                "id": "disposables_14",
+                "name": "Aluminum Foil Sheets 10.75\" 1/200ct."
+            },
+            {
+                "id": "disposables_15",
+                "name": "Aluminum Lid (full Pan)"
+            },
+            {
+                "id": "disposables_16",
+                "name": "Aluminum Lid (half pan)"
+            },
+            {
+                "id": "disposables_17",
+                "name": "Aluminum Pan (full pan)"
+            },
+            {
+                "id": "disposables_18",
+                "name": "Aluminum Pan (half pan)"
+            },
+            {
+                "id": "disposables_19",
+                "name": "Cutlery Meal Kit"
+            },
+            {
+                "id": "disposables_20",
+                "name": "Deli container togo 16oz."
+            },
+            {
+                "id": "disposables_21",
+                "name": "Deli container togo 8oz."
+            },
+            {
+                "id": "disposables_22",
+                "name": "Deli container togo lids"
+            },
+            {
+                "id": "disposables_23",
+                "name": "Film Poly 12\" Wrap"
+            },
+            {
+                "id": "disposables_24",
+                "name": "Film Poly 18\" Wrap"
+            },
+            {
+                "id": "disposables_25",
+                "name": "Film Poly 24\" Wrap"
+            },
+            {
+                "id": "disposables_26",
+                "name": "Fork White Heavy Duty box"
+            },
+            {
+                "id": "disposables_27",
+                "name": "Gloves Lg"
+            },
+            {
+                "id": "disposables_28",
+                "name": "Gloves Med"
+            },
+            {
+                "id": "disposables_29",
+                "name": "Gloves Sm"
+            },
+            {
+                "id": "disposables_30",
+                "name": "Knife White Heavy Duty box"
+            },
+            {
+                "id": "disposables_31",
+                "name": "Menu Tissue (sgl)"
+            },
+            {
+                "id": "disposables_32",
+                "name": "Paper Towel (brown roll)"
+            },
+            {
+                "id": "disposables_33",
+                "name": "Paper Towels (dispenser)"
+            },
+            {
+                "id": "disposables_34",
+                "name": "Paper Towels (kitchen)"
+            },
+            {
+                "id": "disposables_35",
+                "name": "Pizza Boxes 10\""
+            },
+            {
+                "id": "disposables_36",
+                "name": "Pizza Boxes 14\""
+            },
+            {
+                "id": "disposables_37",
+                "name": "Pizza Boxes 18\""
+            },
+            {
+                "id": "disposables_38",
+                "name": "Portion Control Bag (sandwich size)"
+            },
+            {
+                "id": "disposables_39",
+                "name": "Register 3 1/8\" Thermal Roll"
+            },
+            {
+                "id": "disposables_40",
+                "name": "Register paper 3 1/8\" Thermal"
+            },
+            {
+                "id": "disposables_41",
+                "name": "Toilet Tissue"
+            },
+            {
+                "id": "disposables_42",
+                "name": "Trash Bags (kitchen size)"
+            },
+            {
+                "id": "disposables_43",
+                "name": "Trash Bags (Lg 55-65 gal)"
+            },
+            {
+                "id": "disposables_44",
+                "name": "Trash Bags (Small)"
+            },
+            {
+                "id": "disposables_45",
+                "name": "Togo T-Shirt Bag Lg."
+            },
+            {
+                "id": "disposables_46",
+                "name": "Togo T-Shirt Bag Med"
+            },
+            {
+                "id": "disposables_47",
+                "name": "Togo T-Shirt Bag Sm"
+            }
+        ]
+    },
+    "frozen.ref": {
+        "label": "FROZEN.REF",
+        "items": [
+            {
+                "id": "frozen.ref_0",
+                "name": "Cake Bundt"
+            },
+            {
+                "id": "frozen.ref_1",
+                "name": "Cake Chocolate"
+            },
+            {
+                "id": "frozen.ref_2",
+                "name": "Cake Italian Lemon"
+            },
+            {
+                "id": "frozen.ref_3",
+                "name": "Cake Strawberry"
+            },
+            {
+                "id": "frozen.ref_4",
+                "name": "Cannoli Cream w/choc"
+            },
+            {
+                "id": "frozen.ref_5",
+                "name": "Cannoli Shell Lg"
+            },
+            {
+                "id": "frozen.ref_6",
+                "name": "Cannoli Shell Lg (choc)"
+            },
+            {
+                "id": "frozen.ref_7",
+                "name": "Cannoli Shell Sm"
+            },
+            {
+                "id": "frozen.ref_8",
+                "name": "Cannoli Shell Sm (choc)"
+            },
+            {
+                "id": "frozen.ref_9",
+                "name": "Cheesecake NY"
+            },
+            {
+                "id": "frozen.ref_10",
+                "name": "Cheesecake Oreo"
+            },
+            {
+                "id": "frozen.ref_11",
+                "name": "Cheesecake Turtle"
+            },
+            {
+                "id": "frozen.ref_12",
+                "name": "French Fries Crinkle Cut"
+            },
+            {
+                "id": "frozen.ref_13",
+                "name": "French Fries Homestyle"
+            },
+            {
+                "id": "frozen.ref_14",
+                "name": "French Fries Shoestring"
+            },
+            {
+                "id": "frozen.ref_15",
+                "name": "Hashbrown 2/10lb."
+            },
+            {
+                "id": "frozen.ref_16",
+                "name": "Pasta Tortellini"
+            },
+            {
+                "id": "frozen.ref_17",
+                "name": "Pizza Crust Cauliflower"
+            },
+            {
+                "id": "frozen.ref_18",
+                "name": "Tater Tots"
+            },
+            {
+                "id": "frozen.ref_19",
+                "name": "Tiramisu (ea.)"
+            },
+            {
+                "id": "frozen.ref_20",
+                "name": "French Fries 3/8th\" Straight"
+            },
+            {
+                "id": "frozen.ref_21",
+                "name": "Biscuits 1/24 cs."
+            },
+            {
+                "id": "frozen.ref_22",
+                "name": " "
+            }
+        ]
+    },
+    "grocery_dry": {
+        "label": "GROCERY DRY",
+        "items": [
+            {
+                "id": "grocery_dry_0",
+                "name": "Baguettes"
+            },
+            {
+                "id": "grocery_dry_1",
+                "name": "Basalmic Glaze"
+            },
+            {
+                "id": "grocery_dry_2",
+                "name": "Bread Crumbs Panko 25lb."
+            },
+            {
+                "id": "grocery_dry_3",
+                "name": "Bread Sliced Sandwich"
+            },
+            {
+                "id": "grocery_dry_4",
+                "name": "Buns Hamburger"
+            },
+            {
+                "id": "grocery_dry_5",
+                "name": "Buns Hot Dog"
+            },
+            {
+                "id": "grocery_dry_6",
+                "name": "Croutons 4/2.5lbs."
+            },
+            {
+                "id": "grocery_dry_7",
+                "name": "Dressing Caesar 1 gal"
+            },
+            {
+                "id": "grocery_dry_8",
+                "name": "Dressing Italian 1 gal."
+            },
+            {
+                "id": "grocery_dry_9",
+                "name": "Dressing Mix Italian packet"
+            },
+            {
+                "id": "grocery_dry_10",
+                "name": "Dressing Mix Ranch packet"
+            },
+            {
+                "id": "grocery_dry_11",
+                "name": "Dressing Vinagrette 1 gal."
+            },
+            {
+                "id": "grocery_dry_12",
+                "name": "Flour High Gluten All Trump 25lb."
+            },
+            {
+                "id": "grocery_dry_13",
+                "name": "Flour High Gluten All Trump 50lb."
+            },
+            {
+                "id": "grocery_dry_14",
+                "name": "Tortillas Flour 10\""
+            },
+            {
+                "id": "grocery_dry_15",
+                "name": "Fry Oil"
+            },
+            {
+                "id": "grocery_dry_16",
+                "name": "Garlic Minced in water"
+            },
+            {
+                "id": "grocery_dry_17",
+                "name": "Garlic Powder 5lb."
+            },
+            {
+                "id": "grocery_dry_18",
+                "name": "Hot Sauce Red Hot 1 gal."
+            },
+            {
+                "id": "grocery_dry_19",
+                "name": "Jalapeno Sliced #10"
+            },
+            {
+                "id": "grocery_dry_20",
+                "name": "Mayonnaise 4/1 gal."
+            },
+            {
+                "id": "grocery_dry_21",
+                "name": "Olive Ripe Sliced #10 "
+            },
+            {
+                "id": "grocery_dry_22",
+                "name": "Onion minced dried"
+            },
+            {
+                "id": "grocery_dry_23",
+                "name": "Onion Powder"
+            },
+            {
+                "id": "grocery_dry_24",
+                "name": "Pan Spray cs"
+            },
+            {
+                "id": "grocery_dry_25",
+                "name": "Parmesan Packets"
+            },
+            {
+                "id": "grocery_dry_26",
+                "name": "Parsley minced dried"
+            },
+            {
+                "id": "grocery_dry_27",
+                "name": "Pasta Fettucine 10\""
+            },
+            {
+                "id": "grocery_dry_28",
+                "name": "Pasta Lasagna 10\""
+            },
+            {
+                "id": "grocery_dry_29",
+                "name": "Pasta Penne Rigate"
+            },
+            {
+                "id": "grocery_dry_30",
+                "name": "Pasta Rotini Tri Color"
+            },
+            {
+                "id": "grocery_dry_31",
+                "name": "Pasta Spaghetti 10\""
+            },
+            {
+                "id": "grocery_dry_32",
+                "name": "Pepperoncini Whole 1 gal."
+            },
+            {
+                "id": "grocery_dry_33",
+                "name": "Pineapple tidbits #10"
+            },
+            {
+                "id": "grocery_dry_34",
+                "name": "Ranch Dressing mix cs."
+            },
+            {
+                "id": "grocery_dry_35",
+                "name": "Red Pepper Packets"
+            },
+            {
+                "id": "grocery_dry_36",
+                "name": "Salsa Fire Roasted #10"
+            },
+            {
+                "id": "grocery_dry_37",
+                "name": "Salt 50lb."
+            },
+            {
+                "id": "grocery_dry_38",
+                "name": "Sugar 50lb."
+            },
+            {
+                "id": "grocery_dry_39",
+                "name": "Tomato Paste cs."
+            },
+            {
+                "id": "grocery_dry_40",
+                "name": "Tomato Sauce cs."
+            },
+            {
+                "id": "grocery_dry_41",
+                "name": "Vinegar Red 1 gal"
+            },
+            {
+                "id": "grocery_dry_42",
+                "name": "Vinegar White 1 gal"
+            },
+            {
+                "id": "grocery_dry_43",
+                "name": "Yeast "
+            },
+            {
+                "id": "grocery_dry_44",
+                "name": "Chocolate for Cannoli #10 can"
+            },
+            {
+                "id": "grocery_dry_45",
+                "name": "Texas Toast"
+            },
+            {
+                "id": "grocery_dry_46",
+                "name": "Everything Bagel"
+            },
+            {
+                "id": "grocery_dry_47",
+                "name": "Plain Bagel"
+            }
+        ]
+    },
+    "meats": {
+        "label": "MEATS",
+        "items": [
+            {
+                "id": "meats_0",
+                "name": "Bacon Sliced 1cs"
+            },
+            {
+                "id": "meats_1",
+                "name": "Canadian Bacon"
+            },
+            {
+                "id": "meats_2",
+                "name": "Ground Beef 73/27 lbs"
+            },
+            {
+                "id": "meats_3",
+                "name": "Ground Beef 80/20 lbs"
+            },
+            {
+                "id": "meats_4",
+                "name": "Ground Beef 90/10 lbs"
+            },
+            {
+                "id": "meats_5",
+                "name": "Italian Sausage Rope"
+            },
+            {
+                "id": "meats_6",
+                "name": "Pepperoni"
+            },
+            {
+                "id": "meats_7",
+                "name": "Philly Meat"
+            },
+            {
+                "id": "meats_8",
+                "name": "Chicken Breast"
+            },
+            {
+                "id": "meats_9",
+                "name": "Chicken Wings"
+            },
+            {
+                "id": "meats_10",
+                "name": "Bacon Bits "
+            },
+            {
+                "id": "meats_11",
+                "name": "Shrimp 21-25 raw peeled 5/2lb."
+            },
+            {
+                "id": "meats_12",
+                "name": "Brisket"
+            },
+            {
+                "id": "meats_13",
+                "name": "Pork Butt"
+            },
+            {
+                "id": "meats_14",
+                "name": "Polish Sausage"
+            },
+            {
+                "id": "meats_15",
+                "name": "Hot Links"
+            },
+            {
+                "id": "meats_16",
+                "name": "Hot Dogs"
+            },
+            {
+                "id": "meats_17",
+                "name": "Catfish/Swai cs."
+            }
+        ]
+    },
+    "produce": {
+        "label": "PRODUCE",
+        "items": [
+            {
+                "id": "produce_0",
+                "name": "Basil Fresh"
+            },
+            {
+                "id": "produce_1",
+                "name": "Bell Peppers (Yellow, Red,Orange) 6 pk"
+            },
+            {
+                "id": "produce_2",
+                "name": "Bell Peppers Choppers"
+            },
+            {
+                "id": "produce_3",
+                "name": "Broccoli Florets (fresh)"
+            },
+            {
+                "id": "produce_4",
+                "name": "Broccoli Florets (frozen)"
+            },
+            {
+                "id": "produce_5",
+                "name": "Celery 1cs"
+            },
+            {
+                "id": "produce_6",
+                "name": "Constellation Cherry Tomatoes"
+            },
+            {
+                "id": "produce_7",
+                "name": "Cucumber English 2 pk"
+            },
+            {
+                "id": "produce_8",
+                "name": "Lettuce Romaine"
+            },
+            {
+                "id": "produce_9",
+                "name": "Mushroom Medium"
+            },
+            {
+                "id": "produce_10",
+                "name": "Onion Red"
+            },
+            {
+                "id": "produce_11",
+                "name": "Onion Yellow"
+            },
+            {
+                "id": "produce_12",
+                "name": "Potato Idaho 70 ct./50 lb."
+            },
+            {
+                "id": "produce_13",
+                "name": "Spinach Fresh"
+            },
+            {
+                "id": "produce_14",
+                "name": "Tomato Cherry"
+            },
+            {
+                "id": "produce_15",
+                "name": "Tomato Roma"
+            }
+        ]
+    },
+    "prepared": {
+        "label": "PREPARED",
+        "items": [
+            {
+                "id": "prepared_0",
+                "name": "Chicken Breast Cooked (4 oz.)"
+            },
+            {
+                "id": "prepared_1",
+                "name": "Boneless Bites (prepared 8 ea.)"
+            },
+            {
+                "id": "prepared_2",
+                "name": "Chicken Tenders (prepared 3 ea.)"
+            },
+            {
+                "id": "prepared_3",
+                "name": "Dough Par Bake 18\""
+            },
+            {
+                "id": "prepared_4",
+                "name": "Marinara (gal.)"
+            },
+            {
+                "id": "prepared_5",
+                "name": "Pizza Sauce (gal.)"
+            },
+            {
+                "id": "prepared_6",
+                "name": "Italian Sausage Cooked (lb.)"
+            },
+            {
+                "id": "prepared_7",
+                "name": "Onion Diced (qt.)"
+            },
+            {
+                "id": "prepared_8",
+                "name": "Onion Sliced (qt.)"
+            },
+            {
+                "id": "prepared_9",
+                "name": "Bell Pepper Chopped (qt.)"
+            },
+            {
+                "id": "prepared_10",
+                "name": "Mushroom Sliced (qt)"
+            },
+            {
+                "id": "prepared_11",
+                "name": "Tomatos Sliced (qt.)"
+            },
+            {
+                "id": "prepared_12",
+                "name": "Tomatos Diced (qt.)"
+            },
+            {
+                "id": "prepared_13",
+                "name": "Bacon Bits (qt)"
+            },
+            {
+                "id": "prepared_14",
+                "name": "Stromboli (prepared) ea."
+            },
+            {
+                "id": "prepared_15",
+                "name": "Meatballs (ea)"
+            },
+            {
+                "id": "prepared_16",
+                "name": "Fettucine Alfredo (prepared) ea."
+            },
+            {
+                "id": "prepared_17",
+                "name": "Spaghetti w/meatballs (prepared) ea."
+            },
+            {
+                "id": "prepared_18",
+                "name": "Chicken Parmesan (prepared) ea."
+            }
+        ]
+    },
+    "smallwares": {
+        "label": "SMALLWARES",
+        "items": [
+            {
+                "id": "smallwares_0",
+                "name": "Cheese shakers"
+            }
+        ]
+    },
+    "bakery": {
+        "label": "BAKERY",
+        "items": [
+            {
+                "id": "bakery_0",
+                "name": "Film Poly 24\" Wrap"
+            }
+        ]
+    }
+}
