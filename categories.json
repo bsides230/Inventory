@@ -1,75 +1,80 @@
 {
     "produce": {
         "color": "green",
-        "icon": "carrot",
-        "label": "PRODUCE"
-    },
-    "meat": {
-        "color": "red",
-        "icon": "beef"
+        "icon": "leaf",
+        "label_en": "Produce",
+        "label_es": "Productos Frescos"
     },
     "dairy": {
         "color": "blue",
         "icon": "milk",
-        "label": "DAIRY"
-    },
-    "beverages": {
-        "color": "orange",
-        "icon": "cup-soda"
+        "label_en": "Dairy",
+        "label_es": "Lácteos"
     },
     "bev_alc": {
-        "color": "gray",
-        "icon": "box",
-        "label": "BEV-ALC"
+        "color": "amber",
+        "icon": "beer",
+        "label_en": "Alcohol",
+        "label_es": "Alcohol"
     },
     "bev_bib": {
-        "color": "zinc",
-        "icon": "package",
-        "label": "BEV-BIB"
+        "color": "indigo",
+        "icon": "cup-soda",
+        "label_en": "Fountain Beverages",
+        "label_es": "Bebidas de Fuente"
     },
     "bev_rtd": {
-        "color": "neutral",
-        "icon": "shopping-cart",
-        "label": "BEV-RTD"
+        "color": "cyan",
+        "icon": "bottle-water",
+        "label_en": "Bottled Beverages",
+        "label_es": "Bebidas Embotelladas"
     },
     "cleaning": {
-        "color": "stone",
-        "icon": "archive",
-        "label": "CLEANING"
+        "color": "teal",
+        "icon": "spray-can",
+        "label_en": "Cleaning",
+        "label_es": "Limpieza"
     },
     "disposables": {
-        "color": "gray",
-        "icon": "layers",
-        "label": "DISPOSABLES"
+        "color": "rose",
+        "icon": "utensils",
+        "label_en": "Disposables",
+        "label_es": "Desechables"
     },
     "frozen.ref": {
-        "color": "zinc",
-        "icon": "box",
-        "label": "FROZEN.REF"
+        "color": "sky",
+        "icon": "snowflake",
+        "label_en": "Frozen/Refrigerated",
+        "label_es": "Congelados/Refrigerados"
     },
     "grocery_dry": {
-        "color": "neutral",
-        "icon": "package",
-        "label": "GROCERY DRY"
+        "color": "yellow",
+        "icon": "wheat",
+        "label_en": "Dry Grocery",
+        "label_es": "Abarrotes Secos"
     },
     "meats": {
-        "color": "stone",
-        "icon": "shopping-cart",
-        "label": "MEATS"
+        "color": "red",
+        "icon": "beef",
+        "label_en": "Meats",
+        "label_es": "Carnes"
     },
     "prepared": {
-        "color": "gray",
-        "icon": "archive",
-        "label": "PREPARED"
+        "color": "orange",
+        "icon": "chef-hat",
+        "label_en": "Prepared",
+        "label_es": "Preparados"
     },
     "smallwares": {
-        "color": "zinc",
-        "icon": "layers",
-        "label": "SMALLWARES"
+        "color": "gray",
+        "icon": "cooking-pot",
+        "label_en": "Smallwares",
+        "label_es": "Utensilios"
     },
     "bakery": {
-        "color": "neutral",
-        "icon": "box",
-        "label": "BAKERY"
+        "color": "yellow",
+        "icon": "croissant",
+        "label_en": "Bakery",
+        "label_es": "Panadería"
     }
 }

@@ -1,0 +1,100 @@
+{
+    "label": "PREPARED",
+    "items": [
+        {
+            "id": "prepared_0",
+            "name_en": "Chicken Breast Cooked (4 oz.)",
+            "name_es": "Pechuga de Pollo Cocida (4 oz.)"
+        },
+        {
+            "id": "prepared_1",
+            "name_en": "Boneless Bites (prepared 8 ea.)",
+            "name_es": "Trozos sin Hueso (preparados 8 c/u)"
+        },
+        {
+            "id": "prepared_2",
+            "name_en": "Chicken Tenders (prepared 3 ea.)",
+            "name_es": "Tiras de Pollo (preparadas 3 c/u)"
+        },
+        {
+            "id": "prepared_3",
+            "name_en": "Dough Par Bake 18\"",
+            "name_es": "Masa Pre-cocida 18\""
+        },
+        {
+            "id": "prepared_4",
+            "name_en": "Marinara (gal.)",
+            "name_es": "Salsa Marinara (gal.)"
+        },
+        {
+            "id": "prepared_5",
+            "name_en": "Pizza Sauce (gal.)",
+            "name_es": "Salsa de Pizza (gal.)"
+        },
+        {
+            "id": "prepared_6",
+            "name_en": "Italian Sausage Cooked (lb.)",
+            "name_es": "Salchicha Italiana Cocida (lb.)"
+        },
+        {
+            "id": "prepared_7",
+            "name_en": "Onion Diced (qt.)",
+            "name_es": "Cebolla Cortada en Cubitos (cto.)"
+        },
+        {
+            "id": "prepared_8",
+            "name_en": "Onion Sliced (qt.)",
+            "name_es": "Cebolla en Rodajas (cto.)"
+        },
+        {
+            "id": "prepared_9",
+            "name_en": "Bell Pepper Chopped (qt.)",
+            "name_es": "Pimiento Picado (cto.)"
+        },
+        {
+            "id": "prepared_10",
+            "name_en": "Mushroom Sliced (qt)",
+            "name_es": "Champi\u00f1ones en Rodajas (cto.)"
+        },
+        {
+            "id": "prepared_11",
+            "name_en": "Tomatos Sliced (qt.)",
+            "name_es": "Tomates en Rodajas (cto.)"
+        },
+        {
+            "id": "prepared_12",
+            "name_en": "Tomatos Diced (qt.)",
+            "name_es": "Tomates Cortados en Cubitos (cto.)"
+        },
+        {
+            "id": "prepared_13",
+            "name_en": "Bacon Bits (qt)",
+            "name_es": "Trozos de Tocino (cto.)"
+        },
+        {
+            "id": "prepared_14",
+            "name_en": "Stromboli (prepared) ea.",
+            "name_es": "Stromboli (preparado) c/u"
+        },
+        {
+            "id": "prepared_15",
+            "name_en": "Meatballs (ea)",
+            "name_es": "Alb\u00f3ndigas (c/u)"
+        },
+        {
+            "id": "prepared_16",
+            "name_en": "Fettucine Alfredo (prepared) ea.",
+            "name_es": "Fettuccine Alfredo (preparado) c/u"
+        },
+        {
+            "id": "prepared_17",
+            "name_en": "Spaghetti w/meatballs (prepared) ea.",
+            "name_es": "Espaguetis con Alb\u00f3ndigas (preparado) c/u"
+        },
+        {
+            "id": "prepared_18",
+            "name_en": "Chicken Parmesan (prepared) ea.",
+            "name_es": "Pollo a la Parmesana (preparado) c/u"
+        }
+    ]
+}

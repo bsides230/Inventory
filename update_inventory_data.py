@@ -10,8 +10,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 ITEM_MASTER_DIR = Path("item master")
 CATEGORIES_FILE = Path("categories.json")
-INVENTORY_DATA_FILE = Path("inventory_data.json")
-BACKUP_FILE = Path("inventory_data.json.bak")
+DATA_DIR = Path("data")
 FLAG_FILE = Path("global_flags/update_inventory.txt")
 
 def load_categories_config() -> dict:
@@ -24,25 +23,26 @@ def save_categories_config(config: dict):
     with open(CATEGORIES_FILE, "w") as f:
         json.dump(config, f, indent=4)
 
-def get_master_excel_file():
-    for file in ITEM_MASTER_DIR.iterdir():
-        if file.suffix == ".xlsx" and not file.name.startswith("~"):
-            return file
-    return None
-
 def convert_excel_to_json():
     logging.info("Starting conversion of Excel to JSON...")
 
-    excel_file = get_master_excel_file()
-    if not excel_file:
-        logging.error("No Excel file found in 'item master/' directory.")
+    english_file = ITEM_MASTER_DIR / "English Master.xlsx"
+    spanish_file = ITEM_MASTER_DIR / "Spanish Master.xlsx"
+
+    if not english_file.exists():
+        logging.error("No 'English Master.xlsx' file found in 'item master/' directory.")
         return False
 
-    logging.info(f"Reading Excel file: {excel_file.name}")
+    if not spanish_file.exists():
+        logging.error("No 'Spanish Master.xlsx' file found in 'item master/' directory. Proceeding with English only.")
+
+    logging.info(f"Reading Excel files...")
 
     try:
-        xls = pd.ExcelFile(excel_file)
-        data = {}
+        xls_en = pd.ExcelFile(english_file)
+        xls_es = pd.ExcelFile(spanish_file) if spanish_file.exists() else None
+
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
         config = load_categories_config()
         config_updated = False
 
@@ -50,59 +50,86 @@ def convert_excel_to_json():
         fallback_colors = ["gray", "zinc", "neutral", "stone"]
         icon_idx = 0
 
-        for sheet_name in xls.sheet_names:
-            df = pd.read_excel(xls, sheet_name=sheet_name, header=None)
-            if df.empty or len(df.columns) == 0:
+        for sheet_name in xls_en.sheet_names:
+            df_en = pd.read_excel(xls_en, sheet_name=sheet_name, header=None)
+            if df_en.empty or len(df_en.columns) == 0:
                 continue
 
+            df_es = None
+            if xls_es and sheet_name in xls_es.sheet_names:
+                df_es = pd.read_excel(xls_es, sheet_name=sheet_name, header=None)
+
             # First column contains items
-            items = df[0].dropna().astype(str).tolist()
-            if items:
+            items_en = df_en[0].dropna().astype(str).tolist()
+            if items_en:
                 cat_id = sheet_name.lower().replace(" ", "_").replace("-", "_")
 
                 if cat_id not in config:
                     config[cat_id] = {
                         "color": fallback_colors[icon_idx % len(fallback_colors)],
                         "icon": fallback_icons[icon_idx % len(fallback_icons)],
-                        "label": sheet_name
+                        "label_en": sheet_name,
+                        "label_es": sheet_name
                     }
                     config_updated = True
                     icon_idx += 1
-                elif "label" not in config[cat_id]:
-                    config[cat_id]["label"] = sheet_name
-                    config_updated = True
+                else:
+                    needs_update = False
+                    if "label_en" not in config[cat_id]:
+                        config[cat_id]["label_en"] = config[cat_id].get("label", sheet_name)
+                        needs_update = True
+                    if "label_es" not in config[cat_id]:
+                        config[cat_id]["label_es"] = config[cat_id].get("label", sheet_name)
+                        needs_update = True
+                    if "label" in config[cat_id] and "label_en" in config[cat_id] and "label_es" in config[cat_id]:
+                        del config[cat_id]["label"]
+                        needs_update = True
+                    if needs_update:
+                        config_updated = True
 
-                data[cat_id] = {
+                category_data = {
                     "label": sheet_name,
-                    "items": [{"id": f"{cat_id}_{i}", "name": item} for i, item in enumerate(items)]
+                    "items": []
                 }
+
+                for i, item_en in enumerate(items_en):
+                    item_es = item_en
+                    if df_es is not None and i < len(df_es) and len(df_es.columns) > 0:
+                        val = df_es.iloc[i, 0]
+                        if pd.notna(val):
+                            item_es = str(val)
+
+                    category_data["items"].append({
+                        "id": f"{cat_id}_{i}",
+                        "name_en": item_en,
+                        "name_es": item_es
+                    })
+
+                # Save individual category JSON file
+                json_filepath = DATA_DIR / f"{cat_id}.json"
+
+                # Check if changed to avoid unnecessary writes, though writing is fast
+                current_data = None
+                if json_filepath.exists():
+                    try:
+                        with open(json_filepath, "r") as f:
+                            current_data = json.load(f)
+                    except json.JSONDecodeError:
+                        pass
+
+                if current_data != category_data:
+                    logging.info(f"Saving new converted data to {json_filepath.name}")
+                    with open(json_filepath, "w") as f:
+                        json.dump(category_data, f, indent=4)
 
         if config_updated:
             logging.info("Updating categories.json with new categories.")
             save_categories_config(config)
 
-        # Check if data changed
-        current_data = None
-        if INVENTORY_DATA_FILE.exists():
-            try:
-                with open(INVENTORY_DATA_FILE, "r") as f:
-                    current_data = json.load(f)
-            except json.JSONDecodeError:
-                pass
-
-        if current_data == data:
-            logging.info("No changes detected in Excel file compared to existing JSON.")
-            return True
-
-        # Backup existing
-        if INVENTORY_DATA_FILE.exists():
-            logging.info(f"Creating backup of existing data to {BACKUP_FILE.name}")
-            shutil.copy2(INVENTORY_DATA_FILE, BACKUP_FILE)
-
-        # Save new data
-        logging.info(f"Saving new converted data to {INVENTORY_DATA_FILE.name}")
-        with open(INVENTORY_DATA_FILE, "w") as f:
-            json.dump(data, f, indent=4)
+        # Cleanup obsolete json file if it exists
+        if Path("inventory_data.json").exists():
+             # We no longer use this file, but we keep it for backup or ignore it.
+             pass
 
         return True
 
@@ -129,7 +156,7 @@ def check_and_update():
                 logging.error(f"Could not remove flag file: {e}")
         else:
             logging.error("Conversion failed. Flag file kept.")
-    elif not INVENTORY_DATA_FILE.exists():
+    elif not DATA_DIR.exists() or not list(DATA_DIR.glob("*.json")):
         # First run logic
         logging.info("No existing JSON data found. Running initial conversion.")
         convert_excel_to_json()

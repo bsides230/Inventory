@@ -1,0 +1,18 @@
+INFO:     Will watch for changes in these directories: ['/app']
+INFO:     Uvicorn running on http://0.0.0.0:8030 (Press CTRL+C to quit)
+INFO:     Started reloader process [6179] using StatReload
+INFO:     Started server process [6392]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:53604 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53604 - "GET /style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53612 - "GET /app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48238 - "GET /api/status HTTP/1.1" 200 OK
+2026-03-11 22:32:28,365 - INFO - Handling /api/categories request
+INFO:     127.0.0.1:48238 - "GET /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48238 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48238 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48254 - "GET /app.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:48266 - "GET /manifest.json HTTP/1.1" 200 OK
+2026-03-11 22:32:28,877 - INFO - Handling /api/inventory/disposables request
+INFO:     127.0.0.1:48266 - "GET /api/inventory/disposables HTTP/1.1" 200 OK

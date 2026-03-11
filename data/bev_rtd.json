@@ -1,0 +1,25 @@
+{
+    "label": "BEV-RTD",
+    "items": [
+        {
+            "id": "bev_rtd_0",
+            "name_en": "Tea automatic brew 32/3.5oz.",
+            "name_es": "T\u00e9 preparado autom\u00e1tico 32/3.5oz."
+        },
+        {
+            "id": "bev_rtd_1",
+            "name_en": "Jarritos Asst Flavors cs.",
+            "name_es": "Jarritos Sabores Surtidos caja"
+        },
+        {
+            "id": "bev_rtd_2",
+            "name_en": "Mexican Coca-Cola cs",
+            "name_es": "Coca-Cola Mexicana caja"
+        },
+        {
+            "id": "bev_rtd_3",
+            "name_en": "Mexican Sprite cs",
+            "name_es": "Sprite Mexicano caja"
+        }
+    ]
+}
