@@ -5,205 +5,99 @@ const API_BASE = '/api';
 // --- i18n Dictionary ---
 const translations = {
     en: {
-        loginTitle: "Inventory Login",
-        labelUsername: "Username",
-        labelPin: "4-Digit PIN",
-        btnLogin: "Login",
-        loginError: "Invalid username or PIN",
         appTitle: "Inventory",
-        userGreeting: "User",
-        labelSave: "Save Changes",
         langToggle: "Español",
         itemsCount: "items",
-        // Categories
-        catProduce: "Produce",
-        catMeat: "Meat",
-        catDairy: "Dairy",
-        catBeverages: "Beverages",
-        // Units
-        cases: "cases",
-        bags: "bags",
-        lbs: "lbs",
-        blocks: "blocks",
-        tubs: "tubs",
-        par: "Par"
+        labelSubmitOrder: "Submit Order",
+        labelOrderModalTitle: "Submit Order",
+        labelOrderDate: "Order Date",
+        labelRushOrder: "Rush Order (Urgent)",
+        labelNeededBy: "Needed By Date",
+        labelCancel: "Cancel",
+        labelConfirm: "Confirm Order",
+        each: "each",
+        case: "case"
     },
     es: {
-        loginTitle: "Inicio de sesión",
-        labelUsername: "Usuario",
-        labelPin: "PIN de 4 dígitos",
-        btnLogin: "Entrar",
-        loginError: "Usuario o PIN inválido",
         appTitle: "Inventario",
-        userGreeting: "Usuario",
-        labelSave: "Guardar",
         langToggle: "English",
         itemsCount: "artículos",
-        // Categories
-        catProduce: "Verduras",
-        catMeat: "Carnes",
-        catDairy: "Lácteos",
-        catBeverages: "Bebidas",
-        // Units
-        cases: "cajas",
-        bags: "bolsas",
-        lbs: "libras",
-        blocks: "bloques",
-        tubs: "tinas",
-        par: "Mín"
+        labelSubmitOrder: "Enviar Pedido",
+        labelOrderModalTitle: "Enviar Pedido",
+        labelOrderDate: "Fecha del Pedido",
+        labelRushOrder: "Pedido Urgente",
+        labelNeededBy: "Fecha Requerida",
+        labelCancel: "Cancelar",
+        labelConfirm: "Confirmar Pedido",
+        each: "c/u",
+        case: "caja"
     }
 };
 
 // --- State Management ---
 const state = {
-    isAuthenticated: false,
-    user: null,
     lang: localStorage.getItem('falcone_lang') || 'en', // 'en' or 'es'
     currentCategory: null,
-    inventory: {}
+    inventory: {},
+    categories: []
 };
 
 // --- DOM Elements ---
 const DOM = {
-    loginScreen: document.getElementById('loginScreen'),
-    loginForm: document.getElementById('loginForm'),
-    usernameInput: document.getElementById('username'),
-    pinInput: document.getElementById('pin'),
-    loginError: document.getElementById('loginError'),
-
     appHeader: document.querySelector('header'),
     dashboardView: document.getElementById('dashboardView'),
     categoryView: document.getElementById('categoryView'),
 
     btnBack: document.getElementById('btnBack'),
-    btnLogout: document.getElementById('btnLogout'),
     btnToggleLangApp: document.getElementById('btnToggleLangApp'),
-    btnToggleLangLogin: document.getElementById('btnToggleLangLogin'),
 
+    htmlTitle: document.getElementById('htmlTitle'),
     appTitle: document.getElementById('appTitle'),
-    currentUser: document.getElementById('currentUser'),
-    userGreeting: document.getElementById('userGreeting'),
 
     categoryTitle: document.getElementById('categoryTitle'),
     categoryCount: document.getElementById('categoryCount'),
     itemList: document.getElementById('itemList'),
+
+    // Order Modal
+    btnSubmitOrder: document.getElementById('btnSubmitOrder'),
+    orderModal: document.getElementById('orderModal'),
+    orderDateInput: document.getElementById('orderDateInput'),
+    rushOrderCheckbox: document.getElementById('rushOrderCheckbox'),
+    neededByContainer: document.getElementById('neededByContainer'),
+    neededByInput: document.getElementById('neededByInput'),
+    btnCancelOrder: document.getElementById('btnCancelOrder'),
+    btnConfirmOrder: document.getElementById('btnConfirmOrder'),
+    orderModalError: document.getElementById('orderModalError'),
 };
 
 // --- Initialization ---
 async function initApp() {
-    // Apply initial language
-    applyLanguage();
-
-    // Check backend status/auth requirement
     try {
         const res = await fetch(`${API_BASE}/status`);
         const data = await res.json();
+        const loc = data.location || "Falcone's Pizza";
+        DOM.htmlTitle.textContent = `${loc} Inventory`;
 
-        if (!data.auth_required) {
-            // Auth disabled by backend toggle
-            setAuthenticated("anonymous");
-            return;
-        }
+        // Update translation logic for title based on location
+        translations.en.appTitle = `${loc} Inventory`;
+        translations.es.appTitle = `Inventario ${loc}`;
     } catch (e) {
         console.error("Failed to fetch status:", e);
     }
 
-    // Check localStorage for existing session
-    const savedUser = localStorage.getItem('falcone_user');
-    if (savedUser) {
-        // Assume valid for this basic implementation. Real apps would verify token.
-        setAuthenticated(savedUser);
-    } else {
-        showLogin();
-    }
-}
-
-// --- Authentication ---
-function showLogin() {
-    DOM.loginScreen.classList.remove('hidden');
-    // Hide main app elements behind it just in case
-    DOM.appHeader.style.display = 'none';
-    DOM.dashboardView.style.display = 'none';
-    DOM.categoryView.style.display = 'none';
-
-    // Focus username
-    setTimeout(() => DOM.usernameInput.focus(), 100);
-}
-
-function setAuthenticated(username) {
-    state.isAuthenticated = true;
-    state.user = username;
-
-    // Save state
-    if (username !== "anonymous") {
-        localStorage.setItem('falcone_user', username);
-    }
-
-    // Update UI
-    DOM.currentUser.textContent = username.charAt(0).toUpperCase() + username.slice(1);
-
-    // Hide login, show app
-    DOM.loginScreen.classList.add('hidden');
-    DOM.appHeader.style.display = 'block';
-    DOM.dashboardView.style.display = 'grid'; // Grid display for dashboard
-
-    // Clear inputs
-    DOM.usernameInput.value = '';
-    DOM.pinInput.value = '';
-
-    // Render initial view
-    renderDashboard();
-}
-
-async function handleLogin(e) {
-    e.preventDefault();
-
-    const username = DOM.usernameInput.value.trim();
-    const pin = DOM.pinInput.value.trim();
-
-    if (!username || !pin) {
-        showLoginError();
-        return;
-    }
+    applyLanguage();
 
     try {
-        const res = await fetch(`${API_BASE}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, pin })
-        });
-
+        const res = await fetch(`${API_BASE}/categories`);
         const data = await res.json();
-
         if (data.success) {
-            DOM.loginError.classList.add('hidden');
-            setAuthenticated(data.user);
-        } else {
-            showLoginError();
+            state.categories = data.categories;
         }
-    } catch (error) {
-        console.error("Login failed:", error);
-        // Fallback for demo if backend is down - let kitchen/1234 through
-        if (username.toLowerCase() === 'kitchen' && pin === '1234') {
-            setAuthenticated('kitchen');
-        } else {
-            showLoginError();
-        }
+    } catch (e) {
+        console.error("Failed to fetch categories:", e);
     }
-}
 
-function showLoginError() {
-    DOM.loginError.classList.remove('hidden');
-    DOM.pinInput.value = '';
-    DOM.pinInput.classList.add('shake');
-    setTimeout(() => DOM.pinInput.classList.remove('shake'), 400);
-}
-
-function handleLogout() {
-    localStorage.removeItem('falcone_user');
-    state.isAuthenticated = false;
-    state.user = null;
-    showLogin();
+    renderDashboard();
 }
 
 // --- Internationalization ---
@@ -217,39 +111,28 @@ function applyLanguage() {
     const t = translations[state.lang];
 
     // Update static text
-    document.getElementById('loginTitle').textContent = t.loginTitle;
-    document.getElementById('labelUsername').textContent = t.labelUsername;
-    document.getElementById('labelPin').textContent = t.labelPin;
-    document.getElementById('btnLogin').textContent = t.btnLogin;
-    document.getElementById('loginError').textContent = t.loginError;
     document.getElementById('appTitle').textContent = t.appTitle;
-    document.getElementById('userGreeting').textContent = t.userGreeting;
-    document.getElementById('labelSave').textContent = t.labelSave;
+    document.getElementById('labelSubmitOrder').textContent = t.labelSubmitOrder;
+    document.getElementById('labelOrderModalTitle').textContent = t.labelOrderModalTitle;
+    document.getElementById('labelOrderDate').textContent = t.labelOrderDate;
+    document.getElementById('labelRushOrder').textContent = t.labelRushOrder;
+    document.getElementById('labelNeededBy').textContent = t.labelNeededBy;
+    document.getElementById('labelCancel').textContent = t.labelCancel;
+    document.getElementById('labelConfirm').textContent = t.labelConfirm;
 
     // Update toggle buttons text
-    const langSpans = document.querySelectorAll('#btnToggleLangLogin span, #btnToggleLangApp span');
+    const langSpans = document.querySelectorAll('#btnToggleLangApp span');
     langSpans.forEach(span => span.textContent = t.langToggle);
 
-    // Update inputs placeholders
-    DOM.usernameInput.placeholder = state.lang === 'en' ? 'e.g. kitchen' : 'ej. cocina';
-
     // If we're logged in, re-render to update dynamic text
-    if (state.isAuthenticated) {
-        if (state.currentCategory) {
-            renderCategory(state.currentCategory);
-        } else {
-            renderDashboard();
-        }
+    if (state.currentCategory) {
+        renderCategory(state.currentCategory);
+    } else {
+        renderDashboard();
     }
 }
 
 // --- Navigation & Rendering ---
-const CATEGORIES = [
-    { id: 'produce', icon: 'carrot', labelKey: 'catProduce' },
-    { id: 'meat', icon: 'beef', labelKey: 'catMeat' },
-    { id: 'dairy', icon: 'milk', labelKey: 'catDairy' },
-    { id: 'beverages', icon: 'cup-soda', labelKey: 'catBeverages' }
-];
 
 function renderDashboard() {
     state.currentCategory = null;
@@ -257,16 +140,17 @@ function renderDashboard() {
     DOM.categoryView.classList.add('hidden');
 
     DOM.dashboardView.innerHTML = '';
-    const t = translations[state.lang];
 
-    CATEGORIES.forEach(cat => {
+    state.categories.forEach(cat => {
         const btn = document.createElement('button');
         btn.className = 'category-btn';
+
+        // Custom styling for category colors
         btn.innerHTML = `
-            <div class="category-icon-container">
-                <i data-lucide="${cat.icon}" class="category-icon"></i>
+            <div class="category-icon-container bg-${cat.color}-900 border-${cat.color}-700">
+                <i data-lucide="${cat.icon}" class="category-icon text-${cat.color}-400"></i>
             </div>
-            <span class="category-title">${t[cat.labelKey]}</span>
+            <span class="category-title">${cat.label}</span>
         `;
         btn.onclick = () => loadCategory(cat.id);
         DOM.dashboardView.appendChild(btn);
@@ -289,8 +173,8 @@ async function loadCategory(categoryId) {
     DOM.btnBack.classList.remove('hidden');
 
     const t = translations[state.lang];
-    const catConfig = CATEGORIES.find(c => c.id === categoryId);
-    DOM.categoryTitle.textContent = t[catConfig.labelKey];
+    const catConfig = state.categories.find(c => c.id === categoryId);
+    DOM.categoryTitle.textContent = catConfig ? catConfig.label : categoryId;
 
     // Show loading state
     DOM.itemList.innerHTML = '<div class="text-center py-8 text-gray-400"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i>Loading...</div>';
@@ -327,37 +211,33 @@ function renderCategory(categoryId) {
 
     items.forEach((item, index) => {
         const itemEl = document.createElement('div');
-        itemEl.className = 'item-card';
-
-        // Translate unit if available, otherwise keep original
-        const displayUnit = t[item.unit] || item.unit;
-
-        // Alert if below par
-        const isLow = item.qty < item.par;
-        const nameColor = isLow ? 'text-falcone-red' : 'text-white';
-        const parAlert = isLow ? `<i data-lucide="alert-triangle" class="w-4 h-4 text-falcone-red inline ml-2"></i>` : '';
+        itemEl.className = 'item-card p-4 bg-falcone-gray border border-gray-800 rounded-xl flex items-center justify-between mb-3';
 
         // Use textContent for user data to prevent XSS
         const nameEscaped = document.createElement('div');
         nameEscaped.textContent = item.name;
 
+        const isEachSelected = item.unit === 'each' ? 'selected' : '';
+        const isCaseSelected = item.unit === 'case' ? 'selected' : '';
+
         itemEl.innerHTML = `
-            <div class="flex-1">
-                <h3 class="text-lg font-bold ${nameColor}">${nameEscaped.innerHTML}${parAlert}</h3>
-                <div class="text-sm text-gray-400 mt-1 flex items-center gap-2">
-                    <span>${t.par}: ${item.par}</span>
-                    <span class="w-1 h-1 rounded-full bg-gray-600"></span>
-                    <span>${displayUnit}</span>
+            <div class="flex-1 pr-4">
+                <h3 class="text-lg font-bold text-white leading-tight">${nameEscaped.innerHTML}</h3>
+                <div class="mt-2">
+                    <select onchange="updateUnit('${categoryId}', ${index}, this.value)" class="bg-black border border-gray-700 rounded-lg text-sm text-gray-300 py-1 px-2 focus:ring-1 focus:ring-falcone-red outline-none">
+                        <option value="each" ${isEachSelected}>${t.each}</option>
+                        <option value="case" ${isCaseSelected}>${t.case}</option>
+                    </select>
                 </div>
             </div>
-            <div class="item-controls flex items-center gap-3">
-                <button class="qty-btn" onclick="updateQty('${categoryId}', ${index}, -1)">
+            <div class="item-controls flex items-center gap-3 shrink-0">
+                <button class="qty-btn w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors" onclick="updateQty('${categoryId}', ${index}, -1)">
                     <i data-lucide="minus" class="w-5 h-5"></i>
                 </button>
-                <input type="number" class="qty-input" value="${item.qty}" min="0"
+                <input type="number" class="qty-input w-16 text-center bg-black border border-gray-700 rounded-lg py-2 text-white font-bold" value="${item.qty}" min="0"
                     onchange="setQty('${categoryId}', ${index}, this.value)"
                     onfocus="this.select()">
-                <button class="qty-btn" onclick="updateQty('${categoryId}', ${index}, 1)">
+                <button class="qty-btn w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors" onclick="updateQty('${categoryId}', ${index}, 1)">
                     <i data-lucide="plus" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -371,6 +251,23 @@ function renderCategory(categoryId) {
     }
 }
 
+// Backend Sync Function
+async function syncItemUpdate(item) {
+    try {
+        await fetch(`${API_BASE}/inventory/${state.currentCategory}/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: item.id,
+                qty: item.qty,
+                unit: item.unit
+            })
+        });
+    } catch (e) {
+        console.error("Failed to sync item update:", e);
+    }
+}
+
 // Global Actions for items (attached directly to window for easy inline access)
 window.updateQty = function(categoryId, itemIndex, delta) {
     const item = state.inventory[categoryId][itemIndex];
@@ -378,7 +275,14 @@ window.updateQty = function(categoryId, itemIndex, delta) {
     if (newQty < 0) newQty = 0;
 
     item.qty = newQty;
-    renderCategory(categoryId);
+
+    // Update input visually without re-rendering entire list immediately to prevent focus loss issues
+    const inputs = document.querySelectorAll('.qty-input');
+    if (inputs[itemIndex]) {
+        inputs[itemIndex].value = newQty;
+    }
+
+    syncItemUpdate(item);
 };
 
 window.setQty = function(categoryId, itemIndex, value) {
@@ -388,43 +292,103 @@ window.setQty = function(categoryId, itemIndex, value) {
     if (isNaN(newQty) || newQty < 0) newQty = 0;
 
     item.qty = newQty;
-    renderCategory(categoryId);
+    syncItemUpdate(item);
 };
 
-document.getElementById('btnSaveInventory').addEventListener('click', () => {
-    // Basic animation to show saving
-    const btn = document.getElementById('btnSaveInventory');
-    const originalContent = btn.innerHTML;
+window.updateUnit = function(categoryId, itemIndex, value) {
+    const item = state.inventory[categoryId][itemIndex];
+    item.unit = value;
+    syncItemUpdate(item);
+};
 
-    btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Saving...';
-    if (window.lucide) lucide.createIcons();
-    btn.disabled = true;
+// Order Submission Handlers
+DOM.btnSubmitOrder.addEventListener('click', () => {
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    DOM.orderDateInput.value = today;
 
-    // Simulate network delay for now
-    setTimeout(() => {
-        btn.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i> Saved!';
-        if (window.lucide) lucide.createIcons();
-        btn.classList.replace('bg-falcone-red', 'bg-green-600');
-        btn.classList.replace('hover:bg-red-600', 'hover:bg-green-700');
+    // Reset modal state
+    DOM.rushOrderCheckbox.checked = false;
+    DOM.neededByContainer.classList.add('hidden');
+    DOM.neededByInput.value = '';
+    DOM.orderModalError.classList.add('hidden');
 
-        setTimeout(() => {
-            btn.innerHTML = originalContent;
-            btn.classList.replace('bg-green-600', 'bg-falcone-red');
-            btn.classList.replace('hover:bg-green-700', 'hover:bg-red-600');
-            btn.disabled = false;
-        }, 2000);
+    DOM.orderModal.classList.remove('hidden');
+});
 
-        // Later we will post state.inventory to the backend here
-    }, 800);
+DOM.rushOrderCheckbox.addEventListener('change', (e) => {
+    if (e.target.checked) {
+        DOM.neededByContainer.classList.remove('hidden');
+    } else {
+        DOM.neededByContainer.classList.add('hidden');
+    }
+});
+
+DOM.btnCancelOrder.addEventListener('click', () => {
+    DOM.orderModal.classList.add('hidden');
+});
+
+DOM.btnConfirmOrder.addEventListener('click', async () => {
+    const date = DOM.orderDateInput.value;
+    const isRush = DOM.rushOrderCheckbox.checked;
+    const neededBy = DOM.neededByInput.value;
+
+    if (!date) {
+        DOM.orderModalError.textContent = "Please select an order date.";
+        DOM.orderModalError.classList.remove('hidden');
+        return;
+    }
+
+    if (isRush && !neededBy) {
+        DOM.orderModalError.textContent = "Please select a needed by date for rush orders.";
+        DOM.orderModalError.classList.remove('hidden');
+        return;
+    }
+
+    DOM.btnConfirmOrder.disabled = true;
+    DOM.btnConfirmOrder.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Submitting...';
+    lucide.createIcons();
+
+    try {
+        const res = await fetch(`${API_BASE}/submit_order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                date: date,
+                is_rush: isRush,
+                needed_by: neededBy || null
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            DOM.orderModal.classList.add('hidden');
+            alert(`Order submitted successfully!\nFile: ${data.filename}`);
+
+            // Reload category to get cleared state
+            if (state.currentCategory) {
+                loadCategory(state.currentCategory);
+            }
+        } else {
+            DOM.orderModalError.textContent = data.message || "Error submitting order.";
+            DOM.orderModalError.classList.remove('hidden');
+        }
+    } catch (e) {
+        console.error("Failed to submit order:", e);
+        DOM.orderModalError.textContent = "Failed to submit order due to a network error.";
+        DOM.orderModalError.classList.remove('hidden');
+    } finally {
+        DOM.btnConfirmOrder.disabled = false;
+        DOM.btnConfirmOrder.innerHTML = '<span id="labelConfirm">Confirm Order</span>';
+        applyLanguage(); // reset label text
+    }
 });
 
 // Global Nav Handlers
 DOM.btnBack.addEventListener('click', renderDashboard);
 
 // --- Event Listeners ---
-DOM.loginForm.addEventListener('submit', handleLogin);
-DOM.btnLogout.addEventListener('click', handleLogout);
-DOM.btnToggleLangLogin.addEventListener('click', toggleLanguage);
 DOM.btnToggleLangApp.addEventListener('click', toggleLanguage);
 
 // Start

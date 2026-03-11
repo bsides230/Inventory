@@ -1,6 +1,8 @@
 import os
 import json
 from pathlib import Path
+import pandas as pd
+from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request, Depends, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -9,16 +11,27 @@ import uvicorn
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 
-app = FastAPI(title="Falcone's Pizza Inventory")
+# --- Initialization ---
+LOCATION_FILE = Path("location.txt")
+CATEGORIES_FILE = Path("categories.json")
+ITEM_MASTER_DIR = Path("item master")
+ORDERS_DIR = Path("orders")
 
-# --- Settings ---
-WEB_DIR = Path("web")
-FLAGS_DIR = Path("global_flags")
-NO_AUTH_FILE = FLAGS_DIR / "no_auth"
+def get_location_name():
+    if LOCATION_FILE.exists():
+        with open(LOCATION_FILE, "r") as f:
+            return f.read().strip()
+    return "Falcone's Pizza"
+
+app = FastAPI(title=f"{get_location_name()} Inventory")
 
 # Setup directories
+WEB_DIR = Path("web")
+FLAGS_DIR = Path("global_flags")
 WEB_DIR.mkdir(exist_ok=True)
 FLAGS_DIR.mkdir(exist_ok=True)
+ITEM_MASTER_DIR.mkdir(exist_ok=True)
+ORDERS_DIR.mkdir(exist_ok=True)
 
 # Add CORS middleware
 app.add_middleware(
@@ -29,69 +42,199 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Mock Data ---
-MOCK_USERS = {
-    "kitchen": "1234",
-    "manager": "4321"
-}
+# --- Data Loading ---
+def load_categories_config() -> Dict[str, dict]:
+    if CATEGORIES_FILE.exists():
+        with open(CATEGORIES_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_categories_config(config: Dict[str, dict]):
+    with open(CATEGORIES_FILE, "w") as f:
+        json.dump(config, f, indent=4)
+
+def get_master_excel_file() -> Optional[Path]:
+    for file in ITEM_MASTER_DIR.iterdir():
+        if file.suffix == ".xlsx" and not file.name.startswith("~"):
+            return file
+    return None
+
+def parse_master_data():
+    excel_file = get_master_excel_file()
+    if not excel_file:
+        return {}
+
+    try:
+        xls = pd.ExcelFile(excel_file)
+        data = {}
+        config = load_categories_config()
+        config_updated = False
+
+        # Random fallback icons if a new category is found
+        fallback_icons = ["box", "package", "shopping-cart", "archive", "layers"]
+        fallback_colors = ["gray", "zinc", "neutral", "stone"]
+
+        icon_idx = 0
+
+        for sheet_name in xls.sheet_names:
+            df = pd.read_excel(xls, sheet_name=sheet_name, header=None)
+            if df.empty or len(df.columns) == 0:
+                continue
+
+            # First column contains items
+            items = df[0].dropna().astype(str).tolist()
+            if items:
+                cat_id = sheet_name.lower().replace(" ", "_").replace("-", "_")
+
+                # Check if category exists in config
+                if cat_id not in config:
+                    config[cat_id] = {
+                        "color": fallback_colors[icon_idx % len(fallback_colors)],
+                        "icon": fallback_icons[icon_idx % len(fallback_icons)],
+                        "label": sheet_name
+                    }
+                    config_updated = True
+                    icon_idx += 1
+                elif "label" not in config[cat_id]:
+                    config[cat_id]["label"] = sheet_name
+                    config_updated = True
+
+                data[cat_id] = {
+                    "label": sheet_name,
+                    "items": [{"id": f"{cat_id}_{i}", "name": item} for i, item in enumerate(items)]
+                }
+
+        if config_updated:
+            save_categories_config(config)
+
+        return data
+    except Exception as e:
+        print(f"Error parsing master Excel file: {e}")
+        return {}
+
+# --- State Management ---
+STATE_FILE = Path("inventory_state.json")
+
+def load_inventory_state() -> Dict[str, dict]:
+    if STATE_FILE.exists():
+        try:
+            with open(STATE_FILE, "r") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+def save_inventory_state(state: Dict[str, dict]):
+    with open(STATE_FILE, "w") as f:
+        json.dump(state, f, indent=4)
+
+INVENTORY_STATE = load_inventory_state()
 
 # --- Models ---
-class LoginRequest(BaseModel):
-    username: str
-    pin: str
+class UpdateItemRequest(BaseModel):
+    id: str
+    qty: int
+    unit: str
 
-# --- Dependencies ---
-def is_auth_enabled() -> bool:
-    return not NO_AUTH_FILE.exists()
+class SubmitOrderRequest(BaseModel):
+    date: str
+    is_rush: bool
+    needed_by: Optional[str] = None
 
 # --- API Endpoints ---
 @app.get("/api/status")
 async def get_status():
-    return {"auth_required": is_auth_enabled(), "status": "online"}
+    return {"status": "online", "location": get_location_name()}
 
-@app.post("/api/login")
-async def login(request: LoginRequest):
-    if not is_auth_enabled():
-         return {"success": True, "message": "Auth disabled", "user": request.username or "anonymous"}
+@app.get("/api/categories")
+async def get_categories():
+    master_data = parse_master_data()
+    config = load_categories_config()
+    categories = []
 
-    user = request.username.lower()
-    if user in MOCK_USERS and MOCK_USERS[user] == request.pin:
-        return {"success": True, "message": "Login successful", "user": user}
+    for cat_id, cat_data in master_data.items():
+        cat_config = config.get(cat_id, {})
+        categories.append({
+            "id": cat_id,
+            "label": cat_config.get("label", cat_data["label"]),
+            "icon": cat_config.get("icon", "box"),
+            "color": cat_config.get("color", "gray")
+        })
+    return {"success": True, "categories": categories}
 
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid username or PIN",
-    )
-
-# Placeholder data endpoint
 @app.get("/api/inventory/{category}")
 async def get_inventory(category: str):
-    # Dummy data
-    data = {
-        "produce": [
-            {"id": "p1", "name": "Tomatoes", "qty": 10, "unit": "cases", "par": 15},
-            {"id": "p2", "name": "Onions", "qty": 5, "unit": "bags", "par": 10},
-            {"id": "p3", "name": "Garlic", "qty": 2, "unit": "lbs", "par": 5},
-        ],
-        "meat": [
-            {"id": "m1", "name": "Pepperoni", "qty": 8, "unit": "cases", "par": 10},
-            {"id": "m2", "name": "Sausage", "qty": 4, "unit": "cases", "par": 8},
-        ],
-        "dairy": [
-            {"id": "d1", "name": "Mozzarella", "qty": 20, "unit": "blocks", "par": 25},
-            {"id": "d2", "name": "Parmesan", "qty": 5, "unit": "tubs", "par": 6},
-        ],
-        "beverages": [
-            {"id": "b1", "name": "Coke", "qty": 12, "unit": "cases", "par": 15},
-            {"id": "b2", "name": "Sprite", "qty": 8, "unit": "cases", "par": 10},
-        ]
-    }
-
+    master_data = parse_master_data()
     category_lower = category.lower()
-    if category_lower in data:
-        return {"success": True, "items": data[category_lower]}
 
-    return {"success": True, "items": []} # empty if not found
+    if category_lower in master_data:
+        items = master_data[category_lower]["items"]
+        # Populate current state
+        for item in items:
+            state = INVENTORY_STATE.get(item["id"], {"qty": 0, "unit": "each"})
+            item["qty"] = state["qty"]
+            item["unit"] = state["unit"]
+
+        return {"success": True, "items": items}
+
+    return {"success": True, "items": []}
+
+@app.post("/api/inventory/{category}/update")
+async def update_inventory(category: str, request: UpdateItemRequest):
+    INVENTORY_STATE[request.id] = {
+        "qty": request.qty,
+        "unit": request.unit
+    }
+    save_inventory_state(INVENTORY_STATE)
+    return {"success": True}
+
+@app.post("/api/submit_order")
+async def submit_order(request: SubmitOrderRequest):
+    master_data = parse_master_data()
+    order_items = []
+
+    for cat_id, cat_data in master_data.items():
+        for item in cat_data["items"]:
+            item_id = item["id"]
+            state = INVENTORY_STATE.get(item_id)
+            if state and state.get("qty", 0) > 0:
+                order_items.append({
+                    "Category": cat_data["label"],
+                    "Item Name": item["name"],
+                    "Quantity": state["qty"],
+                    "Unit": state["unit"]
+                })
+
+    if not order_items:
+        return {"success": False, "message": "No items to order."}
+
+    # Generate Excel
+    df = pd.DataFrame(order_items)
+
+    # Sort by Category
+    df = df.sort_values(by="Category")
+
+    location = get_location_name().replace("/", "_").replace("\\", "_")
+
+    if request.is_rush and request.needed_by:
+        filename = f"{location} URGENT ORDER by {request.needed_by}.xlsx"
+    else:
+        date_str = request.date.replace("/", "-")
+        filename = f"{location} Falcones Order {date_str}.xlsx"
+
+    filepath = ORDERS_DIR / filename
+
+    try:
+        df.to_excel(filepath, index=False)
+
+        # Clear state after successful order
+        INVENTORY_STATE.clear()
+        save_inventory_state(INVENTORY_STATE)
+
+        return {"success": True, "message": "Order submitted successfully", "filename": filename}
+    except Exception as e:
+        print(f"Error saving order: {e}")
+        return {"success": False, "message": f"Error saving order: {str(e)}"}
 
 # --- Static Files ---
 app.mount("/", StaticFiles(directory="web", html=True), name="web")

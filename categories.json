@@ -1,0 +1,75 @@
+{
+    "produce": {
+        "color": "green",
+        "icon": "carrot",
+        "label": "PRODUCE"
+    },
+    "meat": {
+        "color": "red",
+        "icon": "beef"
+    },
+    "dairy": {
+        "color": "blue",
+        "icon": "milk",
+        "label": "DAIRY"
+    },
+    "beverages": {
+        "color": "orange",
+        "icon": "cup-soda"
+    },
+    "bev_alc": {
+        "color": "gray",
+        "icon": "box",
+        "label": "BEV-ALC"
+    },
+    "bev_bib": {
+        "color": "zinc",
+        "icon": "package",
+        "label": "BEV-BIB"
+    },
+    "bev_rtd": {
+        "color": "neutral",
+        "icon": "shopping-cart",
+        "label": "BEV-RTD"
+    },
+    "cleaning": {
+        "color": "stone",
+        "icon": "archive",
+        "label": "CLEANING"
+    },
+    "disposables": {
+        "color": "gray",
+        "icon": "layers",
+        "label": "DISPOSABLES"
+    },
+    "frozen.ref": {
+        "color": "zinc",
+        "icon": "box",
+        "label": "FROZEN.REF"
+    },
+    "grocery_dry": {
+        "color": "neutral",
+        "icon": "package",
+        "label": "GROCERY DRY"
+    },
+    "meats": {
+        "color": "stone",
+        "icon": "shopping-cart",
+        "label": "MEATS"
+    },
+    "prepared": {
+        "color": "gray",
+        "icon": "archive",
+        "label": "PREPARED"
+    },
+    "smallwares": {
+        "color": "zinc",
+        "icon": "layers",
+        "label": "SMALLWARES"
+    },
+    "bakery": {
+        "color": "neutral",
+        "icon": "box",
+        "label": "BAKERY"
+    }
+}
