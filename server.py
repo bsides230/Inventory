@@ -17,7 +17,7 @@ from update_inventory_data import check_and_update
 # --- Initialization ---
 LOCATION_FILE = Path("location.txt")
 CATEGORIES_FILE = Path("categories.json")
-INVENTORY_DATA_FILE = Path("inventory_data.json")
+DATA_DIR = Path("data")
 ITEM_MASTER_DIR = Path("item master")
 ORDERS_DIR = Path("orders")
 
@@ -36,6 +36,7 @@ WEB_DIR.mkdir(exist_ok=True)
 FLAGS_DIR.mkdir(exist_ok=True)
 ITEM_MASTER_DIR.mkdir(exist_ok=True)
 ORDERS_DIR.mkdir(exist_ok=True)
+DATA_DIR.mkdir(exist_ok=True)
 
 # Run initial inventory data conversion check
 check_and_update()
@@ -60,16 +61,27 @@ def save_categories_config(config: Dict[str, dict]):
     with open(CATEGORIES_FILE, "w") as f:
         json.dump(config, f, indent=4)
 
-def get_inventory_data():
+def get_inventory_category(category: str):
+    # Make sure we're always working with latest data
     check_and_update()
-    if INVENTORY_DATA_FILE.exists():
+
+    cat_file = DATA_DIR / f"{category}.json"
+    if cat_file.exists():
         try:
-            with open(INVENTORY_DATA_FILE, "r") as f:
+            with open(cat_file, "r") as f:
                 return json.load(f)
         except Exception as e:
-            logging.error(f"Error reading inventory data json: {e}", exc_info=True)
-            return {}
-    return {}
+            logging.error(f"Error reading {category}.json: {e}", exc_info=True)
+            return None
+    return None
+
+def get_all_inventory_categories():
+    check_and_update()
+    categories = []
+    if DATA_DIR.exists():
+        for file in DATA_DIR.glob("*.json"):
+            categories.append(file.stem)
+    return categories
 
 # --- State Management ---
 STATE_FILE = Path("inventory_state.json")
@@ -112,28 +124,30 @@ async def get_status():
 @app.get("/api/categories")
 async def get_categories():
     logger.info("Handling /api/categories request")
-    master_data = get_inventory_data()
+    cat_ids = get_all_inventory_categories()
     config = load_categories_config()
     categories = []
 
-    for cat_id, cat_data in master_data.items():
-        cat_config = config.get(cat_id, {})
-        categories.append({
-            "id": cat_id,
-            "label": cat_config.get("label", cat_data["label"]),
-            "icon": cat_config.get("icon", "box"),
-            "color": cat_config.get("color", "gray")
-        })
+    for cat_id in cat_ids:
+        cat_data = get_inventory_category(cat_id)
+        if cat_data:
+            cat_config = config.get(cat_id, {})
+            categories.append({
+                "id": cat_id,
+                "label": cat_config.get("label", cat_data["label"]),
+                "icon": cat_config.get("icon", "box"),
+                "color": cat_config.get("color", "gray")
+            })
     return {"success": True, "categories": categories}
 
 @app.get("/api/inventory/{category}")
 async def get_inventory(category: str):
     logger.info(f"Handling /api/inventory/{category} request")
-    master_data = get_inventory_data()
     category_lower = category.lower()
+    cat_data = get_inventory_category(category_lower)
 
-    if category_lower in master_data:
-        items = master_data[category_lower]["items"]
+    if cat_data:
+        items = cat_data["items"]
         # Populate current state
         for item in items:
             state = INVENTORY_STATE.get(item["id"], {"qty": 0, "unit": "each"})
@@ -157,20 +171,23 @@ async def update_inventory(category: str, request: UpdateItemRequest):
 @app.post("/api/submit_order")
 async def submit_order(request: SubmitOrderRequest):
     logger.info(f"Handling /api/submit_order request")
-    master_data = get_inventory_data()
-    order_items = []
 
-    for cat_id, cat_data in master_data.items():
-        for item in cat_data["items"]:
-            item_id = item["id"]
-            state = INVENTORY_STATE.get(item_id)
-            if state and state.get("qty", 0) > 0:
-                order_items.append({
-                    "Category": cat_data["label"],
-                    "Item Name": item["name"],
-                    "Quantity": state["qty"],
-                    "Unit": state["unit"]
-                })
+    order_items = []
+    cat_ids = get_all_inventory_categories()
+
+    for cat_id in cat_ids:
+        cat_data = get_inventory_category(cat_id)
+        if cat_data:
+            for item in cat_data["items"]:
+                item_id = item["id"]
+                state = INVENTORY_STATE.get(item_id)
+                if state and state.get("qty", 0) > 0:
+                    order_items.append({
+                        "Category": cat_data["label"],
+                        "Item Name": item.get("name_en", item.get("name", "")),
+                        "Quantity": state["qty"],
+                        "Unit": state["unit"]
+                    })
 
     if not order_items:
         return {"success": False, "message": "No items to order."}

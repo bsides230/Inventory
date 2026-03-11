@@ -1,75 +1,67 @@
 {
     "produce": {
         "color": "green",
-        "icon": "carrot",
+        "icon": "leaf",
         "label": "PRODUCE"
-    },
-    "meat": {
-        "color": "red",
-        "icon": "beef"
     },
     "dairy": {
         "color": "blue",
         "icon": "milk",
         "label": "DAIRY"
     },
-    "beverages": {
-        "color": "orange",
-        "icon": "cup-soda"
-    },
     "bev_alc": {
-        "color": "gray",
-        "icon": "box",
+        "color": "amber",
+        "icon": "beer",
         "label": "BEV-ALC"
     },
     "bev_bib": {
-        "color": "zinc",
-        "icon": "package",
+        "color": "indigo",
+        "icon": "cup-soda",
         "label": "BEV-BIB"
     },
     "bev_rtd": {
-        "color": "neutral",
-        "icon": "shopping-cart",
+        "color": "cyan",
+        "icon": "bottle-water",
         "label": "BEV-RTD"
     },
     "cleaning": {
-        "color": "stone",
-        "icon": "archive",
+        "color": "teal",
+        "icon": "spray-can",
         "label": "CLEANING"
     },
     "disposables": {
-        "color": "gray",
-        "icon": "layers",
+        "color": "rose",
+        "icon": "utensils",
         "label": "DISPOSABLES"
     },
     "frozen.ref": {
-        "color": "zinc",
-        "icon": "box",
+        "color": "sky",
+        "icon": "snowflake",
         "label": "FROZEN.REF"
     },
     "grocery_dry": {
-        "color": "neutral",
-        "icon": "package",
+        "color": "yellow",
+        "icon": "wheat",
         "label": "GROCERY DRY"
     },
     "meats": {
-        "color": "stone",
-        "icon": "shopping-cart",
+        "color": "red",
+        "icon": "beef",
         "label": "MEATS"
     },
     "prepared": {
-        "color": "gray",
-        "icon": "archive",
+        "color": "orange",
+        "icon": "chef-hat",
         "label": "PREPARED"
     },
     "smallwares": {
-        "color": "zinc",
-        "icon": "layers",
+        "color": "gray",
+        "icon": "cooking-pot",
         "label": "SMALLWARES"
     },
     "bakery": {
-        "color": "neutral",
-        "icon": "box",
+        "color": "yellow",
+        "icon": "croissant",
         "label": "BAKERY"
     }
 }

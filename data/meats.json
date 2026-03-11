@@ -1,0 +1,95 @@
+{
+    "label": "MEATS",
+    "items": [
+        {
+            "id": "meats_0",
+            "name_en": "Bacon Sliced 1cs",
+            "name_es": "Tocino en Rebanadas 1 caja"
+        },
+        {
+            "id": "meats_1",
+            "name_en": "Canadian Bacon",
+            "name_es": "Tocino Canadiense"
+        },
+        {
+            "id": "meats_2",
+            "name_en": "Ground Beef 73/27 lbs",
+            "name_es": "Carne Molida 73/27 lbs"
+        },
+        {
+            "id": "meats_3",
+            "name_en": "Ground Beef 80/20 lbs",
+            "name_es": "Carne Molida 80/20 lbs"
+        },
+        {
+            "id": "meats_4",
+            "name_en": "Ground Beef 90/10 lbs",
+            "name_es": "Carne Molida 90/10 lbs"
+        },
+        {
+            "id": "meats_5",
+            "name_en": "Italian Sausage Rope",
+            "name_es": "Salchicha Italiana en Cuerda"
+        },
+        {
+            "id": "meats_6",
+            "name_en": "Pepperoni",
+            "name_es": "Pepperoni"
+        },
+        {
+            "id": "meats_7",
+            "name_en": "Philly Meat",
+            "name_es": "Carne para Philly"
+        },
+        {
+            "id": "meats_8",
+            "name_en": "Chicken Breast",
+            "name_es": "Pechuga de Pollo"
+        },
+        {
+            "id": "meats_9",
+            "name_en": "Chicken Wings",
+            "name_es": "Alitas de Pollo"
+        },
+        {
+            "id": "meats_10",
+            "name_en": "Bacon Bits ",
+            "name_es": "Trozos de Tocino "
+        },
+        {
+            "id": "meats_11",
+            "name_en": "Shrimp 21-25 raw peeled 5/2lb.",
+            "name_es": "Camarones 21-25 crudos y pelados 5/2lb."
+        },
+        {
+            "id": "meats_12",
+            "name_en": "Brisket",
+            "name_es": "Pecho de Res (Brisket)"
+        },
+        {
+            "id": "meats_13",
+            "name_en": "Pork Butt",
+            "name_es": "Paleta de Cerdo"
+        },
+        {
+            "id": "meats_14",
+            "name_en": "Polish Sausage",
+            "name_es": "Salchicha Polaca"
+        },
+        {
+            "id": "meats_15",
+            "name_en": "Hot Links",
+            "name_es": "Salchichas Picantes"
+        },
+        {
+            "id": "meats_16",
+            "name_en": "Hot Dogs",
+            "name_es": "Hot Dogs"
+        },
+        {
+            "id": "meats_17",
+            "name_en": "Catfish/Swai cs.",
+            "name_es": "Bagre/Swai caja"
+        }
+    ]
+}

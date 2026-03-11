@@ -1,0 +1,245 @@
+{
+    "label": "DISPOSABLES",
+    "items": [
+        {
+            "id": "disposables_0",
+            "name_en": "08\" Ultra Lunch Paper Plate",
+            "name_es": "Plato de Papel Ultra 08\""
+        },
+        {
+            "id": "disposables_1",
+            "name_en": "10\" Ultra Lunch Paper Plate",
+            "name_es": "Plato de Papel Ultra 10\""
+        },
+        {
+            "id": "disposables_2",
+            "name_en": "16 oz. Foam Cup",
+            "name_es": "Vaso de Espuma 16 oz."
+        },
+        {
+            "id": "disposables_3",
+            "name_en": "16 oz. Foam Lid",
+            "name_es": "Tapa para Vaso de Espuma 16 oz."
+        },
+        {
+            "id": "disposables_4",
+            "name_en": "2 oz. Clear portion cup",
+            "name_es": "Vasito Transparente para Porci\u00f3n 2 oz."
+        },
+        {
+            "id": "disposables_5",
+            "name_en": "2 oz. Clear Portion Lid",
+            "name_es": "Tapa Transparente para Porci\u00f3n 2 oz."
+        },
+        {
+            "id": "disposables_6",
+            "name_en": "4 oz. Foam Portion Cup",
+            "name_es": "Vasito de Espuma para Porci\u00f3n 4 oz."
+        },
+        {
+            "id": "disposables_7",
+            "name_en": "4 oz. Foam Portion Lid",
+            "name_es": "Tapa de Espuma para Porci\u00f3n 4 oz."
+        },
+        {
+            "id": "disposables_8",
+            "name_en": "6x6 Clear Plastic togo",
+            "name_es": "Envase de Pl\u00e1stico Transparente para Llevar 6x6"
+        },
+        {
+            "id": "disposables_9",
+            "name_en": "8x8 Clear togo boxes cs",
+            "name_es": "Cajas Transparentes para Llevar 8x8 caja"
+        },
+        {
+            "id": "disposables_10",
+            "name_en": "6x6 White Foam togo",
+            "name_es": "Envase de Espuma Blanca para Llevar 6x6"
+        },
+        {
+            "id": "disposables_11",
+            "name_en": "8x8 White Foam togo",
+            "name_es": "Envase de Espuma Blanca para Llevar 8x8"
+        },
+        {
+            "id": "disposables_12",
+            "name_en": "9x9 White Foam togo",
+            "name_es": "Envase de Espuma Blanca para Llevar 9x9"
+        },
+        {
+            "id": "disposables_13",
+            "name_en": "Aluminum Foil Roll",
+            "name_es": "Rollo de Papel Aluminio"
+        },
+        {
+            "id": "disposables_14",
+            "name_en": "Aluminum Foil Sheets 10.75\" 1/200ct.",
+            "name_es": "Hojas de Papel Aluminio 10.75\" 1/200 ct."
+        },
+        {
+            "id": "disposables_15",
+            "name_en": "Aluminum Lid (full Pan)",
+            "name_es": "Tapa de Aluminio (Bandeja Completa)"
+        },
+        {
+            "id": "disposables_16",
+            "name_en": "Aluminum Lid (half pan)",
+            "name_es": "Tapa de Aluminio (Media Bandeja)"
+        },
+        {
+            "id": "disposables_17",
+            "name_en": "Aluminum Pan (full pan)",
+            "name_es": "Bandeja de Aluminio (Completa)"
+        },
+        {
+            "id": "disposables_18",
+            "name_en": "Aluminum Pan (half pan)",
+            "name_es": "Bandeja de Aluminio (Media)"
+        },
+        {
+            "id": "disposables_19",
+            "name_en": "Cutlery Meal Kit",
+            "name_es": "Kit de Cubiertos para Comida"
+        },
+        {
+            "id": "disposables_20",
+            "name_en": "Deli container togo 16oz.",
+            "name_es": "Envase Deli para Llevar 16 oz."
+        },
+        {
+            "id": "disposables_21",
+            "name_en": "Deli container togo 8oz.",
+            "name_es": "Envase Deli para Llevar 8 oz."
+        },
+        {
+            "id": "disposables_22",
+            "name_en": "Deli container togo lids",
+            "name_es": "Tapas para Envases Deli para Llevar"
+        },
+        {
+            "id": "disposables_23",
+            "name_en": "Film Poly 12\" Wrap",
+            "name_es": "Envoltura de Pel\u00edcula Pl\u00e1stica 12\""
+        },
+        {
+            "id": "disposables_24",
+            "name_en": "Film Poly 18\" Wrap",
+            "name_es": "Envoltura de Pel\u00edcula Pl\u00e1stica 18\""
+        },
+        {
+            "id": "disposables_25",
+            "name_en": "Film Poly 24\" Wrap",
+            "name_es": "Envoltura de Pel\u00edcula Pl\u00e1stica 24\""
+        },
+        {
+            "id": "disposables_26",
+            "name_en": "Fork White Heavy Duty box",
+            "name_es": "Tenedor Blanco de Alta Resistencia caja"
+        },
+        {
+            "id": "disposables_27",
+            "name_en": "Gloves Lg",
+            "name_es": "Guantes G"
+        },
+        {
+            "id": "disposables_28",
+            "name_en": "Gloves Med",
+            "name_es": "Guantes M"
+        },
+        {
+            "id": "disposables_29",
+            "name_en": "Gloves Sm",
+            "name_es": "Guantes P"
+        },
+        {
+            "id": "disposables_30",
+            "name_en": "Knife White Heavy Duty box",
+            "name_es": "Cuchillo Blanco de Alta Resistencia caja"
+        },
+        {
+            "id": "disposables_31",
+            "name_en": "Menu Tissue (sgl)",
+            "name_es": "Papel Seda para Men\u00fa (sgl)"
+        },
+        {
+            "id": "disposables_32",
+            "name_en": "Paper Towel (brown roll)",
+            "name_es": "Toalla de Papel (Rollo Marr\u00f3n)"
+        },
+        {
+            "id": "disposables_33",
+            "name_en": "Paper Towels (dispenser)",
+            "name_es": "Toallas de Papel (Dispensador)"
+        },
+        {
+            "id": "disposables_34",
+            "name_en": "Paper Towels (kitchen)",
+            "name_es": "Toallas de Papel (Cocina)"
+        },
+        {
+            "id": "disposables_35",
+            "name_en": "Pizza Boxes 10\"",
+            "name_es": "Cajas de Pizza 10\""
+        },
+        {
+            "id": "disposables_36",
+            "name_en": "Pizza Boxes 14\"",
+            "name_es": "Cajas de Pizza 14\""
+        },
+        {
+            "id": "disposables_37",
+            "name_en": "Pizza Boxes 18\"",
+            "name_es": "Cajas de Pizza 18\""
+        },
+        {
+            "id": "disposables_38",
+            "name_en": "Portion Control Bag (sandwich size)",
+            "name_es": "Bolsa de Control de Porci\u00f3n (Tama\u00f1o S\u00e1ndwich)"
+        },
+        {
+            "id": "disposables_39",
+            "name_en": "Register 3 1/8\" Thermal Roll",
+            "name_es": "Rollo T\u00e9rmico para Registradora 3 1/8\""
+        },
+        {
+            "id": "disposables_40",
+            "name_en": "Register paper 3 1/8\" Thermal",
+            "name_es": "Papel T\u00e9rmico para Registradora 3 1/8\""
+        },
+        {
+            "id": "disposables_41",
+            "name_en": "Toilet Tissue",
+            "name_es": "Papel Higi\u00e9nico"
+        },
+        {
+            "id": "disposables_42",
+            "name_en": "Trash Bags (kitchen size)",
+            "name_es": "Bolsas de Basura (Tama\u00f1o Cocina)"
+        },
+        {
+            "id": "disposables_43",
+            "name_en": "Trash Bags (Lg 55-65 gal)",
+            "name_es": "Bolsas de Basura (Grandes 55-65 gal)"
+        },
+        {
+            "id": "disposables_44",
+            "name_en": "Trash Bags (Small)",
+            "name_es": "Bolsas de Basura (Peque\u00f1as)"
+        },
+        {
+            "id": "disposables_45",
+            "name_en": "Togo T-Shirt Bag Lg.",
+            "name_es": "Bolsa tipo Camiseta para Llevar G"
+        },
+        {
+            "id": "disposables_46",
+            "name_en": "Togo T-Shirt Bag Med",
+            "name_es": "Bolsa tipo Camiseta para Llevar M"
+        },
+        {
+            "id": "disposables_47",
+            "name_en": "Togo T-Shirt Bag Sm",
+            "name_es": "Bolsa tipo Camiseta para Llevar P"
+        }
+    ]
+}

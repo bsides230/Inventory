@@ -215,7 +215,7 @@ function renderCategory(categoryId) {
 
         // Use textContent for user data to prevent XSS
         const nameEscaped = document.createElement('div');
-        nameEscaped.textContent = item.name;
+        nameEscaped.textContent = state.lang === 'es' ? item.name_es : item.name_en;
 
         const isEachSelected = item.unit === 'each' ? 'selected' : '';
         const isCaseSelected = item.unit === 'case' ? 'selected' : '';

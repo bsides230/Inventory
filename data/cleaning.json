@@ -1,0 +1,30 @@
+{
+    "label": "CLEANING",
+    "items": [
+        {
+            "id": "cleaning_0",
+            "name_en": "Bleach",
+            "name_es": "Cloro"
+        },
+        {
+            "id": "cleaning_1",
+            "name_en": "Dish Detergent (dawn) ",
+            "name_es": "Detergente para Platos (Dawn)"
+        },
+        {
+            "id": "cleaning_2",
+            "name_en": "Floor cleaner (fabuloso purple)",
+            "name_es": "Limpiador de Pisos (Fabuloso morado)"
+        },
+        {
+            "id": "cleaning_3",
+            "name_en": "Scrubber Stainless Steel 12/1 ct.",
+            "name_es": "Esponjas de Acero Inoxidable 12/1 ct."
+        },
+        {
+            "id": "cleaning_4",
+            "name_en": "Dining Room Sanitizer",
+            "name_es": "Desinfectante para Comedor"
+        }
+    ]
+}
