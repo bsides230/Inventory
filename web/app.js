@@ -37,6 +37,7 @@ const translations = {
 // --- State Management ---
 const state = {
     lang: localStorage.getItem('falcone_lang') || 'en', // 'en' or 'es'
+    theme: localStorage.getItem('falcone_theme') || 'dark', // 'light' or 'dark'
     currentCategory: null,
     inventory: {},
     categories: []
@@ -50,6 +51,7 @@ const DOM = {
 
     btnBack: document.getElementById('btnBack'),
     btnToggleLangApp: document.getElementById('btnToggleLangApp'),
+    btnToggleTheme: document.getElementById('btnToggleTheme'),
 
     htmlTitle: document.getElementById('htmlTitle'),
     appTitle: document.getElementById('appTitle'),
@@ -86,6 +88,7 @@ async function initApp() {
     }
 
     applyLanguage();
+    applyTheme();
 
     try {
         const res = await fetch(`${API_BASE}/categories`);
@@ -105,6 +108,24 @@ function toggleLanguage() {
     state.lang = state.lang === 'en' ? 'es' : 'en';
     localStorage.setItem('falcone_lang', state.lang);
     applyLanguage();
+}
+
+function toggleTheme() {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('falcone_theme', state.theme);
+    applyTheme();
+}
+
+function applyTheme() {
+    document.documentElement.setAttribute('data-theme', state.theme);
+
+    if (DOM.btnToggleTheme) {
+        const icon = state.theme === 'dark' ? 'sun' : 'moon';
+        DOM.btnToggleTheme.innerHTML = `<i data-lucide="${icon}" class="w-6 h-6"></i>`;
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
 }
 
 function applyLanguage() {
@@ -156,7 +177,9 @@ function renderDashboard() {
             <div class="category-icon-container bg-${cat.color}-900 border-${cat.color}-700">
                 <i data-lucide="${cat.icon}" class="category-icon text-${cat.color}-400"></i>
             </div>
-            <span class="category-title">${displayLabel}</span>
+            <div class="category-title-wrapper">
+                <span class="category-title">${displayLabel}</span>
+            </div>
         `;
         btn.onclick = () => loadCategory(cat.id);
         DOM.dashboardView.appendChild(btn);
@@ -396,6 +419,9 @@ DOM.btnBack.addEventListener('click', renderDashboard);
 
 // --- Event Listeners ---
 DOM.btnToggleLangApp.addEventListener('click', toggleLanguage);
+if (DOM.btnToggleTheme) {
+    DOM.btnToggleTheme.addEventListener('click', toggleTheme);
+}
 
 // Start
 document.addEventListener('DOMContentLoaded', initApp);

@@ -2,19 +2,37 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-:root {
+:root, [data-theme="dark"] {
   --color-red: #db594b;
   --color-dark: #0a0a0a;
   --color-gray: #1f1f1f;
   --color-light: #f2f2f2;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #9ca3af;
+  --color-bg-body: #0a0a0a;
+  --color-bg-nav: #1f1f1f;
+  --color-border: #374151; /* gray-700 */
+}
+
+[data-theme="light"] {
+  --color-red: #db594b;
+  --color-dark: #f9fafb;
+  --color-gray: #ffffff;
+  --color-light: #111827;
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-bg-body: #f3f4f6;
+  --color-bg-nav: #ffffff;
+  --color-border: #d1d5db; /* gray-300 */
 }
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--color-dark);
-  color: var(--color-light);
+  background-color: var(--color-bg-body);
+  color: var(--color-text-primary);
   -webkit-tap-highlight-color: transparent; /* Remove tap highlights on mobile */
   overscroll-behavior: none; /* Prevent pull-to-refresh on mobile Safari */
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Custom Scrollbar for better appearance on desktop */
@@ -45,13 +63,14 @@ body {
 /* App Drawer / Grid Buttons */
 .category-btn {
   aspect-ratio: 1; /* Make them perfect squares */
-  background: var(--color-gray);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--color-bg-nav);
+  border: 1px solid var(--color-border);
   border-radius: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding: 1rem;
   transition: all 0.2s ease;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   position: relative;
@@ -69,7 +88,7 @@ body {
 
 .category-btn:active, .category-btn.active {
   transform: scale(0.96);
-  background: #2a2a2a;
+  background: var(--color-bg-body);
   border-color: rgba(219, 89, 75, 0.3);
 }
 
@@ -80,25 +99,54 @@ body {
 .category-icon-container {
   background-color: rgba(219, 89, 75, 0.1);
   color: var(--color-red);
-  padding: 1rem;
+  padding: 0.75rem;
   border-radius: 1rem;
-  margin-bottom: 1rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .category-icon {
-  width: 3rem;
-  height: 3rem;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.category-title-wrapper {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  container-type: inline-size;
 }
 
 .category-title {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  color: var(--color-light);
+  color: var(--color-text-primary);
   text-align: center;
   text-transform: capitalize;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+@container (max-width: 120px) {
+  .category-title {
+    font-size: 0.95rem;
+  }
+}
+@container (max-width: 100px) {
+  .category-title {
+    font-size: 0.85rem;
+  }
 }
 
 /* Item List Card */

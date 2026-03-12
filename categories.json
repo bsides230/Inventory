@@ -25,7 +25,7 @@
     },
     "bev_rtd": {
         "color": "cyan",
-        "icon": "bottle-water",
+        "icon": "bottle-wine",
         "label_en": "Bottled Beverages",
         "label_es": "Bebidas Embotelladas"
     },
