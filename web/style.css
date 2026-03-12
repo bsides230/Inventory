@@ -151,19 +151,19 @@ body {
 
 /* Item List Card */
 .item-card {
-  background: var(--color-gray);
+  background: var(--color-bg-nav);
   border-radius: 1rem;
   padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid var(--color-border);
 }
 
 /* Number Input Buttons */
 .qty-btn {
-  background: #333;
-  color: white;
+  background: var(--color-bg-body);
+  color: var(--color-text-primary);
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 0.5rem;
@@ -177,11 +177,12 @@ body {
 
 .qty-btn:active {
   background: var(--color-red);
+  color: #fff;
 }
 
 .qty-input {
   background: transparent;
-  color: white;
+  color: var(--color-text-primary);
   width: 3rem;
   text-align: center;
   font-size: 1.25rem;
@@ -221,8 +222,9 @@ body {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    background: #111;
+    background: var(--color-bg-body);
     padding: 0.5rem;
     border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
   }
 }

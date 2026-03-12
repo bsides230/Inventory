@@ -240,7 +240,7 @@ function renderCategory(categoryId) {
 
     items.forEach((item, index) => {
         const itemEl = document.createElement('div');
-        itemEl.className = 'item-card p-4 bg-falcone-gray border border-gray-800 rounded-xl flex items-center justify-between mb-3';
+        itemEl.className = 'item-card p-4 mb-3';
 
         // Use textContent for user data to prevent XSS
         const nameEscaped = document.createElement('div');
@@ -251,22 +251,22 @@ function renderCategory(categoryId) {
 
         itemEl.innerHTML = `
             <div class="flex-1 pr-4">
-                <h3 class="text-lg font-bold text-white leading-tight">${nameEscaped.innerHTML}</h3>
+                <h3 class="text-lg font-bold text-[var(--color-text-primary)] leading-tight">${nameEscaped.innerHTML}</h3>
                 <div class="mt-2">
-                    <select onchange="updateUnit('${categoryId}', ${index}, this.value)" class="bg-black border border-gray-700 rounded-lg text-sm text-gray-300 py-1 px-2 focus:ring-1 focus:ring-falcone-red outline-none">
+                    <select onchange="updateUnit('${categoryId}', ${index}, this.value)" class="bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-primary)] py-1 px-2 focus:ring-1 focus:ring-falcone-red outline-none">
                         <option value="each" ${isEachSelected}>${t.each}</option>
                         <option value="case" ${isCaseSelected}>${t.case}</option>
                     </select>
                 </div>
             </div>
             <div class="item-controls flex items-center gap-3 shrink-0">
-                <button class="qty-btn w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors" onclick="updateQty('${categoryId}', ${index}, -1)">
+                <button class="qty-btn w-10 h-10 flex items-center justify-center hover:bg-[var(--color-border)] rounded-lg transition-colors" onclick="updateQty('${categoryId}', ${index}, -1)">
                     <i data-lucide="minus" class="w-5 h-5"></i>
                 </button>
-                <input type="number" class="qty-input w-16 text-center bg-black border border-gray-700 rounded-lg py-2 text-white font-bold" value="${item.qty}" min="0"
+                <input type="number" class="qty-input w-16 text-center bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg py-2 font-bold" value="${item.qty}" min="0"
                     onchange="setQty('${categoryId}', ${index}, this.value)"
                     onfocus="this.select()">
-                <button class="qty-btn w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors" onclick="updateQty('${categoryId}', ${index}, 1)">
+                <button class="qty-btn w-10 h-10 flex items-center justify-center hover:bg-[var(--color-border)] rounded-lg transition-colors" onclick="updateQty('${categoryId}', ${index}, 1)">
                     <i data-lucide="plus" class="w-5 h-5"></i>
                 </button>
             </div>
