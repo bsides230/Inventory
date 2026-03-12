@@ -44,8 +44,8 @@
     "frozen.ref": {
         "color": "sky",
         "icon": "snowflake",
-        "label_en": "Frozen/Refrigerated",
-        "label_es": "Congelados/Refrigerados"
+        "label_en": "Frozen & Refrigerated",
+        "label_es": "Congelados & Refrigerados"
     },
     "grocery_dry": {
         "color": "yellow",
