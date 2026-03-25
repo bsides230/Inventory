@@ -1,17 +1,17 @@
 # Execution Status
 
 ## Current Prompt
-- Prompt File: `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
+- Prompt File: `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
 - Status: `COMPLETED`
-- Started At: `2026-03-25T21:22:55Z`
-- Last Updated: `2026-03-25T21:25:02Z`
+- Started At: `2026-03-25T21:28:10Z`
+- Last Updated: `2026-03-25T21:34:25Z`
 
 ## Prompt Sequence
 - [x] `01_PHASE_0_STABILIZE_AND_PREPARE.md`
 - [!] `02_PHASE_1_MULTI_USER_DATA_MODEL.md`
 - [x] `02A_PHASE_1_SCHEMA_AND_MODELS.md`
 - [x] `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
-- [ ] `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
+- [x] `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
 - [ ] `03_PHASE_2_EMAIL_DELIVERY_AND_TEXT_CONFIG.md`
 - [ ] `04_PHASE_3_PUBLIC_DEPLOYMENT.md`
 - [ ] `05_PHASE_4_PWA_HARDENING.md`
@@ -69,9 +69,23 @@ Legend:
   - `tests/test_auth_write_protection.py`
   - `docs/api-contract.md`
 
+### `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
+- Status: `COMPLETED`
+- Started At: `2026-03-25T21:28:10Z`
+- Completed At: `2026-03-25T21:34:25Z`
+- Summary:
+  - Migrated draft read/update endpoints from shared file state to per-user relational draft records.
+  - Implemented atomic submit transaction that exports spreadsheet, snapshots draft into orders/order_items, and rolls back on failure.
+  - Added end-to-end lifecycle, multi-user isolation, and rollback coverage for draft-to-submit flow.
+- Key Files Changed:
+  - `server.py`
+  - `db/repositories.py`
+  - `tests/test_draft_submit_flow.py`
+  - `docs/api-contract.md`
+
 ## Blockers / Notes
 - Parent prompt `02_PHASE_1_MULTI_USER_DATA_MODEL.md` is intentionally marked blocked/decomposed because execution is split into `02A`/`02B`/`02C` for one-prompt-per-PR discipline.
 - `pytest` at repo root still attempts to collect `test_post.py` script; use `pytest tests` for scoped suites.
 
 ## Next Prompt
-- `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
+- `03_PHASE_2_EMAIL_DELIVERY_AND_TEXT_CONFIG.md`

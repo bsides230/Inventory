@@ -6,13 +6,15 @@ from typing import Dict, Optional
 
 import pandas as pd
 import uvicorn
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from db.auth import AuthenticatedUser, get_optional_authenticated_user, get_required_authenticated_user
+from db.database import get_session
+from db.repositories import OrderDraftRepository, OrderRepository
 from update_inventory_data import check_and_update
 
 
@@ -144,38 +146,8 @@ def get_all_inventory_categories():
     return categories
 
 
-# --- State Management ---
-STATE_FILE = Path("inventory_state.json")
-
-
-def load_inventory_state() -> Dict[str, dict]:
-    if STATE_FILE.exists():
-        try:
-            with open(STATE_FILE, "r") as f:
-                data = json.load(f)
-                if not isinstance(data, dict):
-                    return {}
-                if data and all(isinstance(value, dict) and "qty" in value for value in data.values()):
-                    return {"anonymous": data}
-                return data
-        except json.JSONDecodeError:
-            return {}
-    return {}
-
-
-def save_inventory_state(state: Dict[str, dict]):
-    with open(STATE_FILE, "w") as f:
-        json.dump(state, f, indent=4)
-
-
-INVENTORY_STATE = load_inventory_state()
-
-
-def _get_state_bucket_for_user(user: AuthenticatedUser | None) -> Dict[str, dict]:
-    user_key = user.external_id if user else "anonymous"
-    if user_key not in INVENTORY_STATE:
-        INVENTORY_STATE[user_key] = {}
-    return INVENTORY_STATE[user_key]
+def _build_item_lookup(category_data: dict) -> dict[str, dict]:
+    return {item["id"]: item for item in category_data.get("items", [])}
 
 
 # --- Models ---
@@ -252,13 +224,20 @@ async def get_inventory(category: str, user: AuthenticatedUser | None = Depends(
 
     if cat_data:
         items = cat_data["items"]
-        user_state = _get_state_bucket_for_user(user)
-        for item in items:
-            state = user_state.get(item["id"], {"qty": 0, "unit": "each"})
-            item["qty"] = state["qty"]
-            item["unit"] = state["unit"]
+        draft_quantities: dict[str, tuple[int, str]] = {}
+        if user:
+            with get_session(settings.database_url) as session:
+                drafts = OrderDraftRepository(session)
+                draft = drafts.get_active_for_user(user.id, with_items=True)
+                if draft:
+                    draft_quantities = {item.item_id: (item.quantity, item.unit) for item in draft.items}
 
-        return {"success": True, "items": items}
+        response_items = []
+        for item in items:
+            quantity, unit = draft_quantities.get(item["id"], (0, "each"))
+            response_items.append({**item, "qty": quantity, "unit": unit})
+
+        return {"success": True, "items": response_items}
 
     return {"success": True, "items": []}
 
@@ -270,12 +249,31 @@ async def update_inventory(
     user: AuthenticatedUser = Depends(get_required_authenticated_user),
 ):
     logger.info("Handling /api/inventory/%s/update request for item %s", category, request.id)
-    user_state = _get_state_bucket_for_user(user)
-    user_state[request.id] = {
-        "qty": request.qty,
-        "unit": request.unit,
-    }
-    save_inventory_state(INVENTORY_STATE)
+    category_lower = category.lower()
+    cat_data = get_inventory_category(category_lower)
+    if not cat_data:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    item_lookup = _build_item_lookup(cat_data)
+    target_item = item_lookup.get(request.id)
+    if not target_item:
+        raise HTTPException(status_code=404, detail="Item not found in category")
+
+    with get_session(settings.database_url) as session:
+        drafts = OrderDraftRepository(session)
+        draft = drafts.get_or_create_active_for_user(user.id)
+        if request.qty <= 0:
+            drafts.remove_item(draft.id, request.id)
+        else:
+            drafts.add_or_update_item(
+                draft_id=draft.id,
+                item_id=request.id,
+                category_id=category_lower,
+                item_name=target_item.get("name_en", target_item.get("name", request.id)),
+                quantity=request.qty,
+                unit=request.unit,
+            )
+
     return {"success": True}
 
 
@@ -285,32 +283,6 @@ async def submit_order(
     user: AuthenticatedUser = Depends(get_required_authenticated_user),
 ):
     logger.info("Handling /api/submit_order request")
-
-    order_items = []
-    cat_ids = get_all_inventory_categories()
-
-    user_state = _get_state_bucket_for_user(user)
-    for cat_id in cat_ids:
-        cat_data = get_inventory_category(cat_id)
-        if cat_data:
-            for item in cat_data["items"]:
-                item_id = item["id"]
-                state = user_state.get(item_id)
-                if state and state.get("qty", 0) > 0:
-                    order_items.append(
-                        {
-                            "Category": cat_data["label"],
-                            "Item Name": item.get("name_en", item.get("name", "")),
-                            "Quantity": state["qty"],
-                            "Unit": state["unit"],
-                        }
-                    )
-
-    if not order_items:
-        return {"success": False, "message": "No items to order."}
-
-    df = pd.DataFrame(order_items)
-    df = df.sort_values(by="Category")
 
     location = get_location_name().replace("/", "_").replace("\\", "_")
 
@@ -323,14 +295,39 @@ async def submit_order(
     filepath = ORDERS_DIR / filename
 
     try:
-        df.to_excel(filepath, index=False)
+        with get_session(settings.database_url) as session:
+            drafts = OrderDraftRepository(session)
+            orders = OrderRepository(session)
 
-        user_state.clear()
-        save_inventory_state(INVENTORY_STATE)
+            draft = drafts.get_active_for_user(user.id, with_items=True)
+            if draft is None or not draft.items:
+                return {"success": False, "message": "No items to order."}
+
+            draft.is_rush = request.is_rush
+            draft.needed_by = request.needed_by
+
+            order_items = []
+            for draft_item in draft.items:
+                category_data = get_inventory_category(draft_item.category_id)
+                category_label = category_data["label"] if category_data else draft_item.category_id
+                order_items.append(
+                    {
+                        "Category": category_label,
+                        "Item Name": draft_item.item_name,
+                        "Quantity": draft_item.quantity,
+                        "Unit": draft_item.unit,
+                    }
+                )
+
+            df = pd.DataFrame(order_items).sort_values(by="Category")
+            df.to_excel(filepath, index=False)
+            orders.create_from_draft(draft, export_filename=filename)
 
         logger.info("Order successfully saved to %s", filepath)
         return {"success": True, "message": "Order submitted successfully", "filename": filename}
     except Exception as exc:
+        if filepath.exists():
+            filepath.unlink()
         logger.error("Error saving order: %s", exc, exc_info=True)
         return {"success": False, "message": f"Error saving order: {str(exc)}"}
 
