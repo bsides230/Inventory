@@ -65,3 +65,81 @@ COMPLETED
 
 ### Next Recommended Prompt
 - `02_PHASE_1_MULTI_USER_DATA_MODEL.md`
+
+## 2026-03-25T21:06:39Z — 02A_PHASE_1_SCHEMA_AND_MODELS.md
+### Status
+COMPLETED
+
+### Objective
+- Create the Phase 1A relational data foundation by introducing database engine/session wiring, initial schema migrations, ORM models, minimal repositories, and test coverage for migration lifecycle plus draft/order CRUD.
+
+### Work Completed
+- Added a new `db` package with:
+  - environment-based DB URL resolution,
+  - SQLAlchemy engine/session factory helpers,
+  - context-managed session lifecycle helper,
+  - exports for future sub-phase use.
+- Added SQLAlchemy ORM model definitions for all core Phase 1 entities:
+  - `users`, `order_drafts`, `order_draft_items`, `orders`, `order_items`, `app_settings`.
+- Added repository abstractions for core data access patterns needed by upcoming sub-phases:
+  - `UserRepository` for creation/lookups,
+  - `OrderDraftRepository` for draft creation, item upserts, and hydration,
+  - `OrderRepository` for draft-to-order persistence.
+- Added Alembic migration scaffold (`alembic.ini`, `alembic/env.py`, `alembic/script.py.mako`) and first schema revision (`20260325_01`).
+- Added development bootstrap script (`scripts/bootstrap_dev_db.py`) to run migrations and seed a default local dev user.
+- Updated app configuration surface to include `DATABASE_URL` in server settings and `.env.example`.
+- Updated dependencies to include `sqlalchemy` and `alembic`.
+- Added tests that validate migration upgrade/downgrade and repository-backed CRUD behavior.
+
+### Files Created
+- `db/__init__.py`
+- `db/database.py`
+- `db/models.py`
+- `db/repositories.py`
+- `alembic.ini`
+- `alembic/env.py`
+- `alembic/script.py.mako`
+- `alembic/versions/20260325_01_create_multi_user_schema.py`
+- `scripts/bootstrap_dev_db.py`
+- `tests/test_db_migrations.py`
+- `tests/test_db_models.py`
+
+### Files Modified
+- `server.py`
+- `.env.example`
+- `requirements.txt`
+- `prompts/EXECUTION_STATUS.md`
+- `build_notes.md`
+
+### Files Removed
+None
+
+### Key Implementation Details
+- Database connectivity is currently environment-driven via `DATABASE_URL` with a default local SQLite path (`sqlite:///./inventory.db`).
+- SQLite-specific engine/session behavior is handled centrally (`check_same_thread=False`) so tests and dev runtime can share helpers.
+- Alembic runtime pulls DB URL from environment, enabling isolated temporary DB migration tests.
+- Draft item storage enforces uniqueness per draft and inventory item (`uq_order_draft_item`) to support upsert semantics.
+- Repository flow captures lifecycle transition from active draft to submitted order by cloning draft items into `order_items` and flipping draft status.
+- This phase intentionally does not rewrite API endpoints or enforce authentication; it is strictly foundational.
+
+### Tests / Validation
+- Added migration smoke test:
+  - `tests/test_db_migrations.py` verifies `upgrade head` creates expected tables and `downgrade base` returns to `alembic_version` only.
+- Added model/repository CRUD test:
+  - `tests/test_db_models.py` validates user creation, draft create+item upsert, order creation from draft, and draft status transition.
+- Ran `pip install -r requirements.txt` to install migration/ORM dependencies.
+- Ran `pytest -q tests` successfully: 10 passed.
+- Ran `python -m compileall db scripts/bootstrap_dev_db.py alembic tests` successfully.
+- Observed Alembic deprecation warning about `path_separator`; non-blocking for current functionality.
+
+### Blockers / Issues
+- Parent `02_PHASE_1_MULTI_USER_DATA_MODEL.md` remains decomposed by design; execution proceeds via `02A` → `02B` → `02C` to satisfy one-prompt-per-PR scope discipline.
+- Root-level `pytest -q` still includes legacy `test_post.py`; scoped test invocation remains `pytest -q tests`.
+
+### Follow-Up Notes
+- For Phase 1B, wire auth identity to `users.external_id` and enforce write ownership against draft/order user IDs.
+- Consider adding Alembic `path_separator = os` in `alembic.ini` to remove deprecation warnings in CI logs.
+- Keep API behavior backward-compatible during 1B/1C, introducing DB-backed draft flow incrementally rather than replacing all file-backed endpoints at once.
+
+### Next Recommended Prompt
+- `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`

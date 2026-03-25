@@ -1,0 +1,103 @@
+from __future__ import annotations
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session, selectinload
+
+from db.models import Order, OrderDraft, OrderDraftItem, OrderItem, User
+
+
+class UserRepository:
+    def __init__(self, session: Session):
+        self.session = session
+
+    def create(self, external_id: str, email: str, display_name: str) -> User:
+        user = User(external_id=external_id, email=email, display_name=display_name)
+        self.session.add(user)
+        self.session.flush()
+        return user
+
+    def get_by_external_id(self, external_id: str) -> User | None:
+        stmt = select(User).where(User.external_id == external_id)
+        return self.session.scalar(stmt)
+
+
+class OrderDraftRepository:
+    def __init__(self, session: Session):
+        self.session = session
+
+    def create(self, user_id: int, is_rush: bool = False, needed_by: str | None = None) -> OrderDraft:
+        draft = OrderDraft(user_id=user_id, is_rush=is_rush, needed_by=needed_by)
+        self.session.add(draft)
+        self.session.flush()
+        return draft
+
+    def add_or_update_item(
+        self,
+        draft_id: int,
+        item_id: str,
+        category_id: str,
+        item_name: str,
+        quantity: int,
+        unit: str,
+    ) -> OrderDraftItem:
+        stmt = select(OrderDraftItem).where(
+            OrderDraftItem.draft_id == draft_id,
+            OrderDraftItem.item_id == item_id,
+        )
+        item = self.session.scalar(stmt)
+        if item is None:
+            item = OrderDraftItem(
+                draft_id=draft_id,
+                item_id=item_id,
+                category_id=category_id,
+                item_name=item_name,
+                quantity=quantity,
+                unit=unit,
+            )
+            self.session.add(item)
+        else:
+            item.category_id = category_id
+            item.item_name = item_name
+            item.quantity = quantity
+            item.unit = unit
+        self.session.flush()
+        return item
+
+    def get_with_items(self, draft_id: int) -> OrderDraft | None:
+        stmt = select(OrderDraft).options(selectinload(OrderDraft.items)).where(OrderDraft.id == draft_id)
+        return self.session.scalar(stmt)
+
+
+class OrderRepository:
+    def __init__(self, session: Session):
+        self.session = session
+
+    def create_from_draft(self, draft: OrderDraft, export_filename: str | None = None) -> Order:
+        order = Order(
+            user_id=draft.user_id,
+            is_rush=draft.is_rush,
+            needed_by=draft.needed_by,
+            export_filename=export_filename,
+        )
+        self.session.add(order)
+        self.session.flush()
+
+        for draft_item in draft.items:
+            self.session.add(
+                OrderItem(
+                    order_id=order.id,
+                    item_id=draft_item.item_id,
+                    category_id=draft_item.category_id,
+                    item_name=draft_item.item_name,
+                    quantity=draft_item.quantity,
+                    unit=draft_item.unit,
+                )
+            )
+
+        draft.status = "submitted"
+        self.session.flush()
+        return order
+
+    def get_with_items(self, order_id: int) -> Order | None:
+        stmt = select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
+        return self.session.scalar(stmt)
