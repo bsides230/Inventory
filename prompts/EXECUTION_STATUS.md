@@ -1,10 +1,10 @@
 # Execution Status
 
 ## Current Prompt
-- Prompt File: `03_PHASE_2_EMAIL_DELIVERY_AND_TEXT_CONFIG.md`
+- Prompt File: `04_PHASE_3_PUBLIC_DEPLOYMENT.md`
 - Status: `COMPLETED`
-- Started At: `2026-03-25T22:07:48Z`
-- Last Updated: `2026-03-25T22:11:36Z`
+- Started At: `2026-03-25T22:20:34Z`
+- Last Updated: `2026-03-25T22:23:19Z`
 
 ## Prompt Sequence
 - [x] `01_PHASE_0_STABILIZE_AND_PREPARE.md`
@@ -13,7 +13,7 @@
 - [x] `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
 - [x] `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
 - [x] `03_PHASE_2_EMAIL_DELIVERY_AND_TEXT_CONFIG.md`
-- [ ] `04_PHASE_3_PUBLIC_DEPLOYMENT.md`
+- [x] `04_PHASE_3_PUBLIC_DEPLOYMENT.md`
 - [ ] `05_PHASE_4_PWA_HARDENING.md`
 - [ ] `06_PHASE_5_ADMIN_PANEL_AND_MASTER_LIST_MANAGEMENT.md`
 - [ ] `07_PHASE_6_SECURITY_COMPLIANCE_OPERATIONS.md`
@@ -101,9 +101,28 @@ Legend:
   - `tests/test_email_delivery.py`
   - `tests/test_recipients_parser.py`
 
+
+### `04_PHASE_3_PUBLIC_DEPLOYMENT.md`
+- Status: `COMPLETED`
+- Started At: `2026-03-25T22:20:34Z`
+- Completed At: `2026-03-25T22:23:19Z`
+- Summary:
+  - Added Dockerized public deployment stack with API, PostgreSQL, Caddy HTTPS proxy, and periodic backup worker services.
+  - Added app-level deployment security controls for allow-list CORS, request-size guards, and per-IP rate limiting.
+  - Added deployment runbook plus backup/restore scripts and tests covering abuse guards and deployment artifacts.
+- Key Files Changed:
+  - `docker-compose.yml`
+  - `Dockerfile`
+  - `Caddyfile`
+  - `server.py`
+  - `scripts/backup.sh`
+  - `scripts/restore.sh`
+  - `docs/deployment.md`
+  - `tests/test_public_deployment.py`
+
 ## Blockers / Notes
 - Parent prompt `02_PHASE_1_MULTI_USER_DATA_MODEL.md` is intentionally marked blocked/decomposed because execution is split into `02A`/`02B`/`02C` for one-prompt-per-PR discipline.
 - `pytest` at repo root still attempts to collect `test_post.py` script; use `pytest tests` for scoped suites.
 
 ## Next Prompt
-- `04_PHASE_3_PUBLIC_DEPLOYMENT.md`
+- `05_PHASE_4_PWA_HARDENING.md`

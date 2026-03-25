@@ -1,4 +1,4 @@
-# API Contract (Phase 2 Email Delivery + Text Config)
+# API Contract (Phase 3 Public Deployment)
 
 ## Existing Functional Endpoints
 - `GET /api/status`
@@ -55,6 +55,7 @@
 - `GET /api/version`
   - Returns app version and environment from settings.
 
-## Non-Goals in this Contract Revision
-- No admin API surface changes for recipient management (deferred to Phase 5).
-- No public deployment hardening beyond current local/server capabilities.
+## Deployment Security Controls
+- CORS allow-list comes from `CORS_ALLOWED_ORIGINS` (comma-separated list).
+- Body-size protection rejects oversized write payloads with `413 Request body too large`.
+- In-memory per-IP rate limiter rejects excessive traffic with `429 Rate limit exceeded`.

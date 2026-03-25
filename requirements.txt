@@ -5,6 +5,7 @@ pydantic-settings
 pandas
 sqlalchemy
 alembic
+psycopg2-binary
 
 openpyxl
 

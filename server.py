@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,6 +10,7 @@ import pandas as pd
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -38,6 +40,10 @@ class Settings(BaseSettings):
     email_retry_attempts: int = 3
     email_retry_delay_seconds: float = 0.1
     email_dead_letter_log: str = "logs/order_email_dead_letter.log"
+    cors_allowed_origins: str = "http://localhost:8030"
+    max_request_body_bytes: int = 1048576
+    rate_limit_max_requests: int = 120
+    rate_limit_window_seconds: int = 60
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
@@ -57,6 +63,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 logger.addFilter(RequestIdFilter())
+
+
+class InMemoryRateLimiter:
+    def __init__(self, max_requests: int, window_seconds: int):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self._requests: dict[str, list[float]] = {}
+
+    def is_allowed(self, key: str, now: float | None = None) -> bool:
+        current = now if now is not None else time.time()
+        window_start = current - self.window_seconds
+        request_times = self._requests.get(key, [])
+        filtered = [ts for ts in request_times if ts >= window_start]
+        if len(filtered) >= self.max_requests:
+            self._requests[key] = filtered
+            return False
+        filtered.append(current)
+        self._requests[key] = filtered
+        return True
 
 
 # --- Initialization ---
@@ -87,6 +112,10 @@ def get_location_name():
 
 app = FastAPI(title=f"{get_location_name()} Inventory")
 app.state.settings = settings
+app.state.rate_limiter = InMemoryRateLimiter(
+    max_requests=settings.rate_limit_max_requests,
+    window_seconds=settings.rate_limit_window_seconds,
+)
 
 # Setup directories
 WEB_DIR = Path("web")
@@ -147,11 +176,38 @@ async def request_context_middleware(request: Request, call_next):
     return response
 
 
+@app.middleware("http")
+async def security_guard_middleware(request: Request, call_next):
+    if request.method in {"POST", "PUT", "PATCH"}:
+        content_length = request.headers.get("content-length")
+        if content_length:
+            try:
+                if int(content_length) > settings.max_request_body_bytes:
+                    return JSONResponse(
+                        status_code=413,
+                        content={"detail": "Request body too large"},
+                    )
+            except ValueError:
+                logger.warning("Invalid content-length header: %s", content_length)
+
+    client_host = request.client.host if request.client else "unknown"
+    if not app.state.rate_limiter.is_allowed(client_host):
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Rate limit exceeded"},
+        )
+    return await call_next(request)
+
+
+def _cors_origins_from_settings() -> list[str]:
+    return [origin.strip() for origin in settings.cors_allowed_origins.split(",") if origin.strip()]
+
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins_from_settings(),
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
