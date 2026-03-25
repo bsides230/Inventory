@@ -6,12 +6,13 @@ from typing import Dict, Optional
 
 import pandas as pd
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from db.auth import AuthenticatedUser, get_optional_authenticated_user, get_required_authenticated_user
 from update_inventory_data import check_and_update
 
 
@@ -20,6 +21,8 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     app_version: str = "0.1.0"
     database_url: str = "sqlite:///./inventory.db"
+    auth_jwt_secret: str = "change-me"
+    auth_jwt_algorithm: str = "HS256"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
@@ -57,6 +60,7 @@ def get_location_name():
 
 
 app = FastAPI(title=f"{get_location_name()} Inventory")
+app.state.settings = settings
 
 # Setup directories
 WEB_DIR = Path("web")
@@ -148,7 +152,12 @@ def load_inventory_state() -> Dict[str, dict]:
     if STATE_FILE.exists():
         try:
             with open(STATE_FILE, "r") as f:
-                return json.load(f)
+                data = json.load(f)
+                if not isinstance(data, dict):
+                    return {}
+                if data and all(isinstance(value, dict) and "qty" in value for value in data.values()):
+                    return {"anonymous": data}
+                return data
         except json.JSONDecodeError:
             return {}
     return {}
@@ -160,6 +169,13 @@ def save_inventory_state(state: Dict[str, dict]):
 
 
 INVENTORY_STATE = load_inventory_state()
+
+
+def _get_state_bucket_for_user(user: AuthenticatedUser | None) -> Dict[str, dict]:
+    user_key = user.external_id if user else "anonymous"
+    if user_key not in INVENTORY_STATE:
+        INVENTORY_STATE[user_key] = {}
+    return INVENTORY_STATE[user_key]
 
 
 # --- Models ---
@@ -229,15 +245,16 @@ async def get_categories():
 
 
 @app.get("/api/inventory/{category}")
-async def get_inventory(category: str):
+async def get_inventory(category: str, user: AuthenticatedUser | None = Depends(get_optional_authenticated_user)):
     logger.info("Handling /api/inventory/%s request", category)
     category_lower = category.lower()
     cat_data = get_inventory_category(category_lower)
 
     if cat_data:
         items = cat_data["items"]
+        user_state = _get_state_bucket_for_user(user)
         for item in items:
-            state = INVENTORY_STATE.get(item["id"], {"qty": 0, "unit": "each"})
+            state = user_state.get(item["id"], {"qty": 0, "unit": "each"})
             item["qty"] = state["qty"]
             item["unit"] = state["unit"]
 
@@ -247,9 +264,14 @@ async def get_inventory(category: str):
 
 
 @app.post("/api/inventory/{category}/update")
-async def update_inventory(category: str, request: UpdateItemRequest):
+async def update_inventory(
+    category: str,
+    request: UpdateItemRequest,
+    user: AuthenticatedUser = Depends(get_required_authenticated_user),
+):
     logger.info("Handling /api/inventory/%s/update request for item %s", category, request.id)
-    INVENTORY_STATE[request.id] = {
+    user_state = _get_state_bucket_for_user(user)
+    user_state[request.id] = {
         "qty": request.qty,
         "unit": request.unit,
     }
@@ -258,18 +280,22 @@ async def update_inventory(category: str, request: UpdateItemRequest):
 
 
 @app.post("/api/submit_order")
-async def submit_order(request: SubmitOrderRequest):
+async def submit_order(
+    request: SubmitOrderRequest,
+    user: AuthenticatedUser = Depends(get_required_authenticated_user),
+):
     logger.info("Handling /api/submit_order request")
 
     order_items = []
     cat_ids = get_all_inventory_categories()
 
+    user_state = _get_state_bucket_for_user(user)
     for cat_id in cat_ids:
         cat_data = get_inventory_category(cat_id)
         if cat_data:
             for item in cat_data["items"]:
                 item_id = item["id"]
-                state = INVENTORY_STATE.get(item_id)
+                state = user_state.get(item_id)
                 if state and state.get("qty", 0) > 0:
                     order_items.append(
                         {
@@ -299,7 +325,7 @@ async def submit_order(request: SubmitOrderRequest):
     try:
         df.to_excel(filepath, index=False)
 
-        INVENTORY_STATE.clear()
+        user_state.clear()
         save_inventory_state(INVENTORY_STATE)
 
         logger.info("Order successfully saved to %s", filepath)

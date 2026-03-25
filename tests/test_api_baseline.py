@@ -61,9 +61,7 @@ def test_submit_order_with_empty_state_regression():
         "/api/submit_order",
         json={"date": "2026-03-25", "is_rush": False},
     )
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload["success"] is False
+    assert response.status_code == 401
 
 
 def test_request_id_header_roundtrip():

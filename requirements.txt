@@ -11,3 +11,4 @@ openpyxl
 pytest
 requests
 httpx
+PyJWT

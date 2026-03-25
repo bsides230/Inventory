@@ -1,4 +1,4 @@
-# API Contract (Phase 0 Baseline)
+# API Contract (Phase 1B Auth Write Protection)
 
 ## Existing Functional Endpoints
 - `GET /api/status`
@@ -7,10 +7,20 @@
   - Returns available categories and display metadata.
 - `GET /api/inventory/{category}`
   - Returns inventory items for a category with current draft quantities.
+  - If bearer auth is present, quantities are scoped to the authenticated user (`sub` claim).
 - `POST /api/inventory/{category}/update`
-  - Updates quantity/unit for one inventory item in current draft state.
+  - Requires bearer auth.
+  - Updates quantity/unit for one inventory item in the authenticated user's draft state.
 - `POST /api/submit_order`
-  - Generates and saves an order spreadsheet from selected draft quantities.
+  - Requires bearer auth.
+  - Generates and saves an order spreadsheet from selected quantities in the authenticated user's draft state.
+
+## Auth Semantics
+- Write endpoints (`/api/inventory/{category}/update`, `/api/submit_order`) require `Authorization: Bearer <jwt>`.
+- JWT verification uses `AUTH_JWT_SECRET` and `AUTH_JWT_ALGORITHM`.
+- `sub` claim is required and is mapped to `users.external_id`.
+- `email`, `name`, and `role` claims are optional; defaults are inferred if missing.
+- Unknown users are provisioned in the `users` table on first authenticated request.
 
 ## New Operational Endpoints
 - `GET /health/live`
@@ -21,6 +31,5 @@
   - Returns app version and environment from settings.
 
 ## Non-Goals in this Contract Revision
-- No auth semantics were added.
-- No database-backed resources were introduced.
-- No request/response shape changes were made for existing order APIs.
+- No final transactional draft-to-order database submit flow yet (Phase 1C).
+- No admin API surface changes beyond role claim scaffolding in auth context.
