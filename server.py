@@ -1,18 +1,44 @@
-import os
 import json
-from pathlib import Path
-import pandas as pd
-from datetime import datetime
-from fastapi import FastAPI, HTTPException, Request, Depends, status
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
-
 import logging
+import uuid
+from pathlib import Path
+from typing import Dict, Optional
+
+import pandas as pd
+import uvicorn
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from update_inventory_data import check_and_update
+
+
+class Settings(BaseSettings):
+    app_env: str = "development"
+    log_level: str = "INFO"
+    app_version: str = "0.1.0"
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+
+settings = Settings()
+
+
+class RequestIdFilter(logging.Filter):
+    def filter(self, record):
+        record.request_id = getattr(record, "request_id", "-")
+        return True
+
+
+logging.basicConfig(
+    level=getattr(logging, settings.log_level.upper(), logging.INFO),
+    format="%(asctime)s %(levelname)s [request_id=%(request_id)s] %(message)s",
+)
+logger = logging.getLogger(__name__)
+logger.addFilter(RequestIdFilter())
+
 
 # --- Initialization ---
 LOCATION_FILE = Path("location.txt")
@@ -21,11 +47,13 @@ DATA_DIR = Path("data")
 ITEM_MASTER_DIR = Path("item master")
 ORDERS_DIR = Path("orders")
 
+
 def get_location_name():
     if LOCATION_FILE.exists():
         with open(LOCATION_FILE, "r") as f:
             return f.read().strip()
     return "Falcones Pizza"
+
 
 app = FastAPI(title=f"{get_location_name()} Inventory")
 
@@ -41,6 +69,30 @@ DATA_DIR.mkdir(exist_ok=True)
 # Run initial inventory data conversion check
 check_and_update()
 
+
+@app.middleware("http")
+async def request_context_middleware(request: Request, call_next):
+    request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+    request.state.request_id = request_id
+
+    logger.info(
+        "Request started %s %s",
+        request.method,
+        request.url.path,
+        extra={"request_id": request_id},
+    )
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    logger.info(
+        "Request completed %s %s status=%s",
+        request.method,
+        request.url.path,
+        response.status_code,
+        extra={"request_id": request_id},
+    )
+    return response
+
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -50,6 +102,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # --- Data Loading ---
 def load_categories_config() -> Dict[str, dict]:
     if CATEGORIES_FILE.exists():
@@ -57,12 +110,13 @@ def load_categories_config() -> Dict[str, dict]:
             return json.load(f)
     return {}
 
+
 def save_categories_config(config: Dict[str, dict]):
     with open(CATEGORIES_FILE, "w") as f:
         json.dump(config, f, indent=4)
 
+
 def get_inventory_category(category: str):
-    # Make sure we're always working with latest data
     check_and_update()
 
     cat_file = DATA_DIR / f"{category}.json"
@@ -70,10 +124,11 @@ def get_inventory_category(category: str):
         try:
             with open(cat_file, "r") as f:
                 return json.load(f)
-        except Exception as e:
-            logging.error(f"Error reading {category}.json: {e}", exc_info=True)
+        except Exception as exc:
+            logger.error("Error reading %s.json: %s", category, exc, exc_info=True)
             return None
     return None
+
 
 def get_all_inventory_categories():
     check_and_update()
@@ -83,8 +138,10 @@ def get_all_inventory_categories():
             categories.append(file.stem)
     return categories
 
+
 # --- State Management ---
 STATE_FILE = Path("inventory_state.json")
+
 
 def load_inventory_state() -> Dict[str, dict]:
     if STATE_FILE.exists():
@@ -95,11 +152,14 @@ def load_inventory_state() -> Dict[str, dict]:
             return {}
     return {}
 
+
 def save_inventory_state(state: Dict[str, dict]):
     with open(STATE_FILE, "w") as f:
         json.dump(state, f, indent=4)
 
+
 INVENTORY_STATE = load_inventory_state()
+
 
 # --- Models ---
 class UpdateItemRequest(BaseModel):
@@ -107,19 +167,42 @@ class UpdateItemRequest(BaseModel):
     qty: int
     unit: str
 
+
 class SubmitOrderRequest(BaseModel):
     date: str
     is_rush: bool
     needed_by: Optional[str] = None
 
-# Configure logging for the backend debug system
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
 # --- API Endpoints ---
+@app.get("/health/live")
+async def health_live():
+    return {"status": "live"}
+
+
+@app.get("/health/ready")
+async def health_ready():
+    return {
+        "status": "ready",
+        "checks": {
+            "data_dir": DATA_DIR.exists(),
+            "categories_file": CATEGORIES_FILE.exists(),
+        },
+    }
+
+
+@app.get("/api/version")
+async def get_version():
+    return {
+        "version": settings.app_version,
+        "environment": settings.app_env,
+    }
+
+
 @app.get("/api/status")
 async def get_status():
     return {"status": "online", "location": get_location_name()}
+
 
 @app.get("/api/categories")
 async def get_categories():
@@ -132,24 +215,26 @@ async def get_categories():
         cat_data = get_inventory_category(cat_id)
         if cat_data:
             cat_config = config.get(cat_id, {})
-            categories.append({
-                "id": cat_id,
-                "label_en": cat_config.get("label_en", cat_config.get("label", cat_data["label"])),
-                "label_es": cat_config.get("label_es", cat_config.get("label", cat_data["label"])),
-                "icon": cat_config.get("icon", "box"),
-                "color": cat_config.get("color", "gray")
-            })
+            categories.append(
+                {
+                    "id": cat_id,
+                    "label_en": cat_config.get("label_en", cat_config.get("label", cat_data["label"])),
+                    "label_es": cat_config.get("label_es", cat_config.get("label", cat_data["label"])),
+                    "icon": cat_config.get("icon", "box"),
+                    "color": cat_config.get("color", "gray"),
+                }
+            )
     return {"success": True, "categories": categories}
+
 
 @app.get("/api/inventory/{category}")
 async def get_inventory(category: str):
-    logger.info(f"Handling /api/inventory/{category} request")
+    logger.info("Handling /api/inventory/%s request", category)
     category_lower = category.lower()
     cat_data = get_inventory_category(category_lower)
 
     if cat_data:
         items = cat_data["items"]
-        # Populate current state
         for item in items:
             state = INVENTORY_STATE.get(item["id"], {"qty": 0, "unit": "each"})
             item["qty"] = state["qty"]
@@ -159,19 +244,21 @@ async def get_inventory(category: str):
 
     return {"success": True, "items": []}
 
+
 @app.post("/api/inventory/{category}/update")
 async def update_inventory(category: str, request: UpdateItemRequest):
-    logger.info(f"Handling /api/inventory/{category}/update request for item {request.id}")
+    logger.info("Handling /api/inventory/%s/update request for item %s", category, request.id)
     INVENTORY_STATE[request.id] = {
         "qty": request.qty,
-        "unit": request.unit
+        "unit": request.unit,
     }
     save_inventory_state(INVENTORY_STATE)
     return {"success": True}
 
+
 @app.post("/api/submit_order")
 async def submit_order(request: SubmitOrderRequest):
-    logger.info(f"Handling /api/submit_order request")
+    logger.info("Handling /api/submit_order request")
 
     order_items = []
     cat_ids = get_all_inventory_categories()
@@ -183,20 +270,19 @@ async def submit_order(request: SubmitOrderRequest):
                 item_id = item["id"]
                 state = INVENTORY_STATE.get(item_id)
                 if state and state.get("qty", 0) > 0:
-                    order_items.append({
-                        "Category": cat_data["label"],
-                        "Item Name": item.get("name_en", item.get("name", "")),
-                        "Quantity": state["qty"],
-                        "Unit": state["unit"]
-                    })
+                    order_items.append(
+                        {
+                            "Category": cat_data["label"],
+                            "Item Name": item.get("name_en", item.get("name", "")),
+                            "Quantity": state["qty"],
+                            "Unit": state["unit"],
+                        }
+                    )
 
     if not order_items:
         return {"success": False, "message": "No items to order."}
 
-    # Generate Excel
     df = pd.DataFrame(order_items)
-
-    # Sort by Category
     df = df.sort_values(by="Category")
 
     location = get_location_name().replace("/", "_").replace("\\", "_")
@@ -212,18 +298,18 @@ async def submit_order(request: SubmitOrderRequest):
     try:
         df.to_excel(filepath, index=False)
 
-        # Clear state after successful order
         INVENTORY_STATE.clear()
         save_inventory_state(INVENTORY_STATE)
 
-        logger.info(f"Order successfully saved to {filepath}")
+        logger.info("Order successfully saved to %s", filepath)
         return {"success": True, "message": "Order submitted successfully", "filename": filename}
-    except Exception as e:
-        logger.error(f"Error saving order: {e}", exc_info=True)
-        return {"success": False, "message": f"Error saving order: {str(e)}"}
+    except Exception as exc:
+        logger.error("Error saving order: %s", exc, exc_info=True)
+        return {"success": False, "message": f"Error saving order: {str(exc)}"}
 
-# --- Static Files ---
+
 app.mount("/", StaticFiles(directory="web", html=True), name="web")
+
 
 def get_port():
     try:
@@ -232,6 +318,7 @@ def get_port():
             return port
     except (FileNotFoundError, ValueError):
         return 8030
+
 
 if __name__ == "__main__":
     port = get_port()
