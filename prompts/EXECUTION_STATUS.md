@@ -1,14 +1,14 @@
 # Execution Status
 
 ## Current Prompt
-- Prompt File: `01_PHASE_0_STABILIZE_AND_PREPARE.md`
-- Status: `COMPLETED`
-- Started At: `2026-03-25T20:46:59Z`
-- Last Updated: `2026-03-25T20:49:32Z`
+- Prompt File: `02_PHASE_1_MULTI_USER_DATA_MODEL.md`
+- Status: `BLOCKED`
+- Started At: `2026-03-25T20:56:13Z`
+- Last Updated: `2026-03-25T20:56:27Z`
 
 ## Prompt Sequence
 - [x] `01_PHASE_0_STABILIZE_AND_PREPARE.md`
-- [ ] `02_PHASE_1_MULTI_USER_DATA_MODEL.md`
+- [!] `02_PHASE_1_MULTI_USER_DATA_MODEL.md`
 - [ ] `02A_PHASE_1_SCHEMA_AND_MODELS.md`
 - [ ] `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
 - [ ] `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
@@ -40,7 +40,7 @@ Legend:
   - `tests/test_api_baseline.py`
 
 ## Blockers / Notes
-- `pytest` at repo root still attempts to collect `test_post.py` script; use `pytest tests` for the baseline test suite.
+- Phase 1 monolithic scope spans schema, auth, and draft transaction rewrite; splitting into sub-prompts `02A` → `02B` → `02C` is required to keep one-prompt-per-PR discipline.
 
 ## Next Prompt
-- `02_PHASE_1_MULTI_USER_DATA_MODEL.md`
+- `02A_PHASE_1_SCHEMA_AND_MODELS.md`
