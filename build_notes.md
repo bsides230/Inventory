@@ -351,3 +351,76 @@ None
 
 ### Next Recommended Prompt
 - `04_PHASE_3_PUBLIC_DEPLOYMENT.md`
+
+## 2026-03-25T22:23:19Z — 04_PHASE_3_PUBLIC_DEPLOYMENT.md
+### Status
+COMPLETED
+
+### Objective
+- Deliver a publicly deployable HTTPS stack for the ordering platform with persistence, baseline abuse protections, and documented backup/recovery workflow.
+
+### Work Completed
+- Added deployment artifacts for containerized operations:
+  - `Dockerfile` for API/worker runtime image.
+  - `docker-compose.yml` with four services (`api`, `db`, `proxy`, `backup_worker`) and named persistent volumes.
+  - `Caddyfile` for automated TLS reverse proxy routing.
+- Added app-level hardening in `server.py`:
+  - CORS allow-list parsing via `CORS_ALLOWED_ORIGINS`.
+  - request body size limit middleware returning HTTP 413 for oversized write requests.
+  - in-memory per-IP rate limiter middleware returning HTTP 429 when threshold is exceeded.
+  - new environment-backed settings for the above controls.
+- Added operational backup tooling:
+  - `scripts/backup.sh` to snapshot PostgreSQL data volume and generated order files with retention enforcement.
+  - `scripts/restore.sh` to restore order artifacts and provide DB restore guidance.
+- Added deployment documentation:
+  - `docs/deployment.md` runbook covering environment setup, startup, migrations, HTTPS verification, backup strategy, and restore drill steps.
+  - Updated `docs/api-contract.md` to include Phase 3 deployment security controls.
+- Added validation coverage in `tests/test_public_deployment.py` for:
+  - rate-limit guard behavior,
+  - request-size guard behavior,
+  - deployment artifact presence sanity checks.
+
+### Files Created
+- `Dockerfile`
+- `docker-compose.yml`
+- `Caddyfile`
+- `docs/deployment.md`
+- `scripts/backup.sh`
+- `scripts/restore.sh`
+- `tests/test_public_deployment.py`
+
+### Files Modified
+- `server.py`
+- `.env.example`
+- `requirements.txt`
+- `docs/api-contract.md`
+- `prompts/EXECUTION_STATUS.md`
+- `build_notes.md`
+
+### Files Removed
+None
+
+### Key Implementation Details
+- Reverse proxy is handled by Caddy with host binding from `APP_DOMAIN`, enabling ACME-managed certificates without manual TLS renewal flow.
+- Compose persistence intentionally separates concerns by volume (`postgres_data`, `orders_data`, `logs_data`, `backups_data`) to preserve DB and generated artifacts across restarts.
+- Rate limiting is intentionally simple in-memory state for MVP; this is sufficient for single-instance deployment but should be replaced by distributed storage in future multi-instance scaling.
+- Request-size and rate-limit checks execute in middleware before endpoint handlers to block abusive requests early.
+- Added `psycopg2-binary` to support PostgreSQL DSN in deployment compose configuration.
+
+### Tests / Validation
+- Added tests: `tests/test_public_deployment.py`.
+- Ran `pip install -r requirements.txt` to install SQLAlchemy/Alembic/PostgreSQL dependencies in the local environment.
+- Ran `pytest -q tests/test_public_deployment.py tests/test_api_baseline.py tests/test_email_delivery.py` (passed; 13 tests).
+- Ran `python -m compileall server.py scripts/backup.sh scripts/restore.sh tests/test_public_deployment.py` (passed; Python modules compiled).
+- Attempted `docker compose config` for compose smoke validation; command unavailable in environment (`docker: command not found`).
+
+### Blockers / Issues
+- Local execution environment does not provide Docker CLI, so full container startup/proxy HTTPS integration could not be executed here.
+
+### Follow-Up Notes
+- Phase 4 should add browser/PWA-side handling for rate-limit and payload error messaging to improve UX under guard failures.
+- Phase 6 should evaluate moving rate limiting from in-memory process state to a shared backend (e.g., Redis) if horizontal scaling is introduced.
+- Consider replacing direct PostgreSQL data-directory tar with logical `pg_dump` workflow for safer cross-version restore semantics.
+
+### Next Recommended Prompt
+- `05_PHASE_4_PWA_HARDENING.md`
