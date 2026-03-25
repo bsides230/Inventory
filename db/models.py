@@ -74,6 +74,10 @@ class Order(Base):
     is_rush: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     needed_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
     export_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    delivery_status: Mapped[str] = mapped_column(String(32), default="pending", nullable=False)
+    delivery_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    delivery_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     user: Mapped[User] = relationship(back_populates="orders")
     items: Mapped[List[OrderItem]] = relationship(back_populates="order", cascade="all, delete-orphan")

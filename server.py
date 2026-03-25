@@ -1,6 +1,7 @@
 import json
 import logging
 import uuid
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -15,6 +16,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from db.auth import AuthenticatedUser, get_optional_authenticated_user, get_required_authenticated_user
 from db.database import get_session
 from db.repositories import OrderDraftRepository, OrderRepository
+from services.email_delivery import OrderEmailDeliveryService, SmtpEmailClient
+from services.recipients import RecipientConfigError, RecipientConfigStore
 from update_inventory_data import check_and_update
 
 
@@ -25,6 +28,16 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./inventory.db"
     auth_jwt_secret: str = "change-me"
     auth_jwt_algorithm: str = "HS256"
+    order_recipients_file: str = "config/order_recipients.txt"
+    smtp_host: str = "localhost"
+    smtp_port: int = 1025
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    smtp_use_tls: bool = False
+    smtp_sender_email: str = "inventory@example.com"
+    email_retry_attempts: int = 3
+    email_retry_delay_seconds: float = 0.1
+    email_dead_letter_log: str = "logs/order_email_dead_letter.log"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
@@ -52,6 +65,17 @@ CATEGORIES_FILE = Path("categories.json")
 DATA_DIR = Path("data")
 ITEM_MASTER_DIR = Path("item master")
 ORDERS_DIR = Path("orders")
+LOGS_DIR = Path("logs")
+
+
+@dataclass
+class NullOrderEmailDeliveryService:
+    error: str
+
+    def send_order_email(self, **kwargs):
+        from services.email_delivery import EmailDeliveryResult
+
+        return EmailDeliveryResult(status="failed", attempts=0, error=self.error)
 
 
 def get_location_name():
@@ -72,9 +96,32 @@ FLAGS_DIR.mkdir(exist_ok=True)
 ITEM_MASTER_DIR.mkdir(exist_ok=True)
 ORDERS_DIR.mkdir(exist_ok=True)
 DATA_DIR.mkdir(exist_ok=True)
+LOGS_DIR.mkdir(exist_ok=True)
 
 # Run initial inventory data conversion check
 check_and_update()
+
+recipient_store = RecipientConfigStore(Path(settings.order_recipients_file))
+smtp_client = SmtpEmailClient(
+    host=settings.smtp_host,
+    port=settings.smtp_port,
+    username=settings.smtp_username,
+    password=settings.smtp_password,
+    use_tls=settings.smtp_use_tls,
+)
+try:
+    recipient_store.get_recipients()
+    app.state.email_delivery_service = OrderEmailDeliveryService(
+        recipient_store=recipient_store,
+        smtp_client=smtp_client,
+        sender_email=settings.smtp_sender_email,
+        max_attempts=settings.email_retry_attempts,
+        retry_delay_seconds=settings.email_retry_delay_seconds,
+        dead_letter_log_path=Path(settings.email_dead_letter_log),
+    )
+except RecipientConfigError as exc:
+    logger.error("Recipient configuration invalid: %s", exc)
+    app.state.email_delivery_service = NullOrderEmailDeliveryService(error=str(exc))
 
 
 @app.middleware("http")
@@ -321,10 +368,34 @@ async def submit_order(
 
             df = pd.DataFrame(order_items).sort_values(by="Category")
             df.to_excel(filepath, index=False)
-            orders.create_from_draft(draft, export_filename=filename)
+            order = orders.create_from_draft(draft, export_filename=filename)
 
-        logger.info("Order successfully saved to %s", filepath)
-        return {"success": True, "message": "Order submitted successfully", "filename": filename}
+        delivery = app.state.email_delivery_service.send_order_email(
+            order_id=order.id,
+            location=get_location_name(),
+            date=request.date,
+            is_rush=request.is_rush,
+            needed_by=request.needed_by,
+            export_path=filepath,
+        )
+        with get_session(settings.database_url) as session:
+            orders = OrderRepository(session)
+            orders.update_delivery_status(
+                order_id=order.id,
+                status=delivery.status,
+                attempts=delivery.attempts,
+                error=delivery.error,
+            )
+
+        logger.info("Order successfully saved to %s with delivery_status=%s", filepath, delivery.status)
+        return {
+            "success": True,
+            "message": "Order submitted successfully",
+            "filename": filename,
+            "delivery_status": delivery.status,
+            "delivery_attempts": delivery.attempts,
+            "delivery_error": delivery.error,
+        }
     except Exception as exc:
         if filepath.exists():
             filepath.unlink()

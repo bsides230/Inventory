@@ -1,4 +1,4 @@
-# API Contract (Phase 1C Draft Submit Transaction Flow)
+# API Contract (Phase 2 Email Delivery + Text Config)
 
 ## Existing Functional Endpoints
 - `GET /api/status`
@@ -18,7 +18,8 @@
     - writes spreadsheet artifact to `orders/`,
     - snapshots draft into `orders` + `order_items`,
     - marks the submitted draft as non-active.
-  - On export/persistence failure, DB changes are rolled back and no draft is cleared.
+  - Triggers post-submit email delivery with XLSX attachment and retry policy.
+  - Returns delivery metadata: `delivery_status`, `delivery_attempts`, `delivery_error`.
 
 ## Auth Semantics
 - Write endpoints (`/api/inventory/{category}/update`, `/api/submit_order`) require `Authorization: Bearer <jwt>`.
@@ -26,6 +27,25 @@
 - `sub` claim is required and is mapped to `users.external_id`.
 - `email`, `name`, and `role` claims are optional; defaults are inferred if missing.
 - Unknown users are provisioned in the `users` table on first authenticated request.
+
+## Email Delivery Configuration
+- Recipients are loaded from `config/order_recipients.txt`.
+  - One email per line.
+  - Blank lines and `#` comments are ignored.
+  - Invalid emails fail validation.
+- Recipient list is reloaded automatically when file contents change.
+- SMTP settings are configured via environment:
+  - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_USE_TLS`, `SMTP_SENDER_EMAIL`.
+- Retry and failure controls:
+  - `EMAIL_RETRY_ATTEMPTS`
+  - `EMAIL_RETRY_DELAY_SECONDS`
+  - `EMAIL_DEAD_LETTER_LOG`
+
+## Order Delivery Audit Fields
+- `orders.delivery_status`: `pending` | `sent` | `failed`
+- `orders.delivery_attempts`: number of attempts made for most recent send.
+- `orders.delivery_error`: final error when send fails.
+- `orders.delivered_at`: timestamp for successful send.
 
 ## New Operational Endpoints
 - `GET /health/live`
@@ -36,5 +56,5 @@
   - Returns app version and environment from settings.
 
 ## Non-Goals in this Contract Revision
-- No email delivery/retry workflow (Phase 2).
-- No admin API surface changes beyond role claim scaffolding in auth context.
+- No admin API surface changes for recipient management (deferred to Phase 5).
+- No public deployment hardening beyond current local/server capabilities.
