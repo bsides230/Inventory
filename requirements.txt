@@ -3,6 +3,8 @@ uvicorn
 pydantic
 pydantic-settings
 pandas
+sqlalchemy
+alembic
 
 openpyxl
 
