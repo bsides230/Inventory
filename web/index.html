@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Inventory">
     <title id="htmlTitle">Falcones Pizza Inventory</title>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icon-32.png">
+    <link rel="apple-touch-icon" href="/assets/icon-192.png">
 
     <!-- Tailwind CSS (via CDN like RemoDash) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,19 +38,6 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/style.css">
 
-    <!-- Register Service Worker -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(registration => {
-            console.log('SW registered: ', registration);
-          }).catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
-          });
-        });
-      }
-    </script>
-
     <!-- Heroicons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -61,7 +50,6 @@
                 <button id="btnBack" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hidden transition-colors rounded-lg active:bg-[var(--color-border)]">
                     <i data-lucide="arrow-left" class="w-6 h-6"></i>
                 </button>
-                <!-- Title removed as requested -->
                 <h1 class="hidden" id="appTitle">Inventory</h1>
             </div>
 
@@ -82,31 +70,42 @@
         </div>
     </header>
 
+    <div id="pwaNoticeArea" class="max-w-4xl mx-auto w-full px-4 pt-2 space-y-2">
+        <div id="offlineBanner" class="pwa-banner hidden">
+            <i data-lucide="wifi-off" class="w-4 h-4"></i>
+            <span id="offlineBannerText">You are offline. Cached data is available; submitting orders requires a connection.</span>
+        </div>
+        <div id="installBanner" class="pwa-banner hidden">
+            <span id="installBannerText">Install this app for faster access from your home screen.</span>
+            <div class="flex gap-2">
+                <button id="btnInstallApp" class="pwa-banner-btn">Install</button>
+                <button id="btnDismissInstall" class="pwa-banner-btn pwa-banner-btn-secondary">Dismiss</button>
+            </div>
+        </div>
+        <div id="iosInstallBanner" class="pwa-banner hidden">
+            <span id="iosInstallText">On iPhone: tap Share, then “Add to Home Screen”.</span>
+            <button id="btnDismissIosInstall" class="pwa-banner-btn pwa-banner-btn-secondary">Got it</button>
+        </div>
+        <div id="updateBanner" class="pwa-banner hidden">
+            <span id="updateBannerText">A new app update is ready.</span>
+            <button id="btnRefreshApp" class="pwa-banner-btn">Refresh</button>
+        </div>
+    </div>
+
     <!-- Main Content Area -->
     <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-20 no-scrollbar">
         <div class="max-w-4xl mx-auto">
-
-            <!-- Dashboard View (Category Grid) -->
-            <div id="dashboardView" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-8">
-                <!-- Injected via JS -->
-            </div>
-
-            <!-- Category View (Item List) -->
+            <div id="dashboardView" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-8"></div>
             <div id="categoryView" class="hidden pb-8">
                 <div class="flex justify-between items-center mb-6">
                     <h2 id="categoryTitle" class="text-2xl font-bold text-falcone-red capitalize">Category Name</h2>
                     <span id="categoryCount" class="bg-[var(--color-border)] text-[var(--color-text-secondary)] text-sm px-3 py-1 rounded-full">0 items</span>
                 </div>
-
-                <div id="itemList" class="space-y-3">
-                    <!-- Injected via JS -->
-                </div>
+                <div id="itemList" class="space-y-3"></div>
             </div>
-
         </div>
     </main>
 
-    <!-- Submit Order Modal -->
     <div id="orderModal" class="absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center p-6 hidden">
         <div class="w-full max-w-md bg-[var(--color-bg-nav)] p-6 rounded-2xl shadow-2xl border border-falcone-red/20">
             <h2 class="text-2xl font-bold text-[var(--color-text-primary)] mb-6" id="labelOrderModalTitle">Submit Order</h2>
@@ -139,10 +138,7 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="/app.js"></script>
-    <script>
-        lucide.createIcons();
-    </script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>

@@ -1,13 +1,20 @@
 {
-  "name": "Falcones Inventory",
+  "id": "/",
+  "name": "Falcones Pizza Inventory",
   "short_name": "Inventory",
   "description": "Inventory management app for Falcones Pizza",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0a0a0a",
   "theme_color": "#db594b",
   "icons": [
+    {
+      "src": "/assets/icon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
     {
       "src": "/assets/icon-192.png",
       "sizes": "192x192",
