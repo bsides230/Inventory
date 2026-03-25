@@ -31,6 +31,18 @@ class OrderDraftRepository:
         self.session.flush()
         return draft
 
+    def get_active_for_user(self, user_id: int, with_items: bool = False) -> OrderDraft | None:
+        stmt = select(OrderDraft).where(OrderDraft.user_id == user_id, OrderDraft.status == "active")
+        if with_items:
+            stmt = stmt.options(selectinload(OrderDraft.items))
+        return self.session.scalar(stmt.order_by(OrderDraft.id.desc()))
+
+    def get_or_create_active_for_user(self, user_id: int) -> OrderDraft:
+        draft = self.get_active_for_user(user_id)
+        if draft is None:
+            draft = self.create(user_id=user_id)
+        return draft
+
     def add_or_update_item(
         self,
         draft_id: int,
@@ -62,6 +74,13 @@ class OrderDraftRepository:
             item.unit = unit
         self.session.flush()
         return item
+
+    def remove_item(self, draft_id: int, item_id: str) -> None:
+        stmt = select(OrderDraftItem).where(OrderDraftItem.draft_id == draft_id, OrderDraftItem.item_id == item_id)
+        item = self.session.scalar(stmt)
+        if item is not None:
+            self.session.delete(item)
+            self.session.flush()
 
     def get_with_items(self, draft_id: int) -> OrderDraft | None:
         stmt = select(OrderDraft).options(selectinload(OrderDraft.items)).where(OrderDraft.id == draft_id)

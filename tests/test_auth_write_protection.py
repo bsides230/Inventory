@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 
 from db.database import create_db_engine
 from db.models import Base
-from server import INVENTORY_STATE, app
+from server import app
 
 
 client = TestClient(app)
@@ -37,7 +37,6 @@ def setup_function() -> None:
     app.state.settings.auth_jwt_algorithm = "HS256"
     engine = create_db_engine(app.state.settings.database_url)
     Base.metadata.create_all(engine)
-    INVENTORY_STATE.clear()
 
 
 def teardown_function() -> None:

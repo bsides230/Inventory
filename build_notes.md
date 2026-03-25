@@ -212,3 +212,62 @@ None
 
 ### Next Recommended Prompt
 - `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
+
+## 2026-03-25T21:34:25Z — 02C_PHASE_1_DRAFT_ORDER_FLOW.md
+### Status
+COMPLETED
+
+### Objective
+- Finalize Phase 1C by replacing file-backed per-user draft state with relational draft flow, implementing atomic submit transaction behavior, and validating isolation/rollback semantics.
+
+### Work Completed
+- Removed legacy `inventory_state.json` in-memory bucket logic from `server.py` and switched draft reads/writes to DB-backed repositories.
+- Added helper methods in `OrderDraftRepository` to get/create active drafts per user and remove items when quantity is set to zero.
+- Updated `GET /api/inventory/{category}` to hydrate `qty`/`unit` values from authenticated user's active draft items.
+- Updated `POST /api/inventory/{category}/update` to validate category+item existence and persist draft item updates in `order_draft_items`.
+- Reworked `POST /api/submit_order` into a transactional flow that:
+  - loads active draft with items,
+  - writes spreadsheet artifact,
+  - snapshots into `orders`/`order_items`,
+  - marks draft as submitted,
+  - removes partial artifact and preserves draft when an exception occurs.
+- Added dedicated Phase 1C tests for:
+  - multi-user submit isolation,
+  - rollback behavior when export fails,
+  - end-to-end draft update → submit lifecycle.
+- Updated API contract documentation to reflect final Phase 1C semantics and removed outdated “not implemented yet” note.
+
+### Files Created
+- `tests/test_draft_submit_flow.py`
+
+### Files Modified
+- `server.py`
+- `db/repositories.py`
+- `tests/test_auth_write_protection.py`
+- `docs/api-contract.md`
+- `prompts/EXECUTION_STATUS.md`
+- `build_notes.md`
+
+### Files Removed
+- None
+
+### Key Implementation Details
+- Draft state now exists only in DB rows (`order_drafts`, `order_draft_items`) for authenticated users; no shared cross-user mutation path remains.
+- Submit transaction uses one DB session context so order snapshot persistence is rolled back if spreadsheet generation fails.
+- Artifact cleanup (`filepath.unlink`) is performed when submit fails after path creation to avoid stale partial files.
+- Backward compatibility for unauthenticated reads is maintained (`qty=0` default), while write endpoints remain auth-protected.
+
+### Tests / Validation
+- Ran `pip install -r requirements.txt` to ensure runtime/test dependencies were present.
+- Ran `pytest -q tests` and validated all suites including new Phase 1C tests.
+- Ran `python -m compileall server.py db tests` to validate syntax/import integrity.
+
+### Blockers / Issues
+- Root-level `pytest -q` still collects legacy `test_post.py`; scoped invocation `pytest -q tests` remains required.
+
+### Follow-Up Notes
+- Phase 2 should consume `orders.export_filename` + persisted order snapshot for email delivery and retry orchestration.
+- Consider adding explicit DB transaction tests around order persistence exceptions (beyond export failure) when email queueing is introduced.
+
+### Next Recommended Prompt
+- `03_PHASE_2_EMAIL_DELIVERY_AND_TEXT_CONFIG.md`

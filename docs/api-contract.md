@@ -1,4 +1,4 @@
-# API Contract (Phase 1B Auth Write Protection)
+# API Contract (Phase 1C Draft Submit Transaction Flow)
 
 ## Existing Functional Endpoints
 - `GET /api/status`
@@ -7,13 +7,18 @@
   - Returns available categories and display metadata.
 - `GET /api/inventory/{category}`
   - Returns inventory items for a category with current draft quantities.
-  - If bearer auth is present, quantities are scoped to the authenticated user (`sub` claim).
+  - If bearer auth is present, quantities are loaded from that user's active DB-backed draft (`order_drafts`/`order_draft_items`).
 - `POST /api/inventory/{category}/update`
   - Requires bearer auth.
-  - Updates quantity/unit for one inventory item in the authenticated user's draft state.
+  - Upserts (or removes when `qty <= 0`) one item in the authenticated user's active draft.
 - `POST /api/submit_order`
   - Requires bearer auth.
-  - Generates and saves an order spreadsheet from selected quantities in the authenticated user's draft state.
+  - Performs an atomic submit transaction:
+    - validates active draft has items,
+    - writes spreadsheet artifact to `orders/`,
+    - snapshots draft into `orders` + `order_items`,
+    - marks the submitted draft as non-active.
+  - On export/persistence failure, DB changes are rolled back and no draft is cleared.
 
 ## Auth Semantics
 - Write endpoints (`/api/inventory/{category}/update`, `/api/submit_order`) require `Authorization: Bearer <jwt>`.
@@ -31,5 +36,5 @@
   - Returns app version and environment from settings.
 
 ## Non-Goals in this Contract Revision
-- No final transactional draft-to-order database submit flow yet (Phase 1C).
+- No email delivery/retry workflow (Phase 2).
 - No admin API surface changes beyond role claim scaffolding in auth context.
