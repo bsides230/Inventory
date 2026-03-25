@@ -143,3 +143,72 @@ None
 
 ### Next Recommended Prompt
 - `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
+
+## 2026-03-25T21:25:02Z — 02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md
+### Status
+COMPLETED
+
+### Objective
+- Implement request-time authentication identity propagation and enforce write protection so only authenticated users can mutate ordering draft/order state.
+
+### Work Completed
+- Added a dedicated auth module (`db/auth.py`) that:
+  - validates bearer JWT tokens,
+  - extracts identity claims,
+  - provisions/updates corresponding rows in the `users` table,
+  - stores authenticated user context on `request.state`.
+- Extended app settings with JWT config (`AUTH_JWT_SECRET`, `AUTH_JWT_ALGORITHM`) and attached settings to `app.state` so dependencies can resolve auth/DB config consistently.
+- Updated inventory state handling in `server.py` to support per-user state buckets keyed by authenticated `sub`, while preserving backward compatibility for legacy flat state files by auto-migrating loaded shape in memory.
+- Enforced auth on write endpoints:
+  - `POST /api/inventory/{category}/update`
+  - `POST /api/submit_order`
+- Updated read endpoint behavior for `GET /api/inventory/{category}` to return quantities scoped to authenticated user context when auth is provided.
+- Updated API contract documentation to describe write-protection semantics and expected JWT claims.
+- Added auth protection and isolation tests plus adjusted baseline test expectations for unauthenticated submit behavior.
+
+### Files Created
+- `db/auth.py`
+- `tests/test_auth_write_protection.py`
+
+### Files Modified
+- `server.py`
+- `.env.example`
+- `requirements.txt`
+- `docs/api-contract.md`
+- `tests/test_api_baseline.py`
+- `prompts/EXECUTION_STATUS.md`
+- `build_notes.md`
+
+### Files Removed
+None
+
+### Key Implementation Details
+- JWT verification is currently symmetric (`HS256` default) and uses environment-backed settings.
+- `sub` claim is mandatory and mapped to `users.external_id`; `email`, `name`, and `role` are optional with defaults.
+- Role data is captured in the in-request auth context (`AuthenticatedUser.role`) as scaffolding for later admin boundary work.
+- Existing file-backed draft persistence remains in place for this phase, but draft quantities are now partitioned per authenticated user to eliminate cross-user contamination for write/read routes.
+- The migration remains intentionally non-transactional for submit and does not yet replace submit flow with DB-backed atomic draft-to-order transition (deferred to 02C).
+
+### Tests / Validation
+- Added tests:
+  - `tests/test_auth_write_protection.py`
+    - anonymous write denied,
+    - invalid token denied,
+    - user draft isolation on update/read routes.
+- Updated baseline regression expectation:
+  - unauthenticated `/api/submit_order` now returns HTTP 401.
+- Ran `pip install -r requirements.txt`.
+- Ran `pytest -q tests` with passing result (13 passed).
+- Ran `pytest -q tests/test_auth_write_protection.py` after JWT secret-length tweak (3 passed).
+- Ran `python -m compileall server.py db tests` successfully.
+
+### Blockers / Issues
+- Root-level `pytest -q` still collects legacy `test_post.py`; scoped invocation `pytest -q tests` remains recommended.
+
+### Follow-Up Notes
+- Phase 1C should replace this interim per-user file state with full DB-backed draft lifecycle and atomic submit transaction.
+- Consider introducing JWT expiry/audience checks and key rotation strategy in Phase 6 security hardening.
+- If legacy unauthenticated write clients still exist, they must be updated to send bearer auth before deployment.
+
+### Next Recommended Prompt
+- `02C_PHASE_1_DRAFT_ORDER_FLOW.md`

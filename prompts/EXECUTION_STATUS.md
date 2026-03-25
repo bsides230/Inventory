@@ -1,16 +1,16 @@
 # Execution Status
 
 ## Current Prompt
-- Prompt File: `02A_PHASE_1_SCHEMA_AND_MODELS.md`
+- Prompt File: `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
 - Status: `COMPLETED`
-- Started At: `2026-03-25T21:02:21Z`
-- Last Updated: `2026-03-25T21:06:39Z`
+- Started At: `2026-03-25T21:22:55Z`
+- Last Updated: `2026-03-25T21:25:02Z`
 
 ## Prompt Sequence
 - [x] `01_PHASE_0_STABILIZE_AND_PREPARE.md`
 - [!] `02_PHASE_1_MULTI_USER_DATA_MODEL.md`
 - [x] `02A_PHASE_1_SCHEMA_AND_MODELS.md`
-- [ ] `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
+- [x] `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
 - [ ] `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
 - [ ] `03_PHASE_2_EMAIL_DELIVERY_AND_TEXT_CONFIG.md`
 - [ ] `04_PHASE_3_PUBLIC_DEPLOYMENT.md`
@@ -55,9 +55,23 @@ Legend:
   - `tests/test_db_migrations.py`
   - `tests/test_db_models.py`
 
+### `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
+- Status: `COMPLETED`
+- Started At: `2026-03-25T21:22:55Z`
+- Completed At: `2026-03-25T21:25:02Z`
+- Summary:
+  - Added JWT-based authentication dependency layer with request-level user identity context and auto-provisioning to users table.
+  - Enforced authenticated access for inventory update and submit endpoints and introduced user-scoped draft state isolation.
+  - Added auth-focused API tests for unauthorized writes, invalid tokens, and multi-user draft isolation.
+- Key Files Changed:
+  - `server.py`
+  - `db/auth.py`
+  - `tests/test_auth_write_protection.py`
+  - `docs/api-contract.md`
+
 ## Blockers / Notes
 - Parent prompt `02_PHASE_1_MULTI_USER_DATA_MODEL.md` is intentionally marked blocked/decomposed because execution is split into `02A`/`02B`/`02C` for one-prompt-per-PR discipline.
 - `pytest` at repo root still attempts to collect `test_post.py` script; use `pytest tests` for scoped suites.
 
 ## Next Prompt
-- `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
+- `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
