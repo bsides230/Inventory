@@ -271,3 +271,83 @@ COMPLETED
 
 ### Next Recommended Prompt
 - `03_PHASE_2_EMAIL_DELIVERY_AND_TEXT_CONFIG.md`
+
+## 2026-03-25T22:11:36Z — 03_PHASE_2_EMAIL_DELIVERY_AND_TEXT_CONFIG.md
+### Status
+COMPLETED
+
+### Objective
+- Add text-configured order-recipient delivery with server-side email send retries, durable backup artifact handling, and observable delivery outcomes integrated into submit workflow.
+
+### Work Completed
+- Created recipient configuration file support using `config/order_recipients.txt` with one-email-per-line format and comment support.
+- Added recipient parser + cache/reload store that validates addresses, deduplicates values, rejects invalid lines, and refreshes automatically when the file changes.
+- Added SMTP delivery service abstraction that:
+  - builds order email subject/body with location/date/rush/needed-by/order-id metadata,
+  - attaches the generated XLSX order export,
+  - retries failed sends based on configured attempt count and delay,
+  - writes final failures to a dead-letter JSONL log for postmortem visibility.
+- Extended server settings surface with SMTP/retry/recipient/dead-letter environment variables.
+- Wired email delivery into `POST /api/submit_order` after successful DB submit transaction and artifact generation.
+- Preserved local order artifact behavior regardless of email outcome; send failures no longer remove the saved XLSX artifact.
+- Added order delivery audit fields to `orders` table and model (`delivery_status`, `delivery_attempts`, `delivery_error`, `delivered_at`) and implemented repository helper to update those fields.
+- Added a new Alembic migration to add delivery audit columns to existing deployments.
+- Updated API contract docs to capture Phase 2 email config + runtime behavior.
+
+### Files Created
+- `config/order_recipients.txt`
+- `services/__init__.py`
+- `services/recipients.py`
+- `services/email_delivery.py`
+- `alembic/versions/20260325_02_add_order_delivery_fields.py`
+- `tests/test_recipients_parser.py`
+- `tests/test_email_delivery.py`
+
+### Files Modified
+- `server.py`
+- `db/models.py`
+- `db/repositories.py`
+- `.env.example`
+- `docs/api-contract.md`
+- `tests/test_draft_submit_flow.py`
+- `prompts/EXECUTION_STATUS.md`
+- `build_notes.md`
+
+### Files Removed
+None
+
+### Key Implementation Details
+- Recipient parsing enforces strict validity and startup-time validation; on invalid config, a null-delivery fallback records failure metadata instead of crashing order submission.
+- Recipient refresh is mtime+size signature-based so edits to `order_recipients.txt` are picked up without redeploy.
+- Delivery retries happen synchronously in current architecture with `EMAIL_RETRY_ATTEMPTS` and `EMAIL_RETRY_DELAY_SECONDS` controls.
+- Failure dead-letter records are appended to `logs/order_email_dead_letter.log` as JSON lines.
+- Order delivery state is persisted in relational schema for observability and future admin surfaces.
+- Submit pipeline now has two phases:
+  1) transactional artifact + order snapshot persistence,
+  2) email attempt + delivery-status update.
+- Backward compatibility is preserved for order submit response (`success`/`filename`) while adding delivery metadata fields.
+
+### Tests / Validation
+- Added parser tests in `tests/test_recipients_parser.py` for:
+  - comment/blank-line handling,
+  - invalid-email rejection,
+  - file-change reload behavior.
+- Added delivery tests in `tests/test_email_delivery.py` for:
+  - transient failures followed by retry success,
+  - final failure dead-letter creation.
+- Added submit flow coverage in `tests/test_draft_submit_flow.py` to verify artifact persistence and DB audit update when email delivery fails.
+- Ran `pip install -r requirements.txt` to ensure local environment had missing deps.
+- Ran `pytest -q tests` successfully (22 passed).
+- Ran `python -m compileall server.py db services tests` successfully.
+
+### Blockers / Issues
+- Root-level `pytest -q` still collects legacy `test_post.py`; scoped suite invocation remains `pytest -q tests`.
+- Alembic emits existing deprecation warnings about `path_separator` in current config; non-blocking and unchanged in this prompt.
+
+### Follow-Up Notes
+- Phase 3 deployment work should externalize SMTP credentials/secrets in production deployment manifests and validate connectivity in readiness checks.
+- Consider moving retries to async/background queue once deployment topology is finalized to avoid request-thread blocking during transient SMTP issues.
+- Admin recipient management remains intentionally deferred to Phase 5.
+
+### Next Recommended Prompt
+- `04_PHASE_3_PUBLIC_DEPLOYMENT.md`

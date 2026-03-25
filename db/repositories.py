@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -97,6 +99,8 @@ class OrderRepository:
             is_rush=draft.is_rush,
             needed_by=draft.needed_by,
             export_filename=export_filename,
+            delivery_status="pending",
+            delivery_attempts=0,
         )
         self.session.add(order)
         self.session.flush()
@@ -120,3 +124,16 @@ class OrderRepository:
     def get_with_items(self, order_id: int) -> Order | None:
         stmt = select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
         return self.session.scalar(stmt)
+
+    def update_delivery_status(self, order_id: int, status: str, attempts: int, error: str | None = None) -> Order | None:
+        order = self.session.get(Order, order_id)
+        if order is None:
+            return None
+
+        order.delivery_status = status
+        order.delivery_attempts = attempts
+        order.delivery_error = error
+        if status == "sent":
+            order.delivered_at = datetime.now(UTC)
+        self.session.flush()
+        return order

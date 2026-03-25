@@ -145,3 +145,38 @@ def test_end_to_end_draft_update_then_submit_lifecycle():
 
     after_submit = client.get(f"/api/inventory/{category}", headers=alpha).json()["items"]
     assert {item["id"]: item["qty"] for item in after_submit}[item_id] == 0
+
+
+def test_submit_persists_local_artifact_when_email_delivery_fails(monkeypatch):
+    category, item_id = _first_category_and_item()
+    alpha = _auth_header("alpha")
+
+    assert client.post(
+        f"/api/inventory/{category}/update",
+        json={"id": item_id, "qty": 1, "unit": "each"},
+        headers=alpha,
+    ).status_code == 200
+
+    class FailingDeliveryService:
+        def send_order_email(self, **kwargs):
+            from services.email_delivery import EmailDeliveryResult
+
+            return EmailDeliveryResult(status="failed", attempts=3, error="smtp down")
+
+    monkeypatch.setattr(app.state, "email_delivery_service", FailingDeliveryService())
+
+    submit = client.post(
+        "/api/submit_order",
+        json={"date": "2026-03-25", "is_rush": False},
+        headers=alpha,
+    )
+    payload = submit.json()
+    assert submit.status_code == 200
+    assert payload["success"] is True
+    assert payload["delivery_status"] == "failed"
+    assert Path("orders", payload["filename"]).exists()
+
+    with get_session(app.state.settings.database_url) as session:
+        saved_order = session.query(Order).first()
+        assert saved_order is not None
+        assert saved_order.delivery_status == "failed"
