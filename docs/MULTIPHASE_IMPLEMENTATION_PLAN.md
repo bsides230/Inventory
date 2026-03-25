@@ -1,9 +1,9 @@
-# Inventory App Finalization & Scale Plan (Multi-Phase)
+# Ordering Platform Finalization & Scale Plan (Multi-Phase)
 
 ## 1) Executive Summary
-This application already has a working FastAPI + static-web foundation, but it is currently designed like a single-session local tool rather than a multi-user internet service. To make it reliable for many users creating orders from phones, the core upgrade path is:
+This application already has a working FastAPI + static-web foundation, but it is currently framed like a single-session inventory tool rather than a multi-user ordering service. To make it reliable for many users creating orders from phones, the core upgrade path is:
 
-1. Move from file-based shared runtime state to a real database-backed order workflow.
+1. Move from inventory-first shared runtime state to a database-backed ordering workflow.
 2. Add production-grade auth, role controls, and admin APIs.
 3. Add server-side email delivery with a text-config fallback now, and admin-managed config later.
 4. Deploy behind a real HTTPS web server and maintain proper observability/backups.
@@ -15,8 +15,8 @@ This document turns that into a practical execution plan for a coding agent.
 
 ## 2) Current-State Findings (What must be fixed first)
 
-### 2.1 Shared global order state will break multi-user behavior
-The current API stores all in-progress quantities in one global `inventory_state.json` map (`INVENTORY_STATE`) and updates by item id only, without user/session separation. In a multi-user scenario, users will overwrite each other and clear each other’s carts on submit. `submit_order` also clears global state after one order succeeds. This is the biggest functional blocker for web deployment. 
+### 2.1 Shared global draft-order state will break multi-user behavior
+The current API stores all in-progress line items in one global `inventory_state.json` map (`INVENTORY_STATE`) and updates by item id only, without user/session separation. In a multi-user scenario, users will overwrite each other and clear each other’s carts on submit. `submit_order` also clears global state after one order succeeds. This is the biggest functional blocker for web deployment. 
 
 ### 2.2 Order “submission” writes only local Excel files
 Current submit flow creates an `.xlsx` file in `orders/` and returns success; there is no email dispatch, no guaranteed delivery workflow, and no queue/retry strategy.
@@ -24,22 +24,23 @@ Current submit flow creates an `.xlsx` file in `orders/` and returns success; th
 ### 2.3 Authentication appears unfinished/inconsistent
 There are wizard/auth toggle messages about username/PIN, but no active auth enforcement in `server.py` endpoints. This is risky once publicly hosted.
 
-### 2.4 Config and data storage are file-local only
-Port, location, categories, flags, and inventory runtime state are local files. This is okay for prototype setup but fragile for concurrent access, backups, and cloud deployment.
+### 2.4 Config and ordering data storage are file-local only
+Port, location, catalog categories, flags, and draft-order runtime state are local files. This is okay for prototype setup but fragile for concurrent access, backups, and cloud deployment.
 
 ### 2.5 PWA baseline exists, but production hardening is incomplete
 A manifest and service worker are present, which is good for add-to-home-screen. However, to work reliably as an installable web app for many users, HTTPS hosting, caching/version policy, and update flow need hardening.
 
 ---
 
-## 3) Target Product Behavior
+## 3) Target Ordering-System Behavior
 
 ### Must-have behavior
-- Multiple users can create orders concurrently without data collision.
-- Orders are persisted server-side with clear status lifecycle.
+- Multiple users can create and submit orders concurrently without data collision.
+- The system centers on draft orders, order review, and submission lifecycle states.
+- Orders are persisted server-side with clear status lifecycle and auditability.
 - Submission sends order output to configured email recipient(s).
 - Recipient can be edited quickly via simple text file now.
-- Later: admin panel can edit recipients, category metadata, and English/Spanish master lists.
+- Later: admin panel can edit recipients, order catalog metadata, and English/Spanish master lists.
 - App is publicly reachable over HTTPS (no Tailscale requirement).
 - App is installable as a PWA on Android/iPhone.
 
@@ -50,10 +51,10 @@ A manifest and service worker are present, which is good for add-to-home-screen.
 
 ---
 
-## 4) Recommended Architecture (Practical + Incremental)
+## 4) Recommended Ordering-System Architecture (Practical + Incremental)
 
 - **Backend**: FastAPI (keep).
-- **Database**: PostgreSQL (preferred) for users, carts, orders, order_items, config.
+- **Database**: PostgreSQL (preferred) for users, draft orders, submitted orders, line items, and config.
 - **Async jobs**: small queue/worker (RQ/Celery/Arq) or background task for email retries.
 - **Email**: SMTP provider (SES, SendGrid, Mailgun, or company SMTP).
 - **Frontend**: current static app kept; progressively add auth/admin screens.
@@ -94,7 +95,7 @@ A manifest and service worker are present, which is good for add-to-home-screen.
 - `settings` (key/value; include email recipient fallback)
 
 ### API changes
-- Replace `/api/inventory/{category}/update` write-to-file behavior with authenticated draft-order writes.
+- Replace legacy inventory-update endpoints with authenticated draft-order writes centered on order creation.
 - Replace global in-memory state with per-user draft retrieval.
 - Make `submit_order` atomic transaction:
   - validate draft
@@ -196,9 +197,9 @@ A manifest and service worker are present, which is good for add-to-home-screen.
 ## 6) Proposed Backlog for the Coding Agent (Ordered)
 
 1. Introduce settings module + `.env.example`.
-2. Add SQLAlchemy/Alembic + PostgreSQL schema for users/orders/drafts/settings.
+2. Add SQLAlchemy/Alembic + PostgreSQL schema for users/draft_orders/orders/order_items/settings.
 3. Implement auth (session or JWT) and protect write endpoints.
-4. Refactor inventory update/submit to DB transactions.
+4. Refactor draft-order update/submit flows to DB transactions.
 5. Add recipient text file parser and outbound email service.
 6. Add order status tracking and retry queue.
 7. Write migration scripts and seed script.
