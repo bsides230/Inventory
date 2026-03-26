@@ -16,7 +16,15 @@ const translations = {
         labelCancel: "Cancel",
         labelConfirm: "Confirm Order",
         each: "each",
-        case: "case"
+        case: "case",
+        offlineBannerText: "You are offline. Cached data is available; submitting orders requires a connection.",
+        installBannerText: "Install this app for faster access from your home screen.",
+        iosInstallText: "On iPhone: tap Share, then Add to Home Screen.",
+        updateBannerText: "A new app update is ready.",
+        installCta: "Install",
+        dismissCta: "Dismiss",
+        gotItCta: "Got it",
+        refreshCta: "Refresh"
     },
     es: {
         appTitle: "Inventario",
@@ -30,7 +38,15 @@ const translations = {
         labelCancel: "Cancelar",
         labelConfirm: "Confirmar Pedido",
         each: "c/u",
-        case: "caja"
+        case: "caja",
+        offlineBannerText: "No tienes conexión. Puedes usar datos en caché; enviar pedidos requiere internet.",
+        installBannerText: "Instala esta app para abrirla más rápido desde tu pantalla principal.",
+        iosInstallText: "En iPhone: toca Compartir y luego Añadir a pantalla de inicio.",
+        updateBannerText: "Hay una actualización lista para instalar.",
+        installCta: "Instalar",
+        dismissCta: "Cerrar",
+        gotItCta: "Entendido",
+        refreshCta: "Actualizar"
     }
 };
 
@@ -40,7 +56,8 @@ const state = {
     theme: localStorage.getItem('falcone_theme') || 'dark', // 'light' or 'dark'
     currentCategory: null,
     inventory: {},
-    categories: []
+    categories: [],
+    deferredInstallPrompt: null
 };
 
 // --- DOM Elements ---
@@ -70,12 +87,115 @@ const DOM = {
     btnCancelOrder: document.getElementById('btnCancelOrder'),
     btnConfirmOrder: document.getElementById('btnConfirmOrder'),
     orderModalError: document.getElementById('orderModalError'),
+    offlineBanner: document.getElementById('offlineBanner'),
+    offlineBannerText: document.getElementById('offlineBannerText'),
+    installBanner: document.getElementById('installBanner'),
+    installBannerText: document.getElementById('installBannerText'),
+    iosInstallBanner: document.getElementById('iosInstallBanner'),
+    iosInstallText: document.getElementById('iosInstallText'),
+    updateBanner: document.getElementById('updateBanner'),
+    updateBannerText: document.getElementById('updateBannerText'),
+    btnInstallApp: document.getElementById('btnInstallApp'),
+    btnDismissInstall: document.getElementById('btnDismissInstall'),
+    btnDismissIosInstall: document.getElementById('btnDismissIosInstall'),
+    btnRefreshApp: document.getElementById('btnRefreshApp'),
 };
+
+
+
+async function apiFetch(url, options = {}) {
+    try {
+        return await fetch(url, options);
+    } catch (error) {
+        if (!navigator.onLine) {
+            DOM.offlineBanner?.classList.remove('hidden');
+        }
+        throw error;
+    }
+}
+
+function updateConnectivityBanner() {
+    if (!DOM.offlineBanner) return;
+    if (navigator.onLine) {
+        DOM.offlineBanner.classList.add('hidden');
+    } else {
+        DOM.offlineBanner.classList.remove('hidden');
+    }
+}
+
+function isIosSafari() {
+    const ua = window.navigator.userAgent;
+    return /iPhone|iPad|iPod/.test(ua) && /Safari/.test(ua) && !/CriOS|FxiOS/.test(ua);
+}
+
+function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+
+    window.addEventListener('load', async () => {
+        try {
+            const registration = await navigator.serviceWorker.register('/sw.js');
+
+            if (registration.waiting) {
+                DOM.updateBanner?.classList.remove('hidden');
+            }
+
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        DOM.updateBanner?.classList.remove('hidden');
+                    }
+                });
+            });
+
+            DOM.btnRefreshApp?.addEventListener('click', () => {
+                const waitingWorker = registration.waiting;
+                if (waitingWorker) {
+                    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+                }
+            });
+
+            navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
+        } catch (error) {
+            console.error('SW registration failed:', error);
+        }
+    });
+}
+
+function setupInstallPrompts() {
+    window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        state.deferredInstallPrompt = event;
+        DOM.installBanner?.classList.remove('hidden');
+    });
+
+    window.addEventListener('appinstalled', () => {
+        state.deferredInstallPrompt = null;
+        DOM.installBanner?.classList.add('hidden');
+        DOM.iosInstallBanner?.classList.add('hidden');
+    });
+
+    if (isIosSafari() && !window.matchMedia('(display-mode: standalone)').matches) {
+        DOM.iosInstallBanner?.classList.remove('hidden');
+    }
+
+    DOM.btnInstallApp?.addEventListener('click', async () => {
+        if (!state.deferredInstallPrompt) return;
+        state.deferredInstallPrompt.prompt();
+        await state.deferredInstallPrompt.userChoice;
+        state.deferredInstallPrompt = null;
+        DOM.installBanner?.classList.add('hidden');
+    });
+
+    DOM.btnDismissInstall?.addEventListener('click', () => DOM.installBanner?.classList.add('hidden'));
+    DOM.btnDismissIosInstall?.addEventListener('click', () => DOM.iosInstallBanner?.classList.add('hidden'));
+}
 
 // --- Initialization ---
 async function initApp() {
     try {
-        const res = await fetch(`${API_BASE}/status`);
+        const res = await apiFetch(`${API_BASE}/status`);
         const data = await res.json();
         const loc = data.location || "Falcones Pizza";
         DOM.htmlTitle.textContent = `${loc} Inventory`;
@@ -91,7 +211,7 @@ async function initApp() {
     applyTheme();
 
     try {
-        const res = await fetch(`${API_BASE}/categories`);
+        const res = await apiFetch(`${API_BASE}/categories`);
         const data = await res.json();
         if (data.success) {
             state.categories = data.categories;
@@ -140,6 +260,14 @@ function applyLanguage() {
     document.getElementById('labelNeededBy').textContent = t.labelNeededBy;
     document.getElementById('labelCancel').textContent = t.labelCancel;
     document.getElementById('labelConfirm').textContent = t.labelConfirm;
+    if (DOM.offlineBannerText) DOM.offlineBannerText.textContent = t.offlineBannerText;
+    if (DOM.installBannerText) DOM.installBannerText.textContent = t.installBannerText;
+    if (DOM.iosInstallText) DOM.iosInstallText.textContent = t.iosInstallText;
+    if (DOM.updateBannerText) DOM.updateBannerText.textContent = t.updateBannerText;
+    if (DOM.btnInstallApp) DOM.btnInstallApp.textContent = t.installCta;
+    if (DOM.btnDismissInstall) DOM.btnDismissInstall.textContent = t.dismissCta;
+    if (DOM.btnDismissIosInstall) DOM.btnDismissIosInstall.textContent = t.gotItCta;
+    if (DOM.btnRefreshApp) DOM.btnRefreshApp.textContent = t.refreshCta;
 
     // Update toggle buttons text
     const langSpans = document.querySelectorAll('#btnToggleLangApp span');
@@ -210,7 +338,7 @@ async function loadCategory(categoryId) {
     if (window.lucide) lucide.createIcons();
 
     try {
-        const res = await fetch(`${API_BASE}/inventory/${categoryId}`);
+        const res = await apiFetch(`${API_BASE}/inventory/${categoryId}`);
         const data = await res.json();
 
         if (data.success) {
@@ -283,7 +411,7 @@ function renderCategory(categoryId) {
 // Backend Sync Function
 async function syncItemUpdate(item) {
     try {
-        await fetch(`${API_BASE}/inventory/${state.currentCategory}/update`, {
+        await apiFetch(`${API_BASE}/inventory/${state.currentCategory}/update`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -379,7 +507,7 @@ DOM.btnConfirmOrder.addEventListener('click', async () => {
     lucide.createIcons();
 
     try {
-        const res = await fetch(`${API_BASE}/submit_order`, {
+        const res = await apiFetch(`${API_BASE}/submit_order`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -424,4 +552,11 @@ if (DOM.btnToggleTheme) {
 }
 
 // Start
-document.addEventListener('DOMContentLoaded', initApp);
+document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+    registerServiceWorker();
+    setupInstallPrompts();
+    updateConnectivityBanner();
+    window.addEventListener('online', updateConnectivityBanner);
+    window.addEventListener('offline', updateConnectivityBanner);
+});

@@ -424,3 +424,119 @@ None
 
 ### Next Recommended Prompt
 - `05_PHASE_4_PWA_HARDENING.md`
+
+## 2026-03-25T23:19:30Z — 05_PHASE_4_PWA_HARDENING.md
+### Status
+COMPLETED
+
+### Objective
+- Harden installable mobile PWA behavior by improving manifest/icon completeness, refining service-worker caching and offline handling, and adding clear install/update/offline UX messaging for Android and iOS users.
+
+### Work Completed
+- Updated `web/manifest.json` with expanded installability metadata (`id`, `scope`, revised `start_url`) and explicit maskable icon declaration.
+- Added additional icon assets (`icon-180.png` and `icon-512-maskable.png`) to support iOS home-screen icon usage and modern Android maskable icon expectations.
+- Reworked `web/sw.js` to implement Phase 4 cache policy:
+  - static assets served cache-first with versioned static cache,
+  - API requests served network-first with API cache fallback,
+  - synthetic JSON 503 offline response for unavailable API requests,
+  - skip-waiting message handling for update activation.
+- Enhanced frontend shell in `web/index.html` with dedicated PWA notice area and banners for:
+  - offline limitations,
+  - Android install prompt CTA,
+  - iOS add-to-home-screen guidance,
+  - update available + refresh CTA.
+- Added banner styling in `web/style.css` for consistent messaging UX in both themes.
+- Extended `web/app.js` with:
+  - service-worker registration/update detection flow,
+  - install prompt orchestration (`beforeinstallprompt`, dismiss/install controls, iOS detection),
+  - online/offline connectivity banner updates,
+  - translated copy for new install/offline/update UI in English and Spanish,
+  - `apiFetch` wrapper usage so network failures surface offline context.
+- Added focused validation tests in `tests/test_pwa_hardening.py` for manifest coverage, service worker strategy expectations, and install/offline/update UI hooks.
+
+### Files Created
+- `web/assets/icon-180.png`
+- `web/assets/icon-512-maskable.png`
+- `tests/test_pwa_hardening.py`
+
+### Files Modified
+- `prompts/EXECUTION_STATUS.md`
+- `build_notes.md`
+- `web/manifest.json`
+- `web/sw.js`
+- `web/index.html`
+- `web/style.css`
+- `web/app.js`
+
+### Files Removed
+None
+
+### Key Implementation Details
+- Offline support remains intentionally read-only for degraded API behavior: `POST`/mutable API attempts return controlled offline JSON response from service worker rather than failing with an unhandled browser exception.
+- Update flow uses waiting service worker + explicit refresh action (`SKIP_WAITING`) so users can control reload timing instead of unexpected mid-session refresh.
+- iOS install UX is guidance-only (no native install prompt support in Safari), while Android/Chromium browsers use deferred install prompt capture and explicit CTA.
+- Existing ordering flow semantics were preserved; changes are additive around resilience/UX messaging and do not implement unsupported offline order submission.
+
+### Tests / Validation
+- Added tests: `tests/test_pwa_hardening.py` (3 checks).
+- Ran `pytest tests/test_pwa_hardening.py` → passed (3/3).
+- Ran `pytest tests/test_api_baseline.py` → failed during import because `jwt` module (`PyJWT`) is not installed in current environment.
+- Ran `node --check web/app.js` to validate JavaScript syntax after PWA lifecycle additions.
+
+### Blockers / Issues
+- Environment is missing optional dependency `PyJWT`, which prevented running broader API regression module collection in this prompt execution.
+
+### Follow-Up Notes
+- Next phase should keep PWA banners compatible with any future admin panel route changes (avoid global element ID collisions).
+- If CI coverage expands to browser-level PWA behavior, add integration tests for actual service-worker lifecycle transitions and offline route rendering.
+
+### Next Recommended Prompt
+- `06_PHASE_5_ADMIN_PANEL_AND_MASTER_LIST_MANAGEMENT.md`
+
+## 2026-03-25T23:37:07Z — 05_PHASE_4_PWA_HARDENING.md (binary-asset correction)
+### Status
+COMPLETED
+
+### Objective
+- Address review feedback that binary icon additions are not supported, while preserving the Phase 4 PWA hardening behavior.
+
+### Work Completed
+- Removed newly-added binary assets `web/assets/icon-180.png` and `web/assets/icon-512-maskable.png`.
+- Updated `web/manifest.json` icon list to reference only pre-existing supported icon assets (`icon-32`, `icon-192`, `icon-512`).
+- Updated `web/index.html` Apple touch icon reference to existing `icon-192.png`.
+- Updated `web/sw.js` static cache asset list to remove references to deleted icon files.
+- Updated `tests/test_pwa_hardening.py` to validate manifest/installability behavior without requiring the removed maskable binary icon entry.
+- Updated `prompts/EXECUTION_STATUS.md` for this execution (in-progress at start, completed at end).
+
+### Files Created
+- None
+
+### Files Modified
+- `prompts/EXECUTION_STATUS.md`
+- `build_notes.md`
+- `web/manifest.json`
+- `web/index.html`
+- `web/sw.js`
+- `tests/test_pwa_hardening.py`
+
+### Files Removed
+- `web/assets/icon-180.png`
+- `web/assets/icon-512-maskable.png`
+
+### Key Implementation Details
+- PWA installability remains intact using existing PNG assets already present in repository support constraints.
+- Service worker cache manifest now accurately reflects available static assets, preventing failed cache-add operations for missing files.
+- No functional changes were made to install/update/offline UX logic beyond removing unsupported binary dependencies.
+
+### Tests / Validation
+- Ran `pytest tests/test_pwa_hardening.py` (passed, 3/3).
+- Ran `node --check web/app.js` (passed, no syntax errors).
+
+### Blockers / Issues
+- None
+
+### Follow-Up Notes
+- If future work requires expanded icon coverage, use a text-based generation pipeline committed as source instructions rather than adding unsupported binaries directly.
+
+### Next Recommended Prompt
+- `06_PHASE_5_ADMIN_PANEL_AND_MASTER_LIST_MANAGEMENT.md`
