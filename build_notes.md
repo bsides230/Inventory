@@ -783,3 +783,53 @@ COMPLETED
 
 ### Next Recommended Prompt
 - `STABILIZATION_AUDIT_FIXES_PHASE.md`
+
+## 2026-03-26T01:52:11Z — Prompt System Reset (Second-Pass Remaining Work)
+### Status
+COMPLETED
+
+### Objective
+- Retire the original migration-phase prompt chain as the active control surface and regenerate a concise second-pass prompt set aligned only to unresolved audit findings.
+
+### Why the prompt system was reset
+- The implementation audit confirmed substantial completion of core migration phases, but identified unresolved stabilization and security/ops gaps.
+- Tracker governance drift was detected (including a phase marked complete without implementation evidence), making the old active sequence unsuitable for remaining execution.
+- A smaller, audit-driven sequence is required to close remaining work with strict verification.
+
+### Prompt cleanup performed
+- Archived old active implementation prompts from `prompts/` into `prompts/archive/`:
+  - `00_MASTER_OVERVIEW.md`
+  - `01_PHASE_0_STABILIZE_AND_PREPARE.md`
+  - `02_PHASE_1_MULTI_USER_DATA_MODEL.md`
+  - `02A_PHASE_1_SCHEMA_AND_MODELS.md`
+  - `02B_PHASE_1_AUTH_AND_WRITE_PROTECTION.md`
+  - `02C_PHASE_1_DRAFT_ORDER_FLOW.md`
+  - `03_PHASE_2_EMAIL_DELIVERY_AND_TEXT_CONFIG.md`
+  - `04_PHASE_3_PUBLIC_DEPLOYMENT.md`
+  - `05_PHASE_4_PWA_HARDENING.md`
+  - `06_PHASE_5_ADMIN_PANEL_AND_MASTER_LIST_MANAGEMENT.md`
+  - `07_PHASE_6_SECURITY_COMPLIANCE_OPERATIONS.md`
+
+### New prompt set created (active)
+- `prompts/00_REMAINING_WORK_OVERVIEW.md`
+- `prompts/01_STABILIZATION_AUDIT_FIXES.md`
+- `prompts/02_SECURITY_AND_OPERATIONS_HARDENING.md`
+- `prompts/99_FINAL_TEST_AND_VERIFICATION.md`
+
+### Sequence design rationale from audit findings
+- Prompt 01 targets immediate correctness/governance stabilization findings called out in audit (recipient reload defect, root pytest determinism, tracker/doc alignment, readiness depth improvements).
+- Prompt 02 isolates pending security/operations hardening work still relevant to current architecture (JWT claim enforcement, ops/readiness hardening).
+- Prompt 99 is a strict final verification/audit gate requiring evidence-backed completion checks and final reporting.
+
+### Admin prompt decision
+- No active `03_ADMIN_COMPLETION_OR_RECONCILIATION.md` was created in this reset.
+- Reason: audit found no verified Phase 5 implementation evidence and also prioritized stabilization + security/ops closure first. Admin expansion remains product-scope-dependent and should be reintroduced only with explicit prioritization after final verification.
+
+### Tracking updates
+- Rewrote `prompts/EXECUTION_STATUS.md` so the new sequence is the active source of truth.
+- Preserved legacy prompt history by archiving prompt files rather than deleting.
+- Left new execution prompts unmarked (not falsely completed), except the overview/control prompt itself.
+
+### Scope guard
+- This PR intentionally performs prompt-system restructuring only.
+- No stabilization/security/admin feature implementation was performed in this reset.
