@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const STATIC_CACHE = `falcones-static-${CACHE_VERSION}`;
 const API_CACHE = `falcones-api-${CACHE_VERSION}`;
 

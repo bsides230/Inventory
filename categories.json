@@ -11,71 +11,11 @@
         "label_en": "Dairy",
         "label_es": "Lácteos"
     },
-    "bev_alc": {
-        "color": "amber",
-        "icon": "beer",
-        "label_en": "Alcohol",
-        "label_es": "Alcohol"
-    },
-    "bev_bib": {
-        "color": "indigo",
-        "icon": "cup-soda",
-        "label_en": "Fountain Beverages",
-        "label_es": "Bebidas de Fuente"
-    },
-    "bev_rtd": {
-        "color": "cyan",
-        "icon": "bottle-wine",
-        "label_en": "Bottled Beverages",
-        "label_es": "Bebidas Embotelladas"
-    },
-    "cleaning": {
-        "color": "teal",
-        "icon": "spray-can",
-        "label_en": "Cleaning",
-        "label_es": "Limpieza"
-    },
-    "disposables": {
-        "color": "rose",
-        "icon": "utensils",
-        "label_en": "Disposables",
-        "label_es": "Desechables"
-    },
-    "frozen.ref": {
-        "color": "sky",
-        "icon": "snowflake",
-        "label_en": "Frozen & Refrigerated",
-        "label_es": "Congelados & Refrigerados"
-    },
-    "grocery_dry": {
-        "color": "yellow",
-        "icon": "wheat",
-        "label_en": "Dry Grocery",
-        "label_es": "Abarrotes Secos"
-    },
     "meats": {
         "color": "red",
         "icon": "🥩",
         "label_en": "Meats",
         "label_es": "Carnes"
-    },
-    "prepared": {
-        "color": "orange",
-        "icon": "chef-hat",
-        "label_en": "Prepared",
-        "label_es": "Preparados"
-    },
-    "smallwares": {
-        "color": "gray",
-        "icon": "cooking-pot",
-        "label_en": "Smallwares",
-        "label_es": "Utensilios"
-    },
-    "bakery": {
-        "color": "yellow",
-        "icon": "croissant",
-        "label_en": "Bakery",
-        "label_es": "Panadería"
     },
     "beverages": {
         "color": "gray",

@@ -198,6 +198,21 @@
         </div>
     </div>
 
+    <!-- Draft Name Modal -->
+    <div id="draftNameModal" class="absolute inset-0 z-50 bg-black/80 flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-sm bg-[var(--color-bg-nav)] rounded-2xl shadow-2xl border border-[var(--color-border)] p-6">
+            <h2 id="draftNameModalTitle" class="text-lg font-bold mb-4">New Draft</h2>
+            <input type="text" id="draftNameInput" maxlength="48"
+                placeholder="e.g. Tuesday Order, Week 3..."
+                class="w-full bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg p-3 text-[var(--color-text-primary)] focus:border-falcone-red outline-none mb-4"
+                onkeydown="if(event.key==='Enter')confirmDraftName();if(event.key==='Escape')closeDraftNameModal();">
+            <div class="flex justify-end gap-3">
+                <button onclick="closeDraftNameModal()" class="px-4 py-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-border)] transition-colors">Cancel</button>
+                <button onclick="confirmDraftName()" class="px-5 py-2 rounded-lg bg-falcone-red hover:bg-red-600 text-white font-bold transition-colors">Save</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/app.js"></script>
     <script>lucide.createIcons();</script>
 </body>

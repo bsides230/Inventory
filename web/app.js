@@ -115,6 +115,9 @@ const DOM = {
     draftDropdown: document.getElementById('draftDropdown'),
     draftList: document.getElementById('draftList'),
     currentDraftName: document.getElementById('currentDraftName'),
+    draftNameModal: document.getElementById('draftNameModal'),
+    draftNameModalTitle: document.getElementById('draftNameModalTitle'),
+    draftNameInput: document.getElementById('draftNameInput'),
 };
 
 // --- PIN Auth ---
@@ -235,7 +238,6 @@ async function loadDrafts() {
             state.drafts = data.drafts;
             renderDraftDropdown();
 
-            // If no draft selected or selected draft not in list, pick first
             if (state.drafts.length > 0) {
                 const found = state.drafts.find(d => d.id === state.currentDraftId);
                 if (!found) {
@@ -260,18 +262,24 @@ function renderDraftDropdown() {
     }
     state.drafts.forEach(draft => {
         const el = document.createElement('div');
-        el.className = `flex items-center justify-between px-3 py-2 hover:bg-[var(--color-border)] cursor-pointer transition-colors ${draft.id === state.currentDraftId ? 'bg-[var(--color-border)]' : ''}`;
+        const isActive = draft.id === state.currentDraftId;
+        el.className = `flex items-center justify-between px-3 py-2 transition-colors ${isActive ? 'bg-[var(--color-border)]' : 'hover:bg-[var(--color-border)]'}`;
         el.innerHTML = `
-            <div onclick="selectDraft(${draft.id}, '${draft.name.replace(/'/g, "\\'")}')">
-                <div class="text-sm font-medium flex items-center gap-2">
-                    ${draft.id === state.currentDraftId ? '<i data-lucide="check" class="w-3 h-3 text-falcone-red"></i>' : ''}
-                    ${escapeHtml(draft.name)}
+            <div class="flex-1 min-w-0 cursor-pointer" onclick="selectDraft(${draft.id}, '${draft.name.replace(/'/g, "\\'")}')">
+                <div class="text-sm font-medium flex items-center gap-2 truncate">
+                    ${isActive ? '<i data-lucide="check" class="w-3 h-3 text-falcone-red shrink-0"></i>' : ''}
+                    <span class="truncate">${escapeHtml(draft.name)}</span>
                 </div>
                 <div class="text-xs text-[var(--color-text-secondary)]">${draft.item_count} item${draft.item_count !== 1 ? 's' : ''}</div>
             </div>
-            <button onclick="event.stopPropagation(); deleteDraft(${draft.id})" class="p-1 text-[var(--color-text-secondary)] hover:text-falcone-red transition-colors rounded ml-2" title="Delete draft">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
+            <div class="flex items-center gap-0.5 shrink-0 ml-1">
+                <button onclick="event.stopPropagation(); openRenameDraftModal(${draft.id}, '${draft.name.replace(/'/g, "\\'")}')" class="p-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded" title="Rename">
+                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="event.stopPropagation(); deleteDraft(${draft.id})" class="p-1.5 text-[var(--color-text-secondary)] hover:text-falcone-red transition-colors rounded" title="Delete">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
         `;
         DOM.draftList.appendChild(el);
     });
@@ -287,34 +295,110 @@ window.selectDraft = async function(draftId, draftName) {
     closeDraftDropdown();
     renderDraftDropdown();
 
-    // Reload current category with new draft
     if (state.currentCategory) {
         state.inventory = {};
         await loadCategory(state.currentCategory);
     }
 };
 
-window.createNewDraft = async function() {
+// --- Draft Name Modal ---
+let _draftNameMode = null; // 'create' | 'rename'
+let _draftRenameId = null;
+
+function openCreateDraftModal() {
     closeDraftDropdown();
+    _draftNameMode = 'create';
+    _draftRenameId = null;
+    DOM.draftNameModalTitle.textContent = 'New Draft';
+    DOM.draftNameInput.value = '';
+    DOM.draftNameInput.placeholder = `e.g. Tuesday Order, Week ${state.drafts.length + 1}...`;
+    DOM.draftNameModal.classList.remove('hidden');
+    setTimeout(() => DOM.draftNameInput.focus(), 50);
+}
+
+window.openRenameDraftModal = function(draftId, currentName) {
+    closeDraftDropdown();
+    _draftNameMode = 'rename';
+    _draftRenameId = draftId;
+    DOM.draftNameModalTitle.textContent = 'Rename Draft';
+    DOM.draftNameInput.value = currentName;
+    DOM.draftNameModal.classList.remove('hidden');
+    setTimeout(() => { DOM.draftNameInput.focus(); DOM.draftNameInput.select(); }, 50);
+};
+
+window.closeDraftNameModal = function() {
+    DOM.draftNameModal.classList.add('hidden');
+    _draftNameMode = null;
+    _draftRenameId = null;
+};
+
+window.confirmDraftName = async function() {
+    const name = DOM.draftNameInput.value.trim();
+    if (!name) { DOM.draftNameInput.focus(); return; }
+
+    if (_draftNameMode === 'create') {
+        DOM.draftNameModal.classList.add('hidden');
+        try {
+            const res = await apiFetch(`${API_BASE}/drafts/new`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                await loadDrafts();
+                await selectDraft(data.draft.id, data.draft.name);
+                if (state.currentCategory) {
+                    state.inventory = {};
+                    await loadCategory(state.currentCategory);
+                }
+            }
+        } catch (e) {
+            console.error('Failed to create draft:', e);
+        }
+    } else if (_draftNameMode === 'rename' && _draftRenameId) {
+        const draftId = _draftRenameId;
+        DOM.draftNameModal.classList.add('hidden');
+        try {
+            await apiFetch(`${API_BASE}/drafts/${draftId}/rename`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name }),
+            });
+            if (draftId === state.currentDraftId) {
+                state.currentDraftName = name;
+                localStorage.setItem('falcone_draft_name', name);
+                DOM.currentDraftName.textContent = name;
+            }
+            await loadDrafts();
+        } catch (e) {
+            console.error('Failed to rename draft:', e);
+        }
+    }
+    _draftNameMode = null;
+    _draftRenameId = null;
+};
+
+window.createNewDraft = function() {
+    openCreateDraftModal();
+};
+
+async function createDraftSilent(name) {
     try {
         const res = await apiFetch(`${API_BASE}/drafts/new`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: `Draft ${state.drafts.length + 1}` }),
+            body: JSON.stringify({ name }),
         });
         const data = await res.json();
         if (data.success) {
             await loadDrafts();
             await selectDraft(data.draft.id, data.draft.name);
-            if (state.currentCategory) {
-                state.inventory = {};
-                await loadCategory(state.currentCategory);
-            }
         }
     } catch (e) {
-        console.error('Failed to create draft:', e);
+        console.error('Failed to create initial draft:', e);
     }
-};
+}
 
 window.deleteDraft = async function(draftId) {
     if (state.drafts.length <= 1) {
@@ -387,8 +471,8 @@ async function initAppAfterAuth() {
     // Load or create drafts
     await loadDrafts();
     if (state.drafts.length === 0) {
-        // Create initial draft
-        await window.createNewDraft();
+        // Silently create first draft with a default name
+        await createDraftSilent('My First Order');
     }
 
     renderDashboard();

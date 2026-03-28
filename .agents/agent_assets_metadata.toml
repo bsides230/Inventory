@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "KJqeTEtBNEFlS_yDG1OJ-"
+uri = "file://docs/Master_Inventory_Format_Guide.md"
+type = "text"
+title = "Master Inventory Format Guide"

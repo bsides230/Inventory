@@ -171,6 +171,30 @@ def convert_excel_to_json():
             logging.info("Updating categories.json")
             save_categories_config(config)
 
+        # --- Cleanup: remove categories/data files not in the new master ---
+        if use_master:
+            processed_ids = set()
+            for sheet_name in sheet_names:
+                cat_label, _ = parse_tab_name(sheet_name)
+                cat_id = cat_label.lower().replace(" ", "_").replace("-", "_")
+                processed_ids.add(cat_id)
+
+            # Remove obsolete data JSON files
+            for json_file in DATA_DIR.glob("*.json"):
+                cat_id_from_file = json_file.stem
+                if cat_id_from_file not in processed_ids:
+                    logging.info(f"Removing obsolete category file: {json_file.name}")
+                    json_file.unlink()
+
+            # Remove obsolete entries from categories.json
+            config_after = load_categories_config()
+            stale_keys = [k for k in config_after if k not in processed_ids]
+            if stale_keys:
+                for k in stale_keys:
+                    logging.info(f"Removing obsolete category config: {k}")
+                    del config_after[k]
+                save_categories_config(config_after)
+
         return True
 
     except Exception as e:
