@@ -1,0 +1,10 @@
+{
+    "label": "Smallwares",
+    "items": [
+        {
+            "id": "smallwares_0",
+            "name_en": "Cheese shakers",
+            "name_es": "Agitadores para queso"
+        }
+    ]
+}

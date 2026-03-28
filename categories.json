@@ -22,5 +22,53 @@
         "icon": "🥤",
         "label_en": "Beverages",
         "label_es": "Beverages"
+    },
+    "alcohol": {
+        "color": "gray",
+        "icon": "🍺",
+        "label_en": "Alcohol",
+        "label_es": "Alcohol"
+    },
+    "fountain_bib": {
+        "color": "zinc",
+        "icon": "🧃",
+        "label_en": "Fountain BIB",
+        "label_es": "Fountain BIB"
+    },
+    "cleaning": {
+        "color": "neutral",
+        "icon": "🧹",
+        "label_en": "Cleaning",
+        "label_es": "Cleaning"
+    },
+    "disposables": {
+        "color": "stone",
+        "icon": "🥡",
+        "label_en": "Disposables",
+        "label_es": "Disposables"
+    },
+    "frozen_&_refrigerated": {
+        "color": "gray",
+        "icon": "❄️",
+        "label_en": "Frozen & Refrigerated",
+        "label_es": "Frozen & Refrigerated"
+    },
+    "dry_grocery": {
+        "color": "zinc",
+        "icon": "🌾",
+        "label_en": "Dry Grocery",
+        "label_es": "Dry Grocery"
+    },
+    "prepared": {
+        "color": "neutral",
+        "icon": "🍲",
+        "label_en": "Prepared",
+        "label_es": "Prepared"
+    },
+    "smallwares": {
+        "color": "stone",
+        "icon": "🍴",
+        "label_en": "Smallwares",
+        "label_es": "Smallwares"
     }
 }

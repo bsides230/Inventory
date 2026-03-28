@@ -1,0 +1,100 @@
+{
+    "label": "Prepared",
+    "items": [
+        {
+            "id": "prepared_0",
+            "name_en": "Bacon Bits (qt) (each)",
+            "name_es": "Trocitos de tocino (cuarto) (unidad)"
+        },
+        {
+            "id": "prepared_1",
+            "name_en": "Bell Pepper Chopped (qt.) (each)",
+            "name_es": "Pimiento morrón picado (cuarto) (unidad)"
+        },
+        {
+            "id": "prepared_2",
+            "name_en": "Boneless Bites (prepared 8 ea.)",
+            "name_es": "Boneless preparados (8 pzas.)"
+        },
+        {
+            "id": "prepared_3",
+            "name_en": "Chicken Breast Cooked (4 oz.) (each)",
+            "name_es": "Pechuga de pollo cocida (4 oz.) (unidad)"
+        },
+        {
+            "id": "prepared_4",
+            "name_en": "Chicken Parmesan (prepared) ea.",
+            "name_es": "Pollo parmesano (preparado) unidad"
+        },
+        {
+            "id": "prepared_5",
+            "name_en": "Chicken Tenders (prepared 3 ea.)",
+            "name_es": "Tiras de pollo (preparadas, 3 pzas.)"
+        },
+        {
+            "id": "prepared_6",
+            "name_en": "Dough Par Bake 18\" (each)",
+            "name_es": "Masa prehorneada 18\" (unidad)"
+        },
+        {
+            "id": "prepared_7",
+            "name_en": "Fettucine Alfredo (prepared) ea.",
+            "name_es": "Fettuccine Alfredo (preparado) unidad"
+        },
+        {
+            "id": "prepared_8",
+            "name_en": "Italian Sausage Cooked (lb.) (each)",
+            "name_es": "Salchicha italiana cocida (lb.) (unidad)"
+        },
+        {
+            "id": "prepared_9",
+            "name_en": "Marinara (gal.) (each)",
+            "name_es": "Marinara (galón) (unidad)"
+        },
+        {
+            "id": "prepared_10",
+            "name_en": "Meatballs (ea)",
+            "name_es": "Albóndigas (unidad)"
+        },
+        {
+            "id": "prepared_11",
+            "name_en": "Mushroom Sliced (qt) (each)",
+            "name_es": "Champiñón rebanado (cuarto) (unidad)"
+        },
+        {
+            "id": "prepared_12",
+            "name_en": "Onion Diced (qt.) (each)",
+            "name_es": "Cebolla en cubos (cuarto) (unidad)"
+        },
+        {
+            "id": "prepared_13",
+            "name_en": "Onion Sliced (qt.) (each)",
+            "name_es": "Cebolla rebanada (cuarto) (unidad)"
+        },
+        {
+            "id": "prepared_14",
+            "name_en": "Pizza Sauce (gal.) (each)",
+            "name_es": "Salsa para pizza (galón) (unidad)"
+        },
+        {
+            "id": "prepared_15",
+            "name_en": "Spaghetti w/meatballs (prepared) ea.",
+            "name_es": "Espagueti con albóndigas (preparado) unidad"
+        },
+        {
+            "id": "prepared_16",
+            "name_en": "Stromboli (prepared) ea.",
+            "name_es": "Stromboli (preparado) unidad"
+        },
+        {
+            "id": "prepared_17",
+            "name_en": "Tomatos Diced (qt.) (each)",
+            "name_es": "Tomates en cubos (cuarto) (unidad)"
+        },
+        {
+            "id": "prepared_18",
+            "name_en": "Tomatos Sliced (qt.) (each)",
+            "name_es": "Tomates rebanados (cuarto) (unidad)"
+        }
+    ]
+}

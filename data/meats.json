@@ -3,18 +3,93 @@
     "items": [
         {
             "id": "meats_0",
-            "name_en": "Pepperoni",
-            "name_es": "Pepperoni"
+            "name_en": "Bacon Bits (case)",
+            "name_es": "Tocino en trocitos (caja)"
         },
         {
             "id": "meats_1",
-            "name_en": "Italian Sausage",
-            "name_es": "Salchicha Italiana"
+            "name_en": "Bacon Sliced 1cs",
+            "name_es": "Tocino rebanado 1 caja"
         },
         {
             "id": "meats_2",
-            "name_en": "Ground Beef",
-            "name_es": "Carne Molida"
+            "name_en": "Brisket (each)",
+            "name_es": "Brisket (unidad)"
+        },
+        {
+            "id": "meats_3",
+            "name_en": "Canadian Bacon (case)",
+            "name_es": "Tocino canadiense (caja)"
+        },
+        {
+            "id": "meats_4",
+            "name_en": "Catfish/Swai cs.",
+            "name_es": "Bagre/Swai (caja)"
+        },
+        {
+            "id": "meats_5",
+            "name_en": "Chicken Breast (case)",
+            "name_es": "Pechuga de pollo (caja)"
+        },
+        {
+            "id": "meats_6",
+            "name_en": "Chicken Wings (case)",
+            "name_es": "Alitas de pollo (caja)"
+        },
+        {
+            "id": "meats_7",
+            "name_en": "Ground Beef 73/27 lbs",
+            "name_es": "Carne molida 73/27 lb."
+        },
+        {
+            "id": "meats_8",
+            "name_en": "Ground Beef 80/20 lbs",
+            "name_es": "Carne molida 80/20 lb."
+        },
+        {
+            "id": "meats_9",
+            "name_en": "Ground Beef 90/10 lbs",
+            "name_es": "Carne molida 90/10 lb."
+        },
+        {
+            "id": "meats_10",
+            "name_en": "Hot Dogs (each)",
+            "name_es": "Hot dogs (unidad)"
+        },
+        {
+            "id": "meats_11",
+            "name_en": "Hot Links (each)",
+            "name_es": "Salchichas hot links (unidad)"
+        },
+        {
+            "id": "meats_12",
+            "name_en": "Italian Sausage Rope (case)",
+            "name_es": "Salchicha italiana en tira (caja)"
+        },
+        {
+            "id": "meats_13",
+            "name_en": "Pepperoni (case)",
+            "name_es": "Pepperoni (caja)"
+        },
+        {
+            "id": "meats_14",
+            "name_en": "Philly Meat (case)",
+            "name_es": "Carne tipo Philly (caja)"
+        },
+        {
+            "id": "meats_15",
+            "name_en": "Polish Sausage (each)",
+            "name_es": "Salchicha polaca (unidad)"
+        },
+        {
+            "id": "meats_16",
+            "name_en": "Pork Butt (each)",
+            "name_es": "Pork butt (unidad)"
+        },
+        {
+            "id": "meats_17",
+            "name_en": "Shrimp 21-25 raw peeled 5/2lb. (case)",
+            "name_es": "Camarón 21-25 crudo pelado 5/2 lb. (caja)"
         }
     ]
 }
