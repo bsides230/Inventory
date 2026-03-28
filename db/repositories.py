@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from db.models import Order, OrderDraft, OrderDraftItem, OrderItem, User
@@ -152,6 +152,30 @@ class OrderRepository:
         draft.status = "submitted"
         self.session.flush()
         return order
+
+    def get_item_frequencies(self, user_id: int | None = None) -> dict[int, dict[str, int]]:
+        stmt = (
+            select(Order.user_id, OrderItem.item_id, func.count(OrderItem.id).label("frequency"))
+            .join(OrderItem, Order.id == OrderItem.order_id)
+            .group_by(Order.user_id, OrderItem.item_id)
+        )
+
+        if user_id is not None:
+            stmt = stmt.where(Order.user_id == user_id)
+
+        result = self.session.execute(stmt)
+
+        frequencies = {}
+        for row in result:
+            u_id = row.user_id
+            i_id = row.item_id
+            freq = row.frequency
+
+            if u_id not in frequencies:
+                frequencies[u_id] = {}
+            frequencies[u_id][i_id] = freq
+
+        return frequencies
 
     def get_with_items(self, order_id: int) -> Order | None:
         stmt = select(Order).options(selectinload(Order.items)).where(Order.id == order_id)

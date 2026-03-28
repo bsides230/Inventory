@@ -66,12 +66,16 @@
 
         <!-- Tabs -->
         <div class="bg-[var(--color-bg-nav)] border-b border-[var(--color-border)] px-6">
-            <div class="max-w-4xl mx-auto flex gap-1">
-                <button class="admin-tab active" data-tab="inventory" onclick="switchTab('inventory')">
+            <div class="max-w-4xl mx-auto flex gap-1 overflow-x-auto">
+                <button class="admin-tab active whitespace-nowrap" data-tab="analytics" onclick="switchTab('analytics')">
+                    <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                    Data Viewer
+                </button>
+                <button class="admin-tab whitespace-nowrap" data-tab="inventory" onclick="switchTab('inventory')">
                     <i data-lucide="package" class="w-4 h-4"></i>
                     Inventory
                 </button>
-                <button class="admin-tab" data-tab="locations" onclick="switchTab('locations')">
+                <button class="admin-tab whitespace-nowrap" data-tab="locations" onclick="switchTab('locations')">
                     <i data-lucide="map-pin" class="w-4 h-4"></i>
                     Locations
                 </button>
@@ -89,8 +93,39 @@
         <!-- Content -->
         <main class="max-w-4xl mx-auto p-6 space-y-6">
 
+            <!-- Analytics Tab -->
+            <div id="tab-analytics" class="tab-content space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="bar-chart-2" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">Order Frequencies per Location</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">View how often items are ordered by each location. Select a location below and browse categories to see frequency counts.</p>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">Select Location:</label>
+                        <select id="analyticsLocationSelect" class="w-full sm:w-64 bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg p-2 text-[var(--color-text-primary)] focus:border-falcone-red outline-none" onchange="renderAnalytics()">
+                            <option value="">Loading locations...</option>
+                        </select>
+                    </div>
+
+                    <!-- Analytics Tabs for Categories -->
+                    <div class="border-b border-[var(--color-border)] mb-4">
+                        <div id="analyticsCategoryTabs" class="flex gap-4 overflow-x-auto pb-2">
+                            <!-- Category tabs will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Category Items List -->
+                    <div id="analyticsContent" class="space-y-2">
+                        <!-- Items and frequencies will be rendered here -->
+                        <div class="text-[var(--color-text-secondary)] text-sm text-center py-4">Select a location to view data.</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Inventory Tab -->
-            <div id="tab-inventory" class="tab-content space-y-6">
+            <div id="tab-inventory" class="tab-content hidden space-y-6">
 
                 <!-- Upload Master -->
                 <div class="admin-card">

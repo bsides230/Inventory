@@ -52,10 +52,116 @@ function adminLogout() {
 function showAdminApp() {
     document.getElementById('adminLoginScreen').classList.add('hidden');
     document.getElementById('adminApp').classList.remove('hidden');
-    switchTab('inventory');
+    switchTab('analytics');
     loadLocations();
     loadEmailSettings();
     loadRecipients();
+    loadAnalytics();
+}
+
+// --- Analytics ---
+let analyticsData = null;
+let currentAnalyticsCategory = null;
+
+async function loadAnalytics() {
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/aggregation`);
+        const data = await res.json();
+        if (data.success) {
+            analyticsData = data;
+
+            const select = document.getElementById('analyticsLocationSelect');
+            select.innerHTML = '<option value="">All Locations</option>' +
+                data.locations.map(loc => `<option value="${escapeHtml(loc.pin)}">${escapeHtml(loc.name)}</option>`).join('');
+
+            renderAnalyticsCategoryTabs();
+            if (data.categories.length > 0) {
+                currentAnalyticsCategory = data.categories[0].id;
+            }
+            renderAnalytics();
+        }
+    } catch (e) {
+        console.error('Failed to load analytics:', e);
+    }
+}
+
+function renderAnalyticsCategoryTabs() {
+    if (!analyticsData) return;
+    const tabsContainer = document.getElementById('analyticsCategoryTabs');
+    tabsContainer.innerHTML = analyticsData.categories.map(cat => `
+        <button onclick="setAnalyticsCategory('${escapeHtml(cat.id)}')"
+                class="analytics-cat-tab px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
+                       ${cat.id === currentAnalyticsCategory ? 'border-falcone-red text-falcone-red' : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)]'}"
+                data-cat-id="${escapeHtml(cat.id)}">
+            ${escapeHtml(cat.label)}
+        </button>
+    `).join('');
+}
+
+window.setAnalyticsCategory = function(catId) {
+    currentAnalyticsCategory = catId;
+    document.querySelectorAll('.analytics-cat-tab').forEach(el => {
+        if (el.getAttribute('data-cat-id') === catId) {
+            el.classList.add('border-falcone-red', 'text-falcone-red');
+            el.classList.remove('border-transparent', 'text-[var(--color-text-secondary)]');
+        } else {
+            el.classList.remove('border-falcone-red', 'text-falcone-red');
+            el.classList.add('border-transparent', 'text-[var(--color-text-secondary)]');
+        }
+    });
+    renderAnalytics();
+}
+
+window.renderAnalytics = function() {
+    if (!analyticsData || !currentAnalyticsCategory) return;
+
+    const locationPin = document.getElementById('analyticsLocationSelect').value;
+    const content = document.getElementById('analyticsContent');
+    const category = analyticsData.categories.find(c => c.id === currentAnalyticsCategory);
+
+    if (!category) return;
+
+    // Calculate frequencies
+    let itemFreqs = {};
+    category.items.forEach(item => { itemFreqs[item.id] = { name: item.name, freq: 0 }; });
+
+    if (locationPin) {
+        const freqs = analyticsData.frequencies[locationPin] || {};
+        for (const [itemId, freq] of Object.entries(freqs)) {
+            if (itemFreqs[itemId]) itemFreqs[itemId].freq += freq;
+        }
+    } else {
+        // All locations
+        for (const freqs of Object.values(analyticsData.frequencies)) {
+            for (const [itemId, freq] of Object.entries(freqs)) {
+                if (itemFreqs[itemId]) itemFreqs[itemId].freq += freq;
+            }
+        }
+    }
+
+    // Sort items by frequency descending, then name ascending
+    const sortedItems = Object.values(itemFreqs).sort((a, b) => {
+        if (b.freq !== a.freq) return b.freq - a.freq;
+        return a.name.localeCompare(b.name);
+    });
+
+    if (sortedItems.length === 0) {
+        content.innerHTML = '<div class="text-[var(--color-text-secondary)] text-sm text-center py-4">No items in this category.</div>';
+        return;
+    }
+
+    content.innerHTML = `
+        <div class="grid grid-cols-[1fr_auto] gap-4 px-4 py-2 bg-[var(--color-bg-nav)] border-b border-[var(--color-border)] text-xs font-bold text-[var(--color-text-secondary)] uppercase tracking-wider rounded-t-lg">
+            <div>Item Name</div>
+            <div class="text-right">Times Ordered</div>
+        </div>
+        ${sortedItems.map((item, i) => `
+            <div class="grid grid-cols-[1fr_auto] gap-4 px-4 py-3 border-b border-[var(--color-border)] hover:bg-[var(--color-border)]/50 transition-colors ${i === sortedItems.length - 1 ? 'rounded-b-lg border-b-0' : ''}">
+                <div class="font-medium truncate" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+                <div class="font-bold font-mono text-falcone-red text-right w-16">${item.freq}</div>
+            </div>
+        `).join('')}
+    `;
 }
 
 // --- Tab switching ---
