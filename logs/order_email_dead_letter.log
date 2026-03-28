@@ -1,0 +1,2 @@
+{"timestamp": "2026-03-28T21:51:44.916764+00:00", "order_id": 1, "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
+{"timestamp": "2026-03-28T21:51:45.416485+00:00", "order_id": 1, "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}

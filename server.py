@@ -18,9 +18,11 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import select
 
 from db.auth import AuthenticatedUser, get_optional_authenticated_user, get_required_authenticated_user
 from db.database import get_session
+from db.models import User
 from db.repositories import OrderDraftRepository, OrderRepository, UserRepository
 from services.email_delivery import OrderEmailDeliveryService, SmtpEmailClient
 from services.recipients import RecipientConfigError, RecipientConfigStore
@@ -497,9 +499,12 @@ async def get_inventory(
     if cat_data:
         items = cat_data["items"]
         draft_quantities: dict[str, tuple[int, str]] = {}
+        item_frequencies: dict[str, int] = {}
         if user:
             with get_session(settings.database_url) as session:
                 drafts = OrderDraftRepository(session)
+                orders = OrderRepository(session)
+
                 if draft_id:
                     draft = drafts.get_by_id_for_user(draft_id, user.id, with_items=True)
                 else:
@@ -507,10 +512,16 @@ async def get_inventory(
                 if draft:
                     draft_quantities = {item.item_id: (item.quantity, item.unit) for item in draft.items}
 
+                user_frequencies = orders.get_item_frequencies(user.id)
+                item_frequencies = user_frequencies.get(user.id, {})
+
         response_items = []
         for item in items:
             quantity, unit = draft_quantities.get(item["id"], (0, "each"))
             response_items.append({**item, "qty": quantity, "unit": unit})
+
+        if user:
+            response_items.sort(key=lambda x: item_frequencies.get(x["id"], 0), reverse=True)
 
         return {"success": True, "items": response_items}
 
@@ -705,6 +716,54 @@ async def submit_order(
 
 
 # --- Admin Endpoints ---
+@app.get("/api/admin/aggregation")
+async def admin_get_aggregation(_=Depends(get_required_admin)):
+    locations = load_locations()
+
+    with get_session(settings.database_url) as session:
+        orders = OrderRepository(session)
+        frequencies = orders.get_item_frequencies()
+
+        user_list = session.execute(select(User)).scalars().all()
+        user_pin_map = {}
+        for u in user_list:
+            if u.external_id and u.external_id.startswith("pin_"):
+                pin = u.external_id.replace("pin_", "")
+                user_pin_map[u.id] = pin
+
+    # locations in response should be based on locations.txt config
+    resp_locations = [{"pin": k, "name": v} for k, v in sorted(locations.items())]
+
+    # frequencies map: PIN -> item_id -> frequency
+    pin_frequencies = {}
+    for user_id, freqs in frequencies.items():
+        pin = user_pin_map.get(user_id)
+        if pin:
+            pin_frequencies[pin] = freqs
+
+    cat_ids = get_all_inventory_categories()
+    config = load_categories_config()
+    categories_data = []
+
+    for cat_id in cat_ids:
+        cat_data = get_inventory_category(cat_id)
+        if cat_data:
+            cat_config = config.get(cat_id, {})
+            items = cat_data.get("items", [])
+            categories_data.append({
+                "id": cat_id,
+                "label": cat_config.get("label_en", cat_config.get("label", cat_data["label"])),
+                "items": [{"id": item["id"], "name": item["name_en"]} for item in items]
+            })
+
+    return {
+        "success": True,
+        "locations": resp_locations,
+        "categories": categories_data,
+        "frequencies": pin_frequencies
+    }
+
+
 @app.get("/api/admin/locations")
 async def admin_get_locations(_=Depends(get_required_admin)):
     locations = load_locations()
