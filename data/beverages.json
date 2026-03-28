@@ -1,0 +1,20 @@
+{
+    "label": "Beverages",
+    "items": [
+        {
+            "id": "beverages_0",
+            "name_en": "Soda Cans",
+            "name_es": "Latas de Refresco"
+        },
+        {
+            "id": "beverages_1",
+            "name_en": "Water Bottles",
+            "name_es": "Botellas de Agua"
+        },
+        {
+            "id": "beverages_2",
+            "name_en": "Juice",
+            "name_es": "Jugo"
+        }
+    ]
+}

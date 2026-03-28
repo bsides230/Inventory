@@ -460,9 +460,13 @@ function renderDashboard() {
         const btn = document.createElement('button');
         btn.className = 'category-btn';
         const displayLabel = state.lang === 'es' ? cat.label_es : cat.label_en;
+        const isLucideIcon = /^[a-z][a-z0-9-]*$/.test(cat.icon || '');
+        const iconHtml = isLucideIcon
+            ? `<i data-lucide="${cat.icon}" class="category-icon text-${cat.color}-400"></i>`
+            : `<span class="category-icon" style="font-size:1.5em;line-height:1;">${cat.icon || '📦'}</span>`;
         btn.innerHTML = `
             <div class="category-icon-container bg-${cat.color}-900 border-${cat.color}-700">
-                <i data-lucide="${cat.icon}" class="category-icon text-${cat.color}-400"></i>
+                ${iconHtml}
             </div>
             <div class="category-title-wrapper">
                 <span class="category-title">${displayLabel}</span>

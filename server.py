@@ -1,15 +1,17 @@
 import json
 import logging
+import shutil
 import time
 import uuid
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import jwt
 import pandas as pd
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -791,6 +793,35 @@ async def admin_change_password(body: UpdateAdminPasswordRequest, _=Depends(get_
         raise HTTPException(status_code=400, detail="New password must be at least 4 characters")
     ADMIN_PASSWORD_FILE.write_text(body.new_password + "\n")
     return {"success": True}
+
+
+@app.post("/api/admin/upload-master")
+async def upload_master_excel(
+    file: UploadFile = File(...),
+    _=Depends(get_required_admin),
+):
+    if not file.filename or not file.filename.lower().endswith(".xlsx"):
+        raise HTTPException(status_code=400, detail="Only .xlsx files are accepted.")
+
+    ITEM_MASTER_DIR.mkdir(parents=True, exist_ok=True)
+    master_path = ITEM_MASTER_DIR / "Master.xlsx"
+
+    if master_path.exists():
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        bak_path = ITEM_MASTER_DIR / f"Master_{ts}.bak"
+        shutil.copy2(master_path, bak_path)
+        logger.info(f"Backed up Master.xlsx to {bak_path.name}")
+
+    content = await file.read()
+    with open(master_path, "wb") as f:
+        f.write(content)
+    logger.info(f"Uploaded new Master.xlsx ({len(content):,} bytes)")
+
+    success = convert_excel_to_json()
+    if success:
+        return {"success": True, "message": f"Master.xlsx uploaded ({len(content):,} bytes) and inventory rebuilt successfully."}
+    else:
+        return {"success": False, "message": "File uploaded but inventory rebuild failed. Check that the sheet format is correct (Column A = English, Column B = Spanish, tab name = Category (icon))."}
 
 
 @app.get("/admin")

@@ -91,27 +91,63 @@
 
             <!-- Inventory Tab -->
             <div id="tab-inventory" class="tab-content space-y-6">
+
+                <!-- Upload Master -->
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="file-spreadsheet" class="w-6 h-6 text-falcone-red"></i>
-                        <h2 class="text-lg font-bold">Rebuild Inventory from Excel</h2>
+                        <i data-lucide="upload-cloud" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">Upload Master Inventory File</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">
-                        Drop your updated <strong class="text-[var(--color-text-primary)]">English Master.xlsx</strong> and <strong class="text-[var(--color-text-primary)]">Spanish Master.xlsx</strong> files into the <code class="bg-[var(--color-border)] px-1 rounded">item master/</code> folder on the server, then click the button below to rebuild the inventory data.
+                        Upload a single <strong class="text-[var(--color-text-primary)]">Master.xlsx</strong> file to update the inventory. The existing file is automatically backed up as a <code class="bg-[var(--color-border)] px-1 rounded">.bak</code> file before replacement.
                     </p>
-                    <div class="bg-[var(--color-bg-body)] rounded-lg border border-[var(--color-border)] p-4 mb-4 text-sm">
-                        <p class="font-medium mb-2 flex items-center gap-2"><i data-lucide="info" class="w-4 h-4 text-blue-400"></i> Excel Format</p>
-                        <ul class="text-[var(--color-text-secondary)] space-y-1 list-disc list-inside">
-                            <li>Each sheet tab = one inventory category</li>
-                            <li>Column A = item names (one per row, no header)</li>
-                            <li>English and Spanish masters must have matching sheet names</li>
-                            <li>Sheet tab names become category names in the app</li>
+
+                    <!-- Format info -->
+                    <div class="bg-[var(--color-bg-body)] rounded-lg border border-[var(--color-border)] p-4 mb-5 text-sm">
+                        <p class="font-medium mb-3 flex items-center gap-2"><i data-lucide="info" class="w-4 h-4 text-blue-400"></i> Master.xlsx Format</p>
+                        <ul class="text-[var(--color-text-secondary)] space-y-1.5 list-disc list-inside">
+                            <li>Each <strong class="text-[var(--color-text-primary)]">sheet tab</strong> = one inventory category</li>
+                            <li><strong class="text-[var(--color-text-primary)]">Column A</strong> = English item names (no header row)</li>
+                            <li><strong class="text-[var(--color-text-primary)]">Column B</strong> = Spanish item names (same row order)</li>
+                            <li>Embed an icon in the tab name using <code class="bg-[var(--color-border)] px-1 rounded">Category Name (🍕)</code> or <code class="bg-[var(--color-border)] px-1 rounded">Category Name "🍕"</code></li>
+                            <li>The icon is extracted automatically and shown in the app</li>
                         </ul>
+                        <div class="mt-3 pt-3 border-t border-[var(--color-border)] text-xs text-[var(--color-text-secondary)]">
+                            Example tab names: <code class="bg-[var(--color-border)] px-1 rounded mx-1">Produce (🥦)</code> <code class="bg-[var(--color-border)] px-1 rounded mx-1">Meats (🥩)</code> <code class="bg-[var(--color-border)] px-1 rounded mx-1">Beverages (🥤)</code>
+                        </div>
                     </div>
-                    <button onclick="rebuildInventory()" id="btnRebuild" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                        Rebuild Inventory Now
-                    </button>
+
+                    <!-- Drop zone -->
+                    <div id="uploadDropZone"
+                         class="border-2 border-dashed border-[var(--color-border)] rounded-xl p-8 text-center cursor-pointer transition-colors hover:border-falcone-red mb-4"
+                         onclick="document.getElementById('masterFileInput').click()"
+                         ondragover="event.preventDefault();this.classList.add('border-falcone-red','bg-falcone-red/5')"
+                         ondragleave="this.classList.remove('border-falcone-red','bg-falcone-red/5')"
+                         ondrop="handleMasterDrop(event)">
+                        <i data-lucide="file-spreadsheet" class="w-10 h-10 text-[var(--color-text-secondary)] mx-auto mb-3"></i>
+                        <p class="font-medium text-sm">Drop Master.xlsx here or <span class="text-falcone-red">click to browse</span></p>
+                        <p class="text-xs text-[var(--color-text-secondary)] mt-1">Only .xlsx files accepted</p>
+                        <input type="file" id="masterFileInput" accept=".xlsx" class="hidden" onchange="handleMasterFileSelect(this)">
+                    </div>
+
+                    <div id="uploadSelectedFile" class="hidden flex items-center gap-3 bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg px-4 py-3 mb-4">
+                        <i data-lucide="file-check" class="w-5 h-5 text-green-400 flex-shrink-0"></i>
+                        <span id="uploadFileName" class="text-sm font-medium flex-1 truncate"></span>
+                        <button onclick="clearMasterFile()" class="text-[var(--color-text-secondary)] hover:text-falcone-red ml-auto flex-shrink-0">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex gap-3 flex-wrap">
+                        <button onclick="uploadMasterFile()" id="btnUpload" disabled class="bg-falcone-red hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            Upload &amp; Rebuild
+                        </button>
+                        <button onclick="rebuildInventory()" id="btnRebuild" class="bg-[var(--color-bg-body)] hover:bg-[var(--color-border)] border border-[var(--color-border)] text-[var(--color-text-primary)] font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2 text-sm">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            Rebuild from Existing File
+                        </button>
+                    </div>
                     <div id="rebuildResult" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
                 </div>
             </div>

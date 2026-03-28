@@ -1,13 +1,13 @@
 {
     "produce": {
         "color": "green",
-        "icon": "leaf",
+        "icon": "🥦",
         "label_en": "Produce",
         "label_es": "Productos Frescos"
     },
     "dairy": {
         "color": "blue",
-        "icon": "milk",
+        "icon": "🧀",
         "label_en": "Dairy",
         "label_es": "Lácteos"
     },
@@ -55,7 +55,7 @@
     },
     "meats": {
         "color": "red",
-        "icon": "beef",
+        "icon": "🥩",
         "label_en": "Meats",
         "label_es": "Carnes"
     },
@@ -76,5 +76,11 @@
         "icon": "croissant",
         "label_en": "Bakery",
         "label_es": "Panadería"
+    },
+    "beverages": {
+        "color": "gray",
+        "icon": "🥤",
+        "label_en": "Beverages",
+        "label_es": "Beverages"
     }
 }

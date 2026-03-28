@@ -70,7 +70,80 @@ function switchTab(tabName) {
     if (window.lucide) lucide.createIcons();
 }
 
-// --- Inventory ---
+// --- Inventory / Upload ---
+let _selectedMasterFile = null;
+
+function handleMasterFileSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+        alert('Please select an .xlsx file.');
+        input.value = '';
+        return;
+    }
+    _selectedMasterFile = file;
+    document.getElementById('uploadFileName').textContent = file.name;
+    document.getElementById('uploadSelectedFile').classList.remove('hidden');
+    document.getElementById('btnUpload').disabled = false;
+    if (window.lucide) lucide.createIcons();
+}
+
+function handleMasterDrop(event) {
+    event.preventDefault();
+    document.getElementById('uploadDropZone').classList.remove('border-falcone-red', 'bg-falcone-red/5');
+    const file = event.dataTransfer.files[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+        alert('Please drop an .xlsx file.');
+        return;
+    }
+    _selectedMasterFile = file;
+    document.getElementById('uploadFileName').textContent = file.name;
+    document.getElementById('uploadSelectedFile').classList.remove('hidden');
+    document.getElementById('btnUpload').disabled = false;
+    if (window.lucide) lucide.createIcons();
+}
+
+function clearMasterFile() {
+    _selectedMasterFile = null;
+    document.getElementById('masterFileInput').value = '';
+    document.getElementById('uploadSelectedFile').classList.add('hidden');
+    document.getElementById('uploadFileName').textContent = '';
+    document.getElementById('btnUpload').disabled = true;
+}
+
+async function uploadMasterFile() {
+    if (!_selectedMasterFile) return;
+    const btn = document.getElementById('btnUpload');
+    const resultEl = document.getElementById('rebuildResult');
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Uploading...';
+    if (window.lucide) lucide.createIcons();
+    resultEl.classList.add('hidden');
+
+    try {
+        const formData = new FormData();
+        formData.append('file', _selectedMasterFile);
+        const res = await adminApiFetch(`${API_BASE}/admin/upload-master`, {
+            method: 'POST',
+            body: formData,
+        });
+        const data = await res.json();
+        resultEl.textContent = data.message;
+        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.classList.remove('hidden');
+        if (data.success) clearMasterFile();
+    } catch (e) {
+        resultEl.textContent = 'Upload failed. Check server logs.';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.classList.remove('hidden');
+    } finally {
+        btn.disabled = !_selectedMasterFile;
+        btn.innerHTML = '<i data-lucide="upload" class="w-4 h-4"></i> Upload &amp; Rebuild';
+        if (window.lucide) lucide.createIcons();
+    }
+}
+
 async function rebuildInventory() {
     const btn = document.getElementById('btnRebuild');
     const resultEl = document.getElementById('rebuildResult');
@@ -91,7 +164,7 @@ async function rebuildInventory() {
         resultEl.classList.remove('hidden');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Rebuild Inventory Now';
+        btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Rebuild from Existing File';
         if (window.lucide) lucide.createIcons();
     }
 }
