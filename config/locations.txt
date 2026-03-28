@@ -1,0 +1,4 @@
+# Location PIN mappings
+# Format: PIN|Location Name  (PIN must be exactly 4 digits)
+# Lines starting with # are comments and are ignored.
+1234|Sample Location

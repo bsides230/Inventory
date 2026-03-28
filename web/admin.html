@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Falcones Pizza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { falcone: { red: '#db594b' } },
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[var(--color-bg-body)] text-[var(--color-text-primary)] font-sans antialiased min-h-screen">
+
+    <!-- Admin Login Screen -->
+    <div id="adminLoginScreen" class="fixed inset-0 z-50 bg-[var(--color-bg-body)] flex items-center justify-center p-6">
+        <div class="w-full max-w-sm">
+            <div class="text-center mb-8">
+                <i data-lucide="shield" class="w-14 h-14 text-falcone-red mx-auto mb-4"></i>
+                <h1 class="text-2xl font-bold">Admin Panel</h1>
+                <p class="text-[var(--color-text-secondary)] mt-1 text-sm">Falcones Pizza Inventory</p>
+            </div>
+            <div class="bg-[var(--color-bg-nav)] rounded-2xl border border-[var(--color-border)] p-6">
+                <label class="block text-sm text-[var(--color-text-secondary)] mb-2">Admin Password</label>
+                <input type="password" id="adminPasswordInput" placeholder="Enter password" class="w-full bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg p-3 text-[var(--color-text-primary)] focus:border-falcone-red outline-none mb-3" onkeydown="if(event.key==='Enter')adminLogin()">
+                <div id="adminLoginError" class="hidden text-falcone-red text-sm mb-3">Incorrect password.</div>
+                <button onclick="adminLogin()" class="w-full bg-falcone-red hover:bg-red-600 text-white font-bold py-3 rounded-lg transition-colors">
+                    Log In
+                </button>
+            </div>
+            <p class="text-center text-[var(--color-text-secondary)] text-xs mt-4">
+                <a href="/" class="hover:text-falcone-red transition-colors">← Back to Ordering App</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Admin App -->
+    <div id="adminApp" class="hidden">
+        <!-- Header -->
+        <header class="bg-[var(--color-bg-nav)] border-b border-[var(--color-border)] px-6 py-4 sticky top-0 z-40">
+            <div class="max-w-4xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="shield" class="w-6 h-6 text-falcone-red"></i>
+                    <h1 class="text-lg font-bold">Admin Panel</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="/" class="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors flex items-center gap-1">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        Ordering App
+                    </a>
+                    <button onclick="adminLogout()" class="text-sm text-[var(--color-text-secondary)] hover:text-falcone-red transition-colors flex items-center gap-1">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        Log Out
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <div class="bg-[var(--color-bg-nav)] border-b border-[var(--color-border)] px-6">
+            <div class="max-w-4xl mx-auto flex gap-1">
+                <button class="admin-tab active" data-tab="inventory" onclick="switchTab('inventory')">
+                    <i data-lucide="package" class="w-4 h-4"></i>
+                    Inventory
+                </button>
+                <button class="admin-tab" data-tab="locations" onclick="switchTab('locations')">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    Locations
+                </button>
+                <button class="admin-tab" data-tab="email" onclick="switchTab('email')">
+                    <i data-lucide="mail" class="w-4 h-4"></i>
+                    Email
+                </button>
+                <button class="admin-tab" data-tab="security" onclick="switchTab('security')">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                    Security
+                </button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <main class="max-w-4xl mx-auto p-6 space-y-6">
+
+            <!-- Inventory Tab -->
+            <div id="tab-inventory" class="tab-content space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="file-spreadsheet" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">Rebuild Inventory from Excel</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                        Drop your updated <strong class="text-[var(--color-text-primary)]">English Master.xlsx</strong> and <strong class="text-[var(--color-text-primary)]">Spanish Master.xlsx</strong> files into the <code class="bg-[var(--color-border)] px-1 rounded">item master/</code> folder on the server, then click the button below to rebuild the inventory data.
+                    </p>
+                    <div class="bg-[var(--color-bg-body)] rounded-lg border border-[var(--color-border)] p-4 mb-4 text-sm">
+                        <p class="font-medium mb-2 flex items-center gap-2"><i data-lucide="info" class="w-4 h-4 text-blue-400"></i> Excel Format</p>
+                        <ul class="text-[var(--color-text-secondary)] space-y-1 list-disc list-inside">
+                            <li>Each sheet tab = one inventory category</li>
+                            <li>Column A = item names (one per row, no header)</li>
+                            <li>English and Spanish masters must have matching sheet names</li>
+                            <li>Sheet tab names become category names in the app</li>
+                        </ul>
+                    </div>
+                    <button onclick="rebuildInventory()" id="btnRebuild" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        Rebuild Inventory Now
+                    </button>
+                    <div id="rebuildResult" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+                </div>
+            </div>
+
+            <!-- Locations Tab -->
+            <div id="tab-locations" class="tab-content hidden space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="map-pin" class="w-6 h-6 text-falcone-red"></i>
+                            <h2 class="text-lg font-bold">Location PINs</h2>
+                        </div>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                        Each location uses a 4-digit PIN to identify themselves when placing orders. The PIN and location name are stamped on every order log entry.
+                    </p>
+
+                    <!-- Add location form -->
+                    <div class="bg-[var(--color-bg-body)] rounded-lg border border-[var(--color-border)] p-4 mb-6">
+                        <h3 class="font-semibold mb-3 text-sm">Add New Location</h3>
+                        <div class="flex gap-3 flex-wrap">
+                            <input type="text" id="newPin" maxlength="4" placeholder="PIN (4 digits)" class="admin-input w-36" oninput="this.value=this.value.replace(/\D/g,'')">
+                            <input type="text" id="newLocationName" placeholder="Location name" class="admin-input flex-1 min-w-[200px]">
+                            <button onclick="addLocation()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm flex items-center gap-2">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                Add
+                            </button>
+                        </div>
+                        <div id="addLocationError" class="hidden text-falcone-red text-xs mt-2"></div>
+                    </div>
+
+                    <!-- Locations list -->
+                    <div id="locationsList" class="space-y-2">
+                        <div class="text-[var(--color-text-secondary)] text-sm text-center py-4">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Tab -->
+            <div id="tab-email" class="tab-content hidden space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="server" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">SMTP Settings</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">Configure outgoing email for order delivery. Settings are saved immediately.</p>
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="admin-label">SMTP Host</label>
+                                <input type="text" id="smtpHost" class="admin-input w-full" placeholder="smtp.gmail.com">
+                            </div>
+                            <div>
+                                <label class="admin-label">SMTP Port</label>
+                                <input type="number" id="smtpPort" class="admin-input w-full" placeholder="587">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="admin-label">Username (optional)</label>
+                                <input type="text" id="smtpUsername" class="admin-input w-full" placeholder="you@example.com">
+                            </div>
+                            <div>
+                                <label class="admin-label">Password (optional)</label>
+                                <input type="password" id="smtpPassword" class="admin-input w-full" placeholder="Leave blank to keep existing">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="admin-label">Sender Email</label>
+                                <input type="email" id="smtpSenderEmail" class="admin-input w-full" placeholder="inventory@example.com">
+                            </div>
+                            <div class="flex items-center gap-3 pt-6">
+                                <input type="checkbox" id="smtpUseTls" class="w-5 h-5 accent-falcone-red">
+                                <label for="smtpUseTls" class="text-sm font-medium">Use TLS (STARTTLS)</label>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 pt-2">
+                            <button onclick="saveEmailSettings()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                Save Settings
+                            </button>
+                        </div>
+                        <div id="emailSettingsResult" class="hidden p-3 rounded-lg text-sm"></div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="users" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">Order Recipients</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">One email address per line. Orders will be sent to all listed addresses.</p>
+                    <textarea id="recipientsList" rows="6" class="admin-input w-full font-mono text-sm" placeholder="ops@example.com&#10;manager@example.com"></textarea>
+                    <div class="flex gap-3 mt-3">
+                        <button onclick="saveRecipients()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            Save Recipients
+                        </button>
+                    </div>
+                    <div id="recipientsResult" class="hidden p-3 rounded-lg text-sm mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Security Tab -->
+            <div id="tab-security" class="tab-content hidden space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="lock" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">Change Admin Password</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">The admin password is stored in <code class="bg-[var(--color-border)] px-1 rounded">config/admin_password.txt</code> on the server.</p>
+                    <div class="space-y-4 max-w-sm">
+                        <div>
+                            <label class="admin-label">Current Password</label>
+                            <input type="password" id="currentPassword" class="admin-input w-full">
+                        </div>
+                        <div>
+                            <label class="admin-label">New Password</label>
+                            <input type="password" id="newPassword" class="admin-input w-full">
+                        </div>
+                        <button onclick="changePassword()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                            <i data-lucide="lock" class="w-4 h-4"></i>
+                            Update Password
+                        </button>
+                        <div id="passwordResult" class="hidden p-3 rounded-lg text-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="/admin.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

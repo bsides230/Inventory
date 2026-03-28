@@ -33,6 +33,7 @@ class OrderDraft(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    draft_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
     status: Mapped[str] = mapped_column(String(32), default="active", nullable=False)
     needed_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
     is_rush: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -78,6 +79,8 @@ class Order(Base):
     delivery_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     delivery_error: Mapped[str | None] = mapped_column(Text, nullable=True)
     delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    location_pin: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    location_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     user: Mapped[User] = relationship(back_populates="orders")
     items: Mapped[List[OrderItem]] = relationship(back_populates="order", cascade="all, delete-orphan")

@@ -260,3 +260,89 @@ body {
   border: 1px solid var(--color-border);
   color: var(--color-text-secondary);
 }
+
+/* PIN keypad */
+.pin-key {
+  background: var(--color-bg-body);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  color: var(--color-text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.1s;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pin-key:active {
+  background: var(--color-red);
+  border-color: var(--color-red);
+  color: #fff;
+  transform: scale(0.95);
+}
+
+.pin-key-delete {
+  font-size: 1rem;
+}
+
+/* Admin panel */
+.admin-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+  cursor: pointer;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
+
+.admin-tab:hover {
+  color: var(--color-text-primary);
+}
+
+.admin-tab.active {
+  color: var(--color-red);
+  border-bottom-color: var(--color-red);
+}
+
+.admin-card {
+  background: var(--color-bg-nav);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.admin-input {
+  background: var(--color-bg-body);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  color: var(--color-text-primary);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.admin-input:focus {
+  border-color: var(--color-red);
+}
+
+.admin-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
