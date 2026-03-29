@@ -18,13 +18,11 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from sqlalchemy import select
-
-from db.auth import AuthenticatedUser, get_optional_authenticated_user, get_required_authenticated_user
-from db.database import get_session
-from db.models import User
-from db.repositories import OrderDraftRepository, OrderRepository, UserRepository
+from auth import AuthenticatedUser, get_optional_authenticated_user, get_required_authenticated_user
 from services.email_delivery import OrderEmailDeliveryService, SmtpEmailClient
+from file_safety import write_json_atomic, append_jsonl, with_lock
+from services.draft_manager import FileDraftManager
+from services.order_manager import FileOrderManager
 from services.recipients import RecipientConfigError, RecipientConfigStore
 from update_inventory_data import check_and_update, convert_excel_to_json
 
@@ -240,12 +238,14 @@ app.state.rate_limiter = InMemoryRateLimiter(
 
 WEB_DIR = Path("web")
 FLAGS_DIR = Path("global_flags")
+DRAFTS_DIR = Path("drafts")
 WEB_DIR.mkdir(exist_ok=True)
 FLAGS_DIR.mkdir(exist_ok=True)
 ITEM_MASTER_DIR.mkdir(exist_ok=True)
 ORDERS_DIR.mkdir(exist_ok=True)
 DATA_DIR.mkdir(exist_ok=True)
 LOGS_DIR.mkdir(exist_ok=True)
+DRAFTS_DIR.mkdir(exist_ok=True)
 
 check_and_update()
 
@@ -458,19 +458,6 @@ async def auth_pin(body: PinAuthRequest):
 
     location_name = locations[pin]
 
-    with get_session(settings.database_url) as session:
-        users = UserRepository(session)
-        external_id = f"pin_{pin}"
-        user = users.get_by_external_id(external_id)
-        if user is None:
-            user = users.create(
-                external_id=external_id,
-                email=f"{external_id}@location.local",
-                display_name=location_name,
-            )
-        else:
-            user.display_name = location_name
-
     payload = {
         "sub": f"pin_{pin}",
         "location_pin": pin,
@@ -571,19 +558,19 @@ async def get_inventory(
         draft_quantities: dict[str, tuple[int, str]] = {}
         item_frequencies: dict[str, int] = {}
         if user:
-            with get_session(settings.database_url) as session:
-                drafts = OrderDraftRepository(session)
-                orders = OrderRepository(session)
+            draft_manager = FileDraftManager(DRAFTS_DIR)
+            order_manager = FileOrderManager(ORDERS_DIR)
 
-                if draft_id:
-                    draft = drafts.get_by_id_for_user(draft_id, user.id, with_items=True)
-                else:
-                    draft = drafts.get_active_for_user(user.id, with_items=True)
-                if draft:
-                    draft_quantities = {item.item_id: (item.quantity, item.unit) for item in draft.items}
+            if draft_id:
+                draft = draft_manager.get_draft(user.id, draft_id)
+            else:
+                draft = draft_manager.get_active_draft(user.id)
 
-                user_frequencies = orders.get_item_frequencies(user.id)
-                item_frequencies = user_frequencies.get(user.id, {})
+            if draft:
+                draft_quantities = {item["item_id"]: (item["quantity"], item["unit"]) for item in draft.get("items", [])}
+
+            user_frequencies = order_manager.get_item_frequencies(user.id)
+            item_frequencies = user_frequencies.get(user.id, {})
 
         response_items = []
         for item in items:
@@ -615,26 +602,39 @@ async def update_inventory(
     if not target_item:
         raise HTTPException(status_code=404, detail="Item not found in category")
 
-    with get_session(settings.database_url) as session:
-        drafts = OrderDraftRepository(session)
-        if draft_id:
-            draft = drafts.get_by_id_for_user(draft_id, user.id)
-            if draft is None:
-                raise HTTPException(status_code=404, detail="Draft not found")
-        else:
-            draft = drafts.get_or_create_active_for_user(user.id)
+    draft_manager = FileDraftManager(DRAFTS_DIR)
 
-        if request.qty <= 0:
-            drafts.remove_item(draft.id, request.id)
+    if draft_id:
+        draft = draft_manager.get_draft(user.id, draft_id)
+        if draft is None:
+            raise HTTPException(status_code=404, detail="Draft not found")
+    else:
+        draft = draft_manager.get_active_draft(user.id)
+        if not draft:
+            draft = draft_manager.create_draft(user.id)
+            draft_id = int(draft["id"])
+
+    # Update items
+    items = draft.get("items", [])
+    item_idx = next((i for i, v in enumerate(items) if v["item_id"] == request.id), None)
+
+    if request.qty <= 0:
+        if item_idx is not None:
+            items.pop(item_idx)
+    else:
+        new_item = {
+            "item_id": request.id,
+            "category_id": category_lower,
+            "item_name": target_item.get("name_en", target_item.get("name", request.id)),
+            "quantity": request.qty,
+            "unit": request.unit,
+        }
+        if item_idx is not None:
+            items[item_idx] = new_item
         else:
-            drafts.add_or_update_item(
-                draft_id=draft.id,
-                item_id=request.id,
-                category_id=category_lower,
-                item_name=target_item.get("name_en", target_item.get("name", request.id)),
-                quantity=request.qty,
-                unit=request.unit,
-            )
+            items.append(new_item)
+
+    draft_manager.update_draft(user.id, int(draft["id"]), items=items)
 
     return {"success": True}
 
@@ -642,32 +642,25 @@ async def update_inventory(
 # --- Draft Management Endpoints ---
 @app.get("/api/drafts")
 async def list_drafts(user: AuthenticatedUser = Depends(get_required_authenticated_user)):
-    with get_session(settings.database_url) as session:
-        drafts_repo = OrderDraftRepository(session)
-        all_drafts = drafts_repo.get_all_active_for_user(user.id)
-        result = []
-        for d in all_drafts:
-            item_count = drafts_repo.count_items(d.id)
-            result.append({
-                "id": d.id,
-                "name": d.draft_name or f"Draft {d.id}",
-                "item_count": item_count,
-                "updated_at": d.updated_at.isoformat() if d.updated_at else None,
-                "created_at": d.created_at.isoformat() if d.created_at else None,
-            })
+    draft_manager = FileDraftManager(DRAFTS_DIR)
+    all_drafts = draft_manager.get_all_active_drafts(user.id)
+    result = []
+    for d in all_drafts:
+        result.append({
+            "id": int(d["id"]),
+            "name": d.get("draft_name", f"Draft {d['id']}"),
+            "item_count": len(d.get("items", [])),
+            "updated_at": d.get("updated_at"),
+            "created_at": d.get("created_at"),
+        })
     return {"success": True, "drafts": result}
 
 
 @app.post("/api/drafts/new")
 async def create_draft(body: NewDraftRequest, user: AuthenticatedUser = Depends(get_required_authenticated_user)):
-    with get_session(settings.database_url) as session:
-        drafts_repo = OrderDraftRepository(session)
-        existing = drafts_repo.get_all_active_for_user(user.id)
-        name = body.name or f"Draft {len(existing) + 1}"
-        draft = drafts_repo.create(user_id=user.id, draft_name=name)
-        draft_id = draft.id
-        draft_name = draft.draft_name
-    return {"success": True, "draft": {"id": draft_id, "name": draft_name, "item_count": 0}}
+    draft_manager = FileDraftManager(DRAFTS_DIR)
+    draft = draft_manager.create_draft(user.id, name=body.name)
+    return {"success": True, "draft": {"id": int(draft["id"]), "name": draft["draft_name"], "item_count": 0}}
 
 
 @app.post("/api/drafts/{draft_id}/rename")
@@ -676,22 +669,19 @@ async def rename_draft(
     body: RenameDraftRequest,
     user: AuthenticatedUser = Depends(get_required_authenticated_user),
 ):
-    with get_session(settings.database_url) as session:
-        drafts_repo = OrderDraftRepository(session)
-        draft = drafts_repo.get_by_id_for_user(draft_id, user.id)
-        if draft is None:
-            raise HTTPException(status_code=404, detail="Draft not found")
-        drafts_repo.rename(draft_id, body.name)
+    draft_manager = FileDraftManager(DRAFTS_DIR)
+    draft = draft_manager.update_draft(user.id, draft_id, name=body.name)
+    if not draft:
+        raise HTTPException(status_code=404, detail="Draft not found")
     return {"success": True}
 
 
 @app.delete("/api/drafts/{draft_id}")
 async def delete_draft(draft_id: int, user: AuthenticatedUser = Depends(get_required_authenticated_user)):
-    with get_session(settings.database_url) as session:
-        drafts_repo = OrderDraftRepository(session)
-        deleted = drafts_repo.delete(draft_id, user.id)
-        if not deleted:
-            raise HTTPException(status_code=404, detail="Draft not found")
+    draft_manager = FileDraftManager(DRAFTS_DIR)
+    deleted = draft_manager.delete_draft(user.id, draft_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Draft not found")
     return {"success": True}
 
 
@@ -719,73 +709,77 @@ async def submit_order(
         filepath = ORDERS_DIR / filename
 
     try:
-        with get_session(settings.database_url) as session:
-            drafts = OrderDraftRepository(session)
-            orders = OrderRepository(session)
+        draft_manager = FileDraftManager(DRAFTS_DIR)
+        order_manager = FileOrderManager(ORDERS_DIR)
 
-            if request.draft_id:
-                draft = drafts.get_by_id_for_user(request.draft_id, user.id, with_items=True)
-            else:
-                draft = drafts.get_active_for_user(user.id, with_items=True)
+        if request.draft_id:
+            draft = draft_manager.get_draft(user.id, request.draft_id)
+        else:
+            draft = draft_manager.get_active_draft(user.id)
 
-            if draft is None or not draft.items:
-                return {"success": False, "message": "No items to order."}
+        if draft is None or not draft.get("items"):
+            return {"success": False, "message": "No items to order."}
 
-            draft.is_rush = request.is_rush
-            draft.needed_by = request.needed_by
+        draft["is_rush"] = request.is_rush
+        draft["needed_by"] = request.needed_by
+        draft_items = draft.get("items", [])
 
-            order_items = []
-            for draft_item in draft.items:
-                category_data = get_inventory_category(draft_item.category_id)
-                category_label = category_data["label"] if category_data else draft_item.category_id
-                order_items.append({
-                    "Category": category_label,
-                    "Item Name": draft_item.item_name,
-                    "Quantity": draft_item.quantity,
-                    "Unit": draft_item.unit,
-                })
+        order_items = []
+        for draft_item in draft_items:
+            category_data = get_inventory_category(draft_item["category_id"])
+            category_label = category_data["label"] if category_data else draft_item["category_id"]
+            order_items.append({
+                "Category": category_label,
+                "Item Name": draft_item["item_name"],
+                "Quantity": draft_item["quantity"],
+                "Unit": draft_item["unit"],
+            })
 
-            df = pd.DataFrame(order_items).sort_values(by="Category")
-            df.to_excel(filepath, index=False)
+        df = pd.DataFrame(order_items).sort_values(by="Category")
+        df.to_excel(filepath, index=False)
 
-            if request.save_only:
-                logger.info(
-                    "Order saved only location_pin=%s location_name=%s file=%s",
-                    location_pin, location_name, filepath,
-                )
-                return {
-                    "success": True,
-                    "message": "Order saved successfully",
-                    "filename": filename,
-                    "delivery_status": "skipped",
-                    "delivery_attempts": 0,
-                    "delivery_error": None,
-                }
-
-            order = orders.create_from_draft(
-                draft,
-                export_filename=filename,
-                location_pin=location_pin,
-                location_name=location_name,
+        if request.save_only:
+            logger.info(
+                "Order saved only location_pin=%s location_name=%s file=%s",
+                location_pin, location_name, filepath,
             )
+            return {
+                "success": True,
+                "message": "Order saved successfully",
+                "filename": filename,
+                "delivery_status": "skipped",
+                "delivery_attempts": 0,
+                "delivery_error": None,
+            }
+
+        order = order_manager.create_order(
+            user.id,
+            draft,
+            export_filename=filename,
+            location_pin=location_pin,
+            location_name=location_name,
+        )
+
+        # update draft status
+        draft_manager.update_draft(user.id, int(draft["id"]), status="submitted")
 
         email_service = build_email_service()
         delivery = email_service.send_order_email(
-            order_id=order.id,
+            order_id=order["id"],
             location=location_name or location,
             date=request.date,
             is_rush=request.is_rush,
             needed_by=request.needed_by,
             export_path=filepath,
         )
-        with get_session(settings.database_url) as session:
-            orders2 = OrderRepository(session)
-            orders2.update_delivery_status(
-                order_id=order.id,
-                status=delivery.status,
-                attempts=delivery.attempts,
-                error=delivery.error,
-            )
+
+        order_manager.update_delivery_status(
+            user.id,
+            order["id"],
+            status=delivery.status,
+            attempts=delivery.attempts,
+            error=delivery.error,
+        )
 
         logger.info(
             "Order submitted location_pin=%s location_name=%s file=%s delivery=%s",
@@ -810,26 +804,18 @@ async def submit_order(
 @app.get("/api/admin/aggregation")
 async def admin_get_aggregation(_=Depends(get_required_admin)):
     locations = load_locations()
-
-    with get_session(settings.database_url) as session:
-        orders = OrderRepository(session)
-        frequencies = orders.get_item_frequencies()
-
-        user_list = session.execute(select(User)).scalars().all()
-        user_pin_map = {}
-        for u in user_list:
-            if u.external_id and u.external_id.startswith("pin_"):
-                pin = u.external_id.replace("pin_", "")
-                user_pin_map[u.id] = pin
+    order_manager = FileOrderManager(ORDERS_DIR)
+    frequencies = order_manager.get_item_frequencies()
 
     # locations in response should be based on locations.txt config
     resp_locations = [{"pin": k, "name": v} for k, v in sorted(locations.items())]
 
-    # frequencies map: PIN -> item_id -> frequency
+    # frequencies map is currently user_id (which is f"pin_{pin}") -> item_id -> frequency
+    # we need PIN -> item_id -> frequency
     pin_frequencies = {}
     for user_id, freqs in frequencies.items():
-        pin = user_pin_map.get(user_id)
-        if pin:
+        if user_id.startswith("pin_"):
+            pin = user_id.replace("pin_", "")
             pin_frequencies[pin] = freqs
 
     cat_ids = get_all_inventory_categories()

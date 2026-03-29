@@ -4,29 +4,10 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://inventory:inventory@db:5432/inventory}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?set production origin}
-    depends_on:
-      db:
-        condition: service_healthy
     volumes:
       - orders_data:/app/orders
       - logs_data:/app/logs
-    restart: unless-stopped
-
-  db:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: inventory
-      POSTGRES_USER: inventory
-      POSTGRES_PASSWORD: inventory
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U inventory -d inventory"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     restart: unless-stopped
 
   proxy:
@@ -49,14 +30,9 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://inventory:inventory@db:5432/inventory}
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
       BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-3600}
-    depends_on:
-      db:
-        condition: service_healthy
     volumes:
-      - postgres_data:/var/lib/postgresql/data:ro
       - orders_data:/app/orders:ro
       - backups_data:/app/backups
     command: >
@@ -67,7 +43,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data:
   orders_data:
   logs_data:
   backups_data:

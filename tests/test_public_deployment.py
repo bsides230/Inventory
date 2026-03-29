@@ -43,7 +43,7 @@ def test_compose_and_proxy_artifacts_exist_with_expected_services():
     compose_text = Path("docker-compose.yml").read_text(encoding="utf-8")
     caddy_text = Path("Caddyfile").read_text(encoding="utf-8")
 
-    for service_name in ["api:", "db:", "proxy:", "backup_worker:"]:
+    for service_name in ["api:", "proxy:", "backup_worker:"]:
         assert service_name in compose_text
 
     assert "reverse_proxy" in caddy_text

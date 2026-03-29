@@ -1,0 +1,69 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "user_id": {
+            "type": "string"
+        },
+        "location_pin": {
+            "type": ["string", "null"]
+        },
+        "location_name": {
+            "type": ["string", "null"]
+        },
+        "is_rush": {
+            "type": "boolean"
+        },
+        "needed_by": {
+            "type": ["string", "null"]
+        },
+        "export_filename": {
+            "type": ["string", "null"]
+        },
+        "delivery_status": {
+            "type": "string"
+        },
+        "delivery_attempts": {
+            "type": "integer"
+        },
+        "delivery_error": {
+            "type": ["string", "null"]
+        },
+        "delivered_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+        },
+        "items": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "item_id": {
+                        "type": "string"
+                    },
+                    "category_id": {
+                        "type": "string"
+                    },
+                    "item_name": {
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "type": "integer"
+                    },
+                    "unit": {
+                        "type": "string"
+                    }
+                },
+                "required": ["item_id", "category_id", "item_name", "quantity", "unit"]
+            }
+        },
+        "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+        }
+    },
+    "required": ["id", "user_id", "is_rush", "delivery_status", "delivery_attempts", "items", "submitted_at"]
+}
