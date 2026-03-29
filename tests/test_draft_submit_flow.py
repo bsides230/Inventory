@@ -163,7 +163,8 @@ def test_submit_persists_local_artifact_when_email_delivery_fails(monkeypatch):
 
             return EmailDeliveryResult(status="failed", attempts=3, error="smtp down")
 
-    monkeypatch.setattr(app.state, "email_delivery_service", FailingDeliveryService())
+    import server
+    monkeypatch.setattr(server, "build_email_service", lambda: FailingDeliveryService())
 
     submit = client.post(
         "/api/submit_order",

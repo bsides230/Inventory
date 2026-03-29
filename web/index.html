@@ -80,7 +80,7 @@
     <header id="appHeader" class="hidden bg-[var(--color-bg-nav)] border-b border-[var(--color-border)] p-3 sticky top-0 z-40 shadow-md">
         <div class="flex justify-between items-center max-w-4xl mx-auto w-full gap-3">
             <div class="flex items-center gap-2 min-w-0">
-                <button id="btnBack" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hidden transition-colors rounded-lg active:bg-[var(--color-border)] shrink-0">
+                <button id="btnBack" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hidden transition-colors rounded-lg active:bg-[var(--color-border)] shrink-0" title="Back" aria-label="Back">
                     <i data-lucide="arrow-left" class="w-6 h-6"></i>
                 </button>
                 <div class="min-w-0">
@@ -94,7 +94,7 @@
             <div class="flex items-center gap-2 shrink-0">
                 <!-- Draft selector -->
                 <div id="draftSelectorWrapper" class="relative hidden">
-                    <button id="btnDraftSelector" class="flex items-center gap-1.5 bg-[var(--border-color)] hover:bg-[var(--border-color)] text-[var(--text-head)] text-sm rounded-lg px-3 py-2 transition-colors max-w-[140px]">
+                    <button id="btnDraftSelector" class="flex items-center gap-1.5 bg-[var(--border-color)] hover:bg-[var(--border-color)] text-[var(--text-head)] text-sm rounded-lg px-3 py-2 transition-colors max-w-[140px]" title="Select Draft">
                         <i data-lucide="file-text" class="w-4 h-4 shrink-0"></i>
                         <span id="currentDraftName" class="truncate mono">Draft</span>
                         <i data-lucide="chevron-down" class="w-3 h-3 shrink-0"></i>
@@ -110,20 +110,20 @@
                     </div>
                 </div>
 
-                <button id="btnSubmitOrder" class="btn-primary flex items-center gap-1.5 shadow-lg">
-                    <i data-lucide="shopping-cart" class="w-4 h-4"></i>
-                    <span id="labelSubmitOrder">Submit</span>
+                <button id="btnSubmitOrder" class="btn-primary flex items-center gap-1.5 shadow-lg" title="Submit Order" aria-label="Submit Order">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    <span id="labelSubmitOrder" class="hidden sm:inline">Submit</span>
                 </button>
 
-                <button id="btnToggleLangApp" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Toggle Language">
+                <button id="btnToggleLangApp" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Toggle Language" aria-label="Toggle Language">
                     <i data-lucide="languages" class="w-5 h-5"></i>
                 </button>
 
-                <button id="btnToggleTheme" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Toggle Theme">
+                <button id="btnToggleTheme" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Toggle Theme" aria-label="Toggle Theme">
                     <i data-lucide="moon" class="w-5 h-5"></i>
                 </button>
 
-                <button id="btnLogout" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--brand-red)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Log out" onclick="logout()">
+                <button id="btnLogout" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--brand-red)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Log out" aria-label="Log out" onclick="logout()">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -189,11 +189,21 @@
 
             <div id="orderModalError" class="text-[var(--brand-red)] text-sm mt-4 hidden">Error message</div>
 
-            <div class="flex justify-end gap-3 mt-8">
-                <button id="btnCancelOrder" class="btn-secondary"><span id="labelCancel">Cancel</span></button>
-                <button id="btnConfirmOrder" class="btn-primary flex items-center gap-2 shadow-lg">
-                    <span id="labelConfirm">Confirm Order</span>
+            <div class="flex justify-between items-center mt-8 gap-3">
+                <button id="btnSaveOrder" class="btn-secondary flex items-center gap-2" title="Save Order">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span id="labelSaveOrder">Save</span>
                 </button>
+                <div class="flex justify-end gap-3">
+                    <button id="btnCancelOrder" class="btn-secondary flex items-center gap-2" title="Cancel">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                        <span id="labelCancel" class="hidden sm:inline">Cancel</span>
+                    </button>
+                    <button id="btnConfirmOrder" class="btn-primary flex items-center gap-2 shadow-lg" title="Confirm Order">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span id="labelConfirm">Confirm Order</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

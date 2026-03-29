@@ -75,6 +75,18 @@
                     <i data-lucide="package" class="w-4 h-4"></i>
                     Inventory
                 </button>
+                <button class="admin-tab whitespace-nowrap" data-tab="category-order" onclick="switchTab('category-order')">
+                    <i data-lucide="list-ordered" class="w-4 h-4"></i>
+                    Category Order
+                </button>
+                <button class="admin-tab whitespace-nowrap" data-tab="ui-labels" onclick="switchTab('ui-labels')">
+                    <i data-lucide="type" class="w-4 h-4"></i>
+                    UI Labels
+                </button>
+                <button class="admin-tab whitespace-nowrap" data-tab="branding" onclick="switchTab('branding')">
+                    <i data-lucide="palette" class="w-4 h-4"></i>
+                    Branding
+                </button>
                 <button class="admin-tab whitespace-nowrap" data-tab="locations" onclick="switchTab('locations')">
                     <i data-lucide="map-pin" class="w-4 h-4"></i>
                     Locations
@@ -184,6 +196,123 @@
                         </button>
                     </div>
                     <div id="rebuildResult" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+                </div>
+            </div>
+
+            <!-- Category Order Tab -->
+            <div id="tab-category-order" class="tab-content hidden space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="list-ordered" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">Category Display Order</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                        Drag and drop the categories below to set their display order in the app.
+                    </p>
+
+                    <div id="categoryOrderList" class="space-y-2 mb-6 select-none">
+                        <div class="text-[var(--color-text-secondary)] text-sm text-center py-4">Loading...</div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="saveCategoryOrder()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            Save Order
+                        </button>
+                    </div>
+                    <div id="categoryOrderResult" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+                </div>
+            </div>
+
+            <!-- UI Labels Tab -->
+            <div id="tab-ui-labels" class="tab-content hidden space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="type" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">UI Labels</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                        Override the default text for functional buttons and labels in the ordering app. Leave a field blank to use the default text.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="uiLabelsForm">
+                        <div>
+                            <label class="admin-label">btn_submit (Submit)</label>
+                            <input type="text" id="label_btn_submit" class="admin-input w-full ui-label-input" data-key="btn_submit" placeholder="Default: Submit / Enviar">
+                        </div>
+                        <div>
+                            <label class="admin-label">btn_save (Save)</label>
+                            <input type="text" id="label_btn_save" class="admin-input w-full ui-label-input" data-key="btn_save" placeholder="Default: Save / Guardar">
+                        </div>
+                        <div>
+                            <label class="admin-label">btn_cancel (Cancel)</label>
+                            <input type="text" id="label_btn_cancel" class="admin-input w-full ui-label-input" data-key="btn_cancel" placeholder="Default: Cancel / Cancelar">
+                        </div>
+                        <div>
+                            <label class="admin-label">btn_confirm (Confirm Order)</label>
+                            <input type="text" id="label_btn_confirm" class="admin-input w-full ui-label-input" data-key="btn_confirm" placeholder="Default: Confirm Order">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="saveUILabels()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            Save Labels
+                        </button>
+                    </div>
+                    <div id="uiLabelsResult" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+                </div>
+            </div>
+
+            <!-- Branding Tab -->
+            <div id="tab-branding" class="tab-content hidden space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="palette" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">Business Branding & Config</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                        Configure global business identity values used throughout the app. Leave fields blank to use default settings.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="brandingForm">
+                        <div>
+                            <label class="admin-label">Business Name</label>
+                            <input type="text" id="brand_name" class="admin-input w-full branding-input" data-key="brand_name" placeholder="Falcones Pizza">
+                        </div>
+                        <div>
+                            <label class="admin-label">App Title</label>
+                            <input type="text" id="app_title" class="admin-input w-full branding-input" data-key="app_title" placeholder="Inventory">
+                        </div>
+                        <div>
+                            <label class="admin-label">Primary Color (Hex)</label>
+                            <input type="text" id="primary_color" class="admin-input w-full branding-input" data-key="primary_color" placeholder="#8e1f1f">
+                        </div>
+                        <div>
+                            <label class="admin-label">Background Core Color (Hex)</label>
+                            <input type="text" id="bg_core" class="admin-input w-full branding-input" data-key="bg_core" placeholder="#0c0c0c">
+                        </div>
+                        <div>
+                            <label class="admin-label">Background Panel Color (Hex)</label>
+                            <input type="text" id="bg_panel" class="admin-input w-full branding-input" data-key="bg_panel" placeholder="#151515">
+                        </div>
+                        <div>
+                            <label class="admin-label">Text Color (Hex)</label>
+                            <input type="text" id="text_color" class="admin-input w-full branding-input" data-key="text_color" placeholder="#f7f3ee">
+                        </div>
+                        <div>
+                            <label class="admin-label">Icon Reference (Lucide)</label>
+                            <input type="text" id="icon_reference" class="admin-input w-full branding-input" data-key="icon_reference" placeholder="pizza">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="saveBranding()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            Save Branding
+                        </button>
+                    </div>
+                    <div id="brandingResult" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
                 </div>
             </div>
 

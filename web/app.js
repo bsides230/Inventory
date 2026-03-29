@@ -15,6 +15,7 @@ const translations = {
         labelNeededBy: "Needed By Date",
         labelCancel: "Cancel",
         labelConfirm: "Confirm Order",
+        labelSaveOrder: "Save",
         each: "each",
         case: "case",
         offlineBannerText: "You are offline. Cached data is available; submitting orders requires a connection.",
@@ -39,6 +40,7 @@ const translations = {
         labelNeededBy: "Fecha Requerida",
         labelCancel: "Cancelar",
         labelConfirm: "Confirmar Pedido",
+        labelSaveOrder: "Guardar",
         each: "c/u",
         case: "caja",
         offlineBannerText: "No tienes conexión. Puedes usar datos en caché; enviar pedidos requiere internet.",
@@ -69,6 +71,8 @@ const state = {
     currentDraftName: localStorage.getItem('falcone_draft_name') || 'Draft',
     drafts: [],
     pinBuffer: '',
+    uiLabels: {},
+    branding: {},
 };
 
 // --- DOM ---
@@ -97,6 +101,7 @@ const DOM = {
     neededByInput: document.getElementById('neededByInput'),
     btnCancelOrder: document.getElementById('btnCancelOrder'),
     btnConfirmOrder: document.getElementById('btnConfirmOrder'),
+    btnSaveOrder: document.getElementById('btnSaveOrder'),
     orderModalError: document.getElementById('orderModalError'),
     offlineBanner: document.getElementById('offlineBanner'),
     offlineBannerText: document.getElementById('offlineBannerText'),
@@ -431,6 +436,27 @@ async function initApp() {
     applyTheme();
     applyLanguage();
 
+    try {
+        const uiLabelsRes = await apiFetch(`${API_BASE}/ui-labels`);
+        const uiLabelsData = await uiLabelsRes.json();
+        if (uiLabelsData.success) {
+            state.uiLabels = uiLabelsData.labels || {};
+        }
+    } catch (e) {
+        console.error("Failed to fetch ui-labels:", e);
+    }
+
+    try {
+        const brandingRes = await apiFetch(`${API_BASE}/branding`);
+        const brandingData = await brandingRes.json();
+        if (brandingData.success) {
+            state.branding = brandingData.branding || {};
+            applyBranding();
+        }
+    } catch (e) {
+        console.error("Failed to fetch branding:", e);
+    }
+
     if (state.token) {
         await initAppAfterAuth();
     } else {
@@ -479,6 +505,56 @@ async function initAppAfterAuth() {
 }
 
 // --- Language & Theme ---
+function applyBranding() {
+    const b = state.branding;
+    if (!b) return;
+
+    if (b.brand_name) {
+        const titleEl = document.getElementById('pinScreenTitle');
+        if (titleEl) titleEl.textContent = b.brand_name;
+    }
+
+    if (b.app_title) {
+        translations.en.appTitle = b.app_title;
+        translations.es.appTitle = b.app_title;
+        const appTitleEl = document.getElementById('appTitle');
+        if (appTitleEl) appTitleEl.textContent = b.app_title;
+        document.getElementById('htmlTitle').textContent = b.app_title;
+    }
+
+    if (b.icon_reference) {
+        const iconEl = document.querySelector('#pinScreen i');
+        if (iconEl) {
+            iconEl.setAttribute('data-lucide', b.icon_reference);
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+
+    // Apply CSS Variables to :root
+    const root = document.documentElement;
+    if (b.primary_color) {
+        root.style.setProperty('--brand-red', b.primary_color);
+        root.style.setProperty('--color-red', b.primary_color);
+        // Approximation for dim
+        root.style.setProperty('--brand-red-dim', `${b.primary_color}20`);
+    }
+    if (b.bg_core) {
+        root.style.setProperty('--bg-core', b.bg_core);
+        root.style.setProperty('--color-bg-body', b.bg_core);
+        root.style.setProperty('--color-dark', b.bg_core);
+    }
+    if (b.bg_panel) {
+        root.style.setProperty('--bg-panel', b.bg_panel);
+        root.style.setProperty('--color-bg-nav', b.bg_panel);
+        root.style.setProperty('--color-gray', b.bg_panel);
+    }
+    if (b.text_color) {
+        root.style.setProperty('--text-head', b.text_color);
+        root.style.setProperty('--color-text-primary', b.text_color);
+        root.style.setProperty('--color-light', b.text_color);
+    }
+}
+
 function toggleLanguage() {
     state.lang = state.lang === 'en' ? 'es' : 'en';
     localStorage.setItem('falcone_lang', state.lang);
@@ -502,16 +578,22 @@ function applyTheme() {
 
 function applyLanguage() {
     const t = translations[state.lang];
-    const setEl = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    const setEl = (id, text, uiKey = null) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = (uiKey && state.uiLabels && state.uiLabels[uiKey]) ? state.uiLabels[uiKey] : text;
+        }
+    };
 
     setEl('appTitle', t.appTitle);
-    setEl('labelSubmitOrder', t.labelSubmitOrder);
+    setEl('labelSubmitOrder', t.labelSubmitOrder, 'btn_submit');
     setEl('labelOrderModalTitle', t.labelOrderModalTitle);
     setEl('labelOrderDate', t.labelOrderDate);
     setEl('labelRushOrder', t.labelRushOrder);
     setEl('labelNeededBy', t.labelNeededBy);
-    setEl('labelCancel', t.labelCancel);
-    setEl('labelConfirm', t.labelConfirm);
+    setEl('labelCancel', t.labelCancel, 'btn_cancel');
+    setEl('labelConfirm', t.labelConfirm, 'btn_confirm');
+    setEl('labelSaveOrder', t.labelSaveOrder, 'btn_save');
     if (DOM.pinScreenSubtitle) DOM.pinScreenSubtitle.textContent = t.pinPrompt;
     if (DOM.offlineBannerText) DOM.offlineBannerText.textContent = t.offlineBannerText;
     if (DOM.installBannerText) DOM.installBannerText.textContent = t.installBannerText;
@@ -702,7 +784,7 @@ DOM.rushOrderCheckbox?.addEventListener('change', (e) => {
 
 DOM.btnCancelOrder?.addEventListener('click', () => DOM.orderModal.classList.add('hidden'));
 
-DOM.btnConfirmOrder?.addEventListener('click', async () => {
+async function submitOrderPayload(saveOnly = false) {
     const date = DOM.orderDateInput.value;
     const isRush = DOM.rushOrderCheckbox.checked;
     const neededBy = DOM.neededByInput.value;
@@ -718,8 +800,11 @@ DOM.btnConfirmOrder?.addEventListener('click', async () => {
         return;
     }
 
-    DOM.btnConfirmOrder.disabled = true;
-    DOM.btnConfirmOrder.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Submitting...';
+    const btn = saveOnly ? DOM.btnSaveOrder : DOM.btnConfirmOrder;
+    const originalContent = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> ${saveOnly ? 'Saving...' : 'Submitting...'}`;
     if (window.lucide) lucide.createIcons();
 
     try {
@@ -731,13 +816,18 @@ DOM.btnConfirmOrder?.addEventListener('click', async () => {
                 is_rush: isRush,
                 needed_by: neededBy || null,
                 draft_id: state.currentDraftId || null,
+                save_only: saveOnly,
             }),
         });
         const data = await res.json();
 
         if (data.success) {
             DOM.orderModal.classList.add('hidden');
-            alert(`Order submitted!\nLocation: ${state.locationName}\nFile: ${data.filename}${data.delivery_error ? `\n\nNote: Email delivery failed: ${data.delivery_error}` : ''}`);
+            if (saveOnly) {
+                alert(`Order saved!\nLocation: ${state.locationName}\nFile: ${data.filename}`);
+            } else {
+                alert(`Order submitted!\nLocation: ${state.locationName}\nFile: ${data.filename}${data.delivery_error ? `\n\nNote: Email delivery failed: ${data.delivery_error}` : ''}`);
+            }
 
             // Submitted draft is now closed — reload drafts and pick a new one
             state.currentDraftId = null;
@@ -751,19 +841,22 @@ DOM.btnConfirmOrder?.addEventListener('click', async () => {
                 await loadCategory(state.currentCategory);
             }
         } else {
-            DOM.orderModalError.textContent = data.message || "Error submitting order.";
+            DOM.orderModalError.textContent = data.message || "Error processing order.";
             DOM.orderModalError.classList.remove('hidden');
         }
     } catch (e) {
-        console.error("Failed to submit order:", e);
-        DOM.orderModalError.textContent = "Failed to submit order due to a network error.";
+        console.error("Failed to process order:", e);
+        DOM.orderModalError.textContent = "Failed to process order due to a network error.";
         DOM.orderModalError.classList.remove('hidden');
     } finally {
-        DOM.btnConfirmOrder.disabled = false;
-        DOM.btnConfirmOrder.innerHTML = '<span id="labelConfirm">Confirm Order</span>';
-        applyLanguage();
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+        applyLanguage(); // Restore standard labels
     }
-});
+}
+
+DOM.btnConfirmOrder?.addEventListener('click', () => submitOrderPayload(false));
+DOM.btnSaveOrder?.addEventListener('click', () => submitOrderPayload(true));
 
 DOM.btnBack?.addEventListener('click', renderDashboard);
 DOM.btnToggleLangApp?.addEventListener('click', toggleLanguage);

@@ -101,6 +101,9 @@ LOCATIONS_CONFIG = Path("config/locations.txt")
 ADMIN_PASSWORD_FILE = Path("config/admin_password.txt")
 EMAIL_SETTINGS_FILE = Path("config/email_settings.txt")
 RECIPIENTS_FILE = Path("config/order_recipients.txt")
+CATEGORY_ORDER_FILE = Path("config/category_order.json")
+UI_LABELS_FILE = Path("config/ui_labels.json")
+BRANDING_FILE = Path("config/branding.json")
 
 
 # --- Config helpers ---
@@ -350,6 +353,25 @@ def get_all_inventory_categories():
     if DATA_DIR.exists():
         for file in DATA_DIR.glob("*.json"):
             categories.append(file.stem)
+
+    # Sort categories based on config/category_order.json if it exists
+    if CATEGORY_ORDER_FILE.exists():
+        try:
+            with open(CATEGORY_ORDER_FILE, "r") as f:
+                order_data = json.load(f)
+                order_list = order_data.get("order", [])
+
+                # Create a lookup for defined order
+                order_map = {cat_id: idx for idx, cat_id in enumerate(order_list)}
+
+                # Sort: items in order_list first (by their index), then others alphabetically
+                categories.sort(key=lambda x: (order_map.get(x, 999999), x))
+        except Exception as exc:
+            logger.error("Error reading category_order.json: %s", exc, exc_info=True)
+            categories.sort()
+    else:
+        categories.sort()
+
     return categories
 
 
@@ -377,6 +399,7 @@ class SubmitOrderRequest(BaseModel):
     is_rush: bool
     needed_by: Optional[str] = None
     draft_id: Optional[int] = None
+    save_only: bool = False
 
 
 class NewDraftRequest(BaseModel):
@@ -408,6 +431,18 @@ class UpdateRecipientsRequest(BaseModel):
 class UpdateAdminPasswordRequest(BaseModel):
     current_password: str
     new_password: str
+
+
+class UpdateCategoryOrderRequest(BaseModel):
+    order: List[str]
+
+
+class UpdateUILabelsRequest(BaseModel):
+    labels: Dict[str, str]
+
+
+class UpdateBrandingRequest(BaseModel):
+    branding: Dict[str, str]
 
 
 # --- Auth Endpoints ---
@@ -477,6 +512,30 @@ async def get_version():
 @app.get("/api/status")
 async def get_status():
     return {"status": "online", "location": get_location_name()}
+
+
+@app.get("/api/branding")
+async def get_branding():
+    branding = {}
+    if BRANDING_FILE.exists():
+        try:
+            with open(BRANDING_FILE, "r") as f:
+                branding = json.load(f)
+        except Exception as exc:
+            logger.error("Error reading branding.json: %s", exc, exc_info=True)
+    return {"success": True, "branding": branding}
+
+
+@app.get("/api/ui-labels")
+async def get_ui_labels():
+    labels = {}
+    if UI_LABELS_FILE.exists():
+        try:
+            with open(UI_LABELS_FILE, "r") as f:
+                labels = json.load(f)
+        except Exception as exc:
+            logger.error("Error reading ui_labels.json: %s", exc, exc_info=True)
+    return {"success": True, "labels": labels}
 
 
 @app.get("/api/categories")
@@ -645,13 +704,19 @@ async def submit_order(
     location_pin = getattr(user, "external_id", "").replace("pin_", "") if user.external_id.startswith("pin_") else None
     location_name = user.display_name
 
-    if request.is_rush and request.needed_by:
-        filename = f"{location} URGENT ORDER by {request.needed_by}.xlsx"
+    if request.save_only:
+        ts = datetime.now().strftime("%Y-%m-%d_%H-%M")
+        filename = f"order_{ts}.xlsx"
+        saved_dir = ORDERS_DIR / "saved"
+        saved_dir.mkdir(parents=True, exist_ok=True)
+        filepath = saved_dir / filename
     else:
-        date_str = request.date.replace("/", "-")
-        filename = f"{location} Falcones Order {date_str}.xlsx"
-
-    filepath = ORDERS_DIR / filename
+        if request.is_rush and request.needed_by:
+            filename = f"{location} URGENT ORDER by {request.needed_by}.xlsx"
+        else:
+            date_str = request.date.replace("/", "-")
+            filename = f"{location} Falcones Order {date_str}.xlsx"
+        filepath = ORDERS_DIR / filename
 
     try:
         with get_session(settings.database_url) as session:
@@ -682,6 +747,21 @@ async def submit_order(
 
             df = pd.DataFrame(order_items).sort_values(by="Category")
             df.to_excel(filepath, index=False)
+
+            if request.save_only:
+                logger.info(
+                    "Order saved only location_pin=%s location_name=%s file=%s",
+                    location_pin, location_name, filepath,
+                )
+                return {
+                    "success": True,
+                    "message": "Order saved successfully",
+                    "filename": filename,
+                    "delivery_status": "skipped",
+                    "delivery_attempts": 0,
+                    "delivery_error": None,
+                }
+
             order = orders.create_from_draft(
                 draft,
                 export_filename=filename,
@@ -852,6 +932,49 @@ async def admin_rebuild_inventory(_=Depends(get_required_admin)):
     except Exception as exc:
         logger.error("Inventory rebuild error: %s", exc, exc_info=True)
         return {"success": False, "message": str(exc)}
+
+
+@app.get("/api/admin/category-order")
+async def admin_get_category_order(_=Depends(get_required_admin)):
+    cat_ids = get_all_inventory_categories()
+    config = load_categories_config()
+    categories = []
+    for cat_id in cat_ids:
+        cat_data = get_inventory_category(cat_id)
+        if cat_data:
+            cat_config = config.get(cat_id, {})
+            categories.append({
+                "id": cat_id,
+                "label_en": cat_config.get("label_en", cat_config.get("label", cat_data["label"])),
+                "label_es": cat_config.get("label_es", cat_config.get("label", cat_data["label"])),
+            })
+    return {"success": True, "categories": categories}
+
+
+@app.post("/api/admin/category-order")
+async def admin_update_category_order(body: UpdateCategoryOrderRequest, _=Depends(get_required_admin)):
+    CATEGORY_ORDER_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(CATEGORY_ORDER_FILE, "w") as f:
+        json.dump({"order": body.order}, f, indent=4)
+    return {"success": True}
+
+
+@app.post("/api/admin/ui-labels")
+async def admin_update_ui_labels(body: UpdateUILabelsRequest, _=Depends(get_required_admin)):
+    UI_LABELS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(UI_LABELS_FILE, "w") as f:
+        json.dump(body.labels, f, indent=4)
+    return {"success": True}
+
+
+@app.post("/api/admin/branding")
+async def admin_update_branding(body: UpdateBrandingRequest, _=Depends(get_required_admin)):
+    BRANDING_FILE.parent.mkdir(parents=True, exist_ok=True)
+    safe_keys = ["brand_name", "app_title", "primary_color", "secondary_color", "bg_core", "bg_panel", "text_color", "icon_reference"]
+    branding = {k: v for k, v in body.branding.items() if k in safe_keys}
+    with open(BRANDING_FILE, "w") as f:
+        json.dump(branding, f, indent=4)
+    return {"success": True}
 
 
 @app.post("/api/admin/password")
