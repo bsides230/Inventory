@@ -775,38 +775,54 @@ async def submit_order(
             location_name=location_name,
         )
 
+        # Write orders/flags/<order_id>.state as submitted
+        flags_dir = ORDERS_DIR / "flags"
+        flags_dir.mkdir(parents=True, exist_ok=True)
+        flag_path = flags_dir / f"{order['id']}.state"
+        flag_path.write_text("submitted")
+
         # update draft state
         draft_manager.update_draft(user.external_id, int(draft["id"]), state="submitted")
 
-        email_service = build_email_service()
-        delivery = email_service.send_order_email(
-            order_id=order["id"],
-            location=location_name or location,
-            date=request.date,
-            is_rush=request.is_rush,
-            needed_by=request.needed_by,
-            export_path=filepath,
-        )
+        # enqueue ipc event
+        event_id = str(uuid.uuid4())
+        event_payload = {
+            "event_id": event_id,
+            "event_type": "email_send",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "payload": {
+                "order_id": order["id"],
+                "location": location_name or location,
+                "date": request.date,
+                "is_rush": request.is_rush,
+                "needed_by": request.needed_by,
+                "export_path": str(filepath)
+            }
+        }
 
-        order_manager.update_delivery_status(
-            user.external_id,
-            order["id"],
-            status=delivery.status,
-            attempts=delivery.attempts,
-            error=delivery.error,
-        )
+        ipc_inbox_dir = Path("ipc/inbox")
+        ipc_inbox_dir.mkdir(parents=True, exist_ok=True)
+        event_path = ipc_inbox_dir / f"{event_id}.json"
+
+        from file_safety import write_json_atomic
+        write_json_atomic(event_path, event_payload)
+
+        # set initial delivery status to pending
+        delivery_status = "pending"
+        delivery_attempts = 0
+        delivery_error = None
 
         logger.info(
-            "Order submitted location_pin=%s location_name=%s file=%s delivery=%s",
-            location_pin, location_name, filepath, delivery.status,
+            "Order submitted location_pin=%s location_name=%s file=%s delivery=%s event_id=%s",
+            location_pin, location_name, filepath, delivery_status, event_id
         )
         return {
             "success": True,
             "message": "Order submitted successfully",
             "filename": filename,
-            "delivery_status": delivery.status,
-            "delivery_attempts": delivery.attempts,
-            "delivery_error": delivery.error,
+            "delivery_status": delivery_status,
+            "delivery_attempts": delivery_attempts,
+            "delivery_error": delivery_error,
         }
     except Exception as exc:
         if filepath.exists():

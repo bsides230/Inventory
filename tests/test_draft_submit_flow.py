@@ -50,7 +50,19 @@ def teardown_function() -> None:
         for f in ORDERS_DIR.rglob("*"):
             if f.is_file():
                 f.unlink()
+    ipc_inbox = Path("ipc/inbox")
+    if ipc_inbox.exists():
+        for f in ipc_inbox.glob("*"):
+            if f.is_file():
+                f.unlink()
 
+def run_ipc_worker_once():
+    # Helper to run the worker processing synchronously for tests
+    from services.ipc_worker import process_event
+    ipc_inbox = Path("ipc/inbox")
+    events = list(ipc_inbox.glob("*.json"))
+    for event_file in events:
+        process_event(event_file)
 
 def test_submit_is_isolated_per_user_and_clears_only_submitter_draft():
     category, item_id = _first_category_and_item()
@@ -144,6 +156,9 @@ def test_end_to_end_draft_update_then_submit_lifecycle():
     assert payload["success"] is True
     assert payload["filename"].endswith(".xlsx")
 
+    # Run IPC worker
+    run_ipc_worker_once()
+
     assert len(list((ORDERS_DIR / "submitted").glob("*.json"))) == 1
 
     after_submit = client.get(f"/api/inventory/{category}", headers=alpha).json()["items"]
@@ -166,8 +181,8 @@ def test_submit_persists_local_artifact_when_email_delivery_fails(monkeypatch):
 
             return EmailDeliveryResult(status="failed", attempts=3, error="smtp down")
 
-    import server
-    monkeypatch.setattr(server, "build_email_service", lambda: FailingDeliveryService())
+    import services.ipc_worker
+    monkeypatch.setattr(services.ipc_worker, "build_email_service", lambda: FailingDeliveryService())
 
     submit = client.post(
         "/api/submit_order",
@@ -177,8 +192,10 @@ def test_submit_persists_local_artifact_when_email_delivery_fails(monkeypatch):
     payload = submit.json()
     assert submit.status_code == 200
     assert payload["success"] is True
-    assert payload["delivery_status"] == "failed"
+    assert payload["delivery_status"] == "pending"
     assert Path("orders", payload["filename"]).exists()
+
+    run_ipc_worker_once()
 
     order_files = list((ORDERS_DIR / "submitted").glob("*.json"))
     assert len(order_files) == 1

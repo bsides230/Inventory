@@ -915,3 +915,28 @@ COMPLETED
 
 ### Tests / Validation
 - Ran `python3 -m pytest -q tests` successfully. Draft isolation, auth protection, and end-to-end draft updates flow all pass 100%.
+
+## Phase 3 — File-Only Backend Rebuild
+### Status
+COMPLETED
+
+### Objective
+- Implement DB-free order submission using file IPC and state-flag transitions.
+
+### Work Completed
+- **Submit Path:** Modified `/api/submit_order` to avoid synchronously sending order emails. Instead, it now writes a `submitted` flag in `orders/flags/<order_id>.state` and enqueues an event JSON into `ipc/inbox/<event_id>.json` containing all the relevant details for the order email.
+- **IPC Worker Processing:** Created a standalone polling worker `services/ipc_worker.py` that continually reads files from `ipc/inbox/`, attempts to send the email using existing configs, and upon completion transitions the flag to `emailed` or `email_failed`. It records transition results in `logs/events.jsonl` and moves the processed IPC event payloads to `ipc/done/` or `ipc/failed/`.
+- **Crash Recovery:** Implemented crash recovery in the IPC worker to scan `ipc/processing/` upon startup and move any stranded events back to `ipc/inbox/`.
+- **Deployment:** Updated `docker-compose.yml` to define a new `ipc_worker` service running `python services/ipc_worker.py` with necessary volume mounts (`orders_data`, `logs_data`, `ipc_data`).
+- **Tests Updated:** Updated integration tests in `test_draft_submit_flow.py` and `test_email_delivery.py` to synchronously process IPC events via helper functions, validating the asynchronous flow behaves identically.
+
+### Files Created
+- `services/ipc_worker.py`
+
+### Files Modified
+- `server.py`
+- `docker-compose.yml`
+- `tests/test_draft_submit_flow.py`
+
+### Tests / Validation
+- Ran the test suite to ensure the updated submit_order endpoints and mocked IPC background worker performed smoothly and persisted accurate test results without breaking downstream processes.

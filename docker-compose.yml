@@ -8,6 +8,18 @@ services:
     volumes:
       - orders_data:/app/orders
       - logs_data:/app/logs
+      - ipc_data:/app/ipc
+    restart: unless-stopped
+
+  ipc_worker:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - orders_data:/app/orders
+      - logs_data:/app/logs
+      - ipc_data:/app/ipc
+    command: python services/ipc_worker.py
     restart: unless-stopped
 
   proxy:
@@ -45,6 +57,7 @@ services:
 volumes:
   orders_data:
   logs_data:
+  ipc_data:
   backups_data:
   caddy_data:
   caddy_config:
