@@ -9,10 +9,6 @@ TARGET_DIR="${BACKUP_DIR}/${TIMESTAMP}"
 
 mkdir -p "${TARGET_DIR}"
 
-if [[ -d /var/lib/postgresql/data ]]; then
-  tar -czf "${TARGET_DIR}/postgres_data.tar.gz" -C /var/lib/postgresql data
-fi
-
 if [[ -d "${ORDERS_DIR}" ]]; then
   tar -czf "${TARGET_DIR}/orders.tar.gz" -C "${ORDERS_DIR}" .
 fi

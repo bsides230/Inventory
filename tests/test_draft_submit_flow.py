@@ -2,10 +2,9 @@ from pathlib import Path
 
 import jwt
 from fastapi.testclient import TestClient
+import json
 
-from db.database import create_db_engine, get_session
-from db.models import Base, Order, OrderDraft
-from server import app
+from server import app, DRAFTS_DIR, ORDERS_DIR
 
 client = TestClient(app)
 
@@ -31,25 +30,26 @@ def _first_category_and_item() -> tuple[str, str]:
 
 
 def setup_function() -> None:
-    db_path = Path("test_flow.db")
-    if db_path.exists():
-        db_path.unlink()
-
-    app.state.settings.database_url = f"sqlite:///{db_path}"
     app.state.settings.auth_jwt_secret = "test-secret-with-sufficient-length-32"
     app.state.settings.auth_jwt_algorithm = "HS256"
-    engine = create_db_engine(app.state.settings.database_url)
-    Base.metadata.create_all(engine)
-
-
+    if DRAFTS_DIR.exists():
+        for f in DRAFTS_DIR.glob("*"):
+            if f.is_file():
+                f.unlink()
+    if ORDERS_DIR.exists():
+        for f in ORDERS_DIR.rglob("*"):
+            if f.is_file():
+                f.unlink()
 
 def teardown_function() -> None:
-    db_path = Path("test_flow.db")
-    if db_path.exists():
-        db_path.unlink()
-
-    for generated in Path("orders").glob("Falcones Pizza Falcones Order *.xlsx"):
-        generated.unlink()
+    if DRAFTS_DIR.exists():
+        for f in DRAFTS_DIR.glob("*"):
+            if f.is_file():
+                f.unlink()
+    if ORDERS_DIR.exists():
+        for f in ORDERS_DIR.rglob("*"):
+            if f.is_file():
+                f.unlink()
 
 
 def test_submit_is_isolated_per_user_and_clears_only_submitter_draft():
@@ -106,10 +106,14 @@ def test_submit_rolls_back_if_export_fails(monkeypatch):
     assert submit.status_code == 200
     assert submit.json()["success"] is False
 
-    with get_session(app.state.settings.database_url) as session:
-        assert session.query(Order).count() == 0
-        active_drafts = session.query(OrderDraft).filter(OrderDraft.status == "active").count()
-        assert active_drafts == 1
+    assert len(list((ORDERS_DIR / "submitted").glob("*.json"))) == 0
+    active_drafts = 0
+    for file in DRAFTS_DIR.glob("alpha_*.json"):
+        with open(file, "r") as f:
+            d = json.load(f)
+            if d.get("status") == "active":
+                active_drafts += 1
+    assert active_drafts == 1
 
     alpha_inventory = client.get(f"/api/inventory/{category}", headers=alpha).json()["items"]
     alpha_qty = {item["id"]: item["qty"] for item in alpha_inventory}[item_id]
@@ -140,8 +144,7 @@ def test_end_to_end_draft_update_then_submit_lifecycle():
     assert payload["success"] is True
     assert payload["filename"].endswith(".xlsx")
 
-    with get_session(app.state.settings.database_url) as session:
-        assert session.query(Order).count() == 1
+    assert len(list((ORDERS_DIR / "submitted").glob("*.json"))) == 1
 
     after_submit = client.get(f"/api/inventory/{category}", headers=alpha).json()["items"]
     assert {item["id"]: item["qty"] for item in after_submit}[item_id] == 0
@@ -177,7 +180,9 @@ def test_submit_persists_local_artifact_when_email_delivery_fails(monkeypatch):
     assert payload["delivery_status"] == "failed"
     assert Path("orders", payload["filename"]).exists()
 
-    with get_session(app.state.settings.database_url) as session:
-        saved_order = session.query(Order).first()
+    order_files = list((ORDERS_DIR / "submitted").glob("*.json"))
+    assert len(order_files) == 1
+    with open(order_files[0], "r") as f:
+        saved_order = json.load(f)
         assert saved_order is not None
-        assert saved_order.delivery_status == "failed"
+        assert saved_order.get("delivery_status") == "failed"

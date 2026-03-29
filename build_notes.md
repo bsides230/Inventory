@@ -833,3 +833,51 @@ COMPLETED
 ### Scope guard
 - This PR intentionally performs prompt-system restructuring only.
 - No stabilization/security/admin feature implementation was performed in this reset.
+
+## Phase 1 — File-Only Backend Rebuild
+### Status
+COMPLETED
+
+### Objective
+- Remove DB runtime dependencies while preserving current behavior, and stabilize file contracts.
+
+### Work Completed
+- **File Contracts:** Defined JSON schemas for drafts, orders, events and documented state flag conventions in the `docs` directory.
+- **File Safety Helpers:** Implemented `write_json_atomic`, `append_jsonl`, and `with_lock` in `file_safety.py`.
+- **Remove DB code paths:** Stripped SQLAlchemy, Alembic, and PostgreSQL references from `server.py`. Replaced `UserRepository`, `OrderDraftRepository`, and `OrderRepository` usages with flat-file JSON storage managers (`FileDraftManager` and `FileOrderManager`).
+- **Remove DB infrastructure:** Deleted the `db` and `alembic` directories. Removed DB services and volumes from `docker-compose.yml`. Cleaned up `requirements.txt` by removing DB dependencies.
+- **Tests Updated:** Updated the core test suites (`test_auth_write_protection.py` and `test_draft_submit_flow.py`) to bypass database setups and mock directly file read/writes for orders and drafts validations.
+
+### Files Created
+- `docs/draft.schema.json`
+- `docs/order.schema.json`
+- `docs/ipc_event.schema.json`
+- `docs/state_flag_conventions.md`
+- `file_safety.py`
+- `services/draft_manager.py`
+- `services/order_manager.py`
+- `auth/dependencies.py`
+- `auth/__init__.py`
+
+### Files Modified
+- `server.py`
+- `requirements.txt`
+- `docker-compose.yml`
+- `scripts/backup.sh`
+- `scripts/restore.sh`
+- `tests/test_public_deployment.py`
+- `tests/test_auth_write_protection.py`
+- `tests/test_draft_submit_flow.py`
+
+### Files Removed
+- `db/` (entire directory)
+- `alembic/` (entire directory)
+- `alembic.ini`
+- `inventory.db`
+- `scripts/bootstrap_dev_db.py`
+- `scripts/create_masters.py`
+- `inventory_data.json`
+- `inventory_state.json`
+
+### Tests / Validation
+- Ran `python3 -m pytest -q tests` successfully with 26 passing tests covering draft and order flows, multi-user isolation and deployment components without any PostgreSQL/SQLite dependencies.

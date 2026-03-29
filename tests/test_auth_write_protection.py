@@ -1,11 +1,10 @@
 from pathlib import Path
 
 import jwt
+import shutil
 from fastapi.testclient import TestClient
 
-from db.database import create_db_engine
-from db.models import Base
-from server import app
+from server import app, DRAFTS_DIR, ORDERS_DIR
 
 
 client = TestClient(app)
@@ -28,21 +27,28 @@ def _first_category() -> str:
 
 
 def setup_function() -> None:
-    db_path = Path("test_auth.db")
-    if db_path.exists():
-        db_path.unlink()
-
-    app.state.settings.database_url = f"sqlite:///{db_path}"
     app.state.settings.auth_jwt_secret = "test-secret-with-sufficient-length-32"
     app.state.settings.auth_jwt_algorithm = "HS256"
-    engine = create_db_engine(app.state.settings.database_url)
-    Base.metadata.create_all(engine)
 
+    if DRAFTS_DIR.exists():
+        for f in DRAFTS_DIR.glob("*"):
+            if f.is_file():
+                f.unlink()
+
+    if ORDERS_DIR.exists():
+        for f in ORDERS_DIR.rglob("*"):
+            if f.is_file():
+                f.unlink()
 
 def teardown_function() -> None:
-    db_path = Path("test_auth.db")
-    if db_path.exists():
-        db_path.unlink()
+    if DRAFTS_DIR.exists():
+        for f in DRAFTS_DIR.glob("*"):
+            if f.is_file():
+                f.unlink()
+    if ORDERS_DIR.exists():
+        for f in ORDERS_DIR.rglob("*"):
+            if f.is_file():
+                f.unlink()
 
 
 def test_write_endpoint_rejects_anonymous_requests():

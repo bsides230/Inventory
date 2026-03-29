@@ -20,9 +20,4 @@ if [[ -f "${SOURCE_DIR}/orders.tar.gz" ]]; then
   tar -xzf "${SOURCE_DIR}/orders.tar.gz" -C "${ORDERS_DIR}"
 fi
 
-if [[ -f "${SOURCE_DIR}/postgres_data.tar.gz" ]]; then
-  echo "Postgres data archive found at ${SOURCE_DIR}/postgres_data.tar.gz"
-  echo "Restore into postgres_data volume with the DB service stopped."
-fi
-
 echo "restore completed from: ${SOURCE_DIR}"
