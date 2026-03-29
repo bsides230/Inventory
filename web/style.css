@@ -69,7 +69,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 1rem;
   transition: all 0.2s ease;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -96,22 +97,11 @@ body {
   opacity: 1;
 }
 
-.category-icon-container {
-  background-color: rgba(219, 89, 75, 0.1);
-  color: var(--color-red);
-  padding: 0.75rem;
-  border-radius: 1rem;
-  margin-top: 0.25rem;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
 .category-icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  font-size: 4rem !important; /* using important here to override the inline styles added dynamically by js previously */
+  width: 4rem;
+  height: 4rem;
+  flex-shrink: 0;
 }
 
 .category-title-wrapper {
@@ -205,11 +195,31 @@ body {
 }
 
 /* Responsive adjustments */
+@media (max-width: 768px) {
+  .category-icon {
+    font-size: 3.5rem !important;
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
+
 @media (max-width: 640px) {
   .category-icon {
+    font-size: 3rem !important;
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .category-icon {
+    font-size: 2.5rem !important;
     width: 2.5rem;
     height: 2.5rem;
   }
+}
+
+@media (max-width: 640px) {
   .category-title {
     font-size: 1.1rem;
   }
