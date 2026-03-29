@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Falcones - UI Design System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================
+       1. CORE VARIABLES (THEME ENGINE)
+       ========================================= */
+    :root {
+      /* DARK MODE (DEFAULT) */
+      --bg-core: #0c0c0c;
+      --bg-panel: #151515;
+      --brand-red: #8e1f1f;
+      --brand-red-bright: #b73030;
+      --brand-red-dim: rgba(142, 31, 31, 0.12);
+
+      --text-head: #f7f3ee;
+      --text-body: #c9c1ba;
+      --text-dim: #8d837b;
+
+      --border-color: #2a2623;
+      --code-bg: #090909;
+      --code-border: #36302c;
+      --input-focus-bg: #181615;
+    }
+
+    /* LIGHT MODE OVERRIDES */
+    body[data-theme="light"] {
+      --bg-core: #f5f1eb;
+      --bg-panel: #fffdfa;
+      --brand-red: #8e1f1f;
+      --brand-red-bright: #b73030;
+      --brand-red-dim: rgba(142, 31, 31, 0.08);
+
+      --text-head: #181412;
+      --text-body: #433a34;
+      --text-dim: #7a6d65;
+
+      --border-color: #ddd3ca;
+      --code-bg: #f3ede7;
+      --code-border: #ddd0c6;
+      --input-focus-bg: #ffffff;
+    }
+
+    /* =========================================
+       2. GLOBAL RESET & TYPOGRAPHY
+       ========================================= */
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background:
+        radial-gradient(circle at top left, rgba(142, 31, 31, 0.08), transparent 30%),
+        var(--bg-core);
+      color: var(--text-body);
+      font-family: "Inter", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.65;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    h1, h2, h3, h4 {
+      color: var(--text-head);
+      margin-top: 0;
+    }
+
+    .display-serif {
+      font-family: "Playfair Display", Georgia, serif;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    /* =========================================
+       3. LAYOUT UTILITIES
+       ========================================= */
+    .page-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px;
+      min-height: 100vh;
+      border-right: 1px solid var(--border-color);
+      border-left: 1px solid var(--border-color);
+      background-color: var(--bg-core);
+      position: relative;
+    }
+
+    .page-container::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,0.015), transparent 160px);
+    }
+
+    .section-divider {
+      border-bottom: 1px solid var(--border-color);
+      margin: 40px 0;
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      color: var(--brand-red);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+    /* =========================================
+       4. TYPOGRAPHY COMPONENTS
+       ========================================= */
+    .hero-title {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 36px;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      line-height: 1.08;
+    }
+
+    .meta-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: var(--brand-red);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    p { font-size: 14px; margin-bottom: 16px; }
+
+    code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--brand-red-bright);
+    }
+
+    /* =========================================
+       5. BUTTONS & INPUTS
+       ========================================= */
+    button {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-dim);
+      padding: 10px 18px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      border-color: var(--brand-red);
+      color: var(--brand-red);
+    }
+
+    button.btn-primary {
+      background: var(--brand-red);
+      color: #ffffff;
+      border-color: var(--brand-red);
+      font-weight: 600;
+    }
+    button.btn-primary:hover { background: var(--brand-red-bright); }
+
+    button.btn-delete {
+      color: #d45c5c;
+      border-color: transparent;
+      padding: 4px 8px;
+    }
+    button.btn-delete:hover {
+      background: rgba(212, 92, 92, 0.08);
+      border-color: #d45c5c;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-body);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      padding: 12px 16px;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      background: var(--input-focus-bg);
+      color: var(--text-head);
+      border-color: var(--brand-red);
+      box-shadow: inset 2px 0 0 var(--brand-red);
+    }
+
+    /* =========================================
+       6. CALLOUTS & DATA BLOCKS
+       ========================================= */
+    .callout {
+      background: linear-gradient(90deg, var(--brand-red-dim) 0%, transparent 100%);
+      border-left: 3px solid var(--brand-red);
+      padding: 16px 20px;
+      font-size: 13px;
+      color: var(--text-body);
+    }
+    .callout strong { color: var(--text-head); }
+
+    .tag-container { display: flex; gap: 10px; flex-wrap: wrap; }
+    .tag {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      border: 1px solid var(--border-color);
+      padding: 4px 8px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.01);
+    }
+    .tag span { color: var(--text-head); font-weight: 600; }
+
+    /* =========================================
+       7. TABLE STYLES (DATA GRID)
+       ========================================= */
+    .table-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      background-color: var(--bg-panel);
+      color: var(--brand-red);
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 2px solid var(--border-color);
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-body);
+      vertical-align: middle;
+    }
+    tr:hover td { background-color: var(--bg-panel); }
+    .col-id { color: var(--brand-red); font-family: "JetBrains Mono"; font-weight: bold; }
+    .col-main { color: var(--text-head); font-weight: 500; }
+
+    /* =========================================
+       8. COLOR SWATCHES (STYLE GUIDE ONLY)
+       ========================================= */
+    .swatch {
+      height: 60px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .swatch-label { font-family: "JetBrains Mono"; font-size: 10px; color: var(--text-dim); }
+
+    /* =========================================
+       9. UTILITIES + FOOTER TOGGLE
+       ========================================= */
+    footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-toggle-inline {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 18px;
+    }
+
+    .theme-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .theme-switch .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #222;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .theme-switch .slider::before {
+      content: "";
+      position: absolute;
+      height: 12px;
+      width: 12px;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      transition: transform 0.2s ease;
+    }
+
+    .theme-switch input:checked + .slider {
+      background-color: var(--brand-red-dim);
+      border-color: var(--brand-red);
+    }
+
+    .theme-switch input:checked + .slider::before {
+      transform: translateX(14px);
+    }
+
+    @media (max-width: 900px) {
+      .grid-2, .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .page-container {
+        padding: 24px;
+        border-left: none;
+        border-right: none;
+      }
+
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+<div class="page-container">
+
+  <header>
+    <div class="meta-label">Falcones · Design System</div>
+    <h1 class="hero-title">Italian Bistro<br />Interface Style Guide</h1>
+    <p style="color: var(--text-dim); max-width: 640px;">
+      Standardized visual components for the Falcones restaurant ecosystem.
+      Built for ordering apps, internal tools, kiosks, menus, and public-facing websites
+      with a warm Italian bistro identity using red, white, grey, and black.
+    </p>
+  </header>
+
+  <div class="section-divider">01 // Color Palette</div>
+  <div class="grid-4">
+    <div>
+      <div class="swatch" style="background: var(--bg-core);"></div>
+      <div class="swatch-label">--bg-core</div>
+      <code style="font-size: 10px;">#0c0c0c</code>
+    </div>
+    <div>
+      <div class="swatch" style="background: var(--bg-panel);"></div>
+      <div class="swatch-label">--bg-panel</div>
+      <code style="font-size: 10px;">#151515</code>
+    </div>
+    <div>
+      <div class="swatch" style="background: var(--brand-red);"></div>
+      <div class="swatch-label">--brand-red</div>
+      <code style="font-size: 10px;">#8e1f1f</code>
+    </div>
+    <div>
+      <div class="swatch" style="background: var(--text-body);"></div>
+      <div class="swatch-label">--text-body</div>
+      <code style="font-size: 10px;">#c9c1ba</code>
+    </div>
+  </div>
+
+  <div class="section-divider">02 // Typography</div>
+  <div class="grid-2">
+    <div>
+      <div class="meta-label">Headings (Playfair Display)</div>
+      <h1 class="display-serif">Heading Level 1</h1>
+      <h2 class="display-serif">Heading Level 2</h2>
+      <h3 class="display-serif">Heading Level 3</h3>
+    </div>
+    <div>
+      <div class="meta-label">Body (Inter)</div>
+      <p>
+        The primary typeface for readability is <strong>Inter</strong>. It is used for app content,
+        product listings, operational notes, ordering screens, and descriptive text.
+      </p>
+      <p style="color: var(--text-dim);">
+        <strong>Playfair Display</strong> adds warmth and a subtle bistro feel for headings and branded moments,
+        while <strong>JetBrains Mono</strong> is reserved for labels, data, IDs, and structured interface metadata.
+      </p>
+    </div>
+  </div>
+
+  <div class="section-divider">03 // Interactive Elements</div>
+  <div class="grid-2">
+    <div>
+      <div class="meta-label">Buttons</div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+        <button class="btn-primary">[ Primary Action ]</button>
+        <button>[ Secondary ]</button>
+        <button class="btn-delete">✕ Remove</button>
+      </div>
+
+      <div class="meta-label">Inputs</div>
+      <input type="text" placeholder="Search menu item, table, or order..." style="margin-bottom: 10px;">
+      <input type="text" value="Read-only item metadata" readonly style="color: var(--text-dim); cursor: not-allowed;">
+    </div>
+
+    <div>
+      <div class="meta-label">Tags & Meta</div>
+      <div class="tag-container" style="margin-bottom: 20px;">
+        <div class="tag">Status: <span>Active</span></div>
+        <div class="tag">Category: <span>Pasta</span></div>
+        <div class="tag">Service: <span>Dine-In</span></div>
+      </div>
+
+      <div class="meta-label">Callouts</div>
+      <div class="callout">
+        <div class="meta-label" style="margin-bottom: 4px;">House Notice</div>
+        <strong>DINNER SERVICE ACTIVE:</strong> Featured specials, wine pairings, and dessert upsells should remain visually prominent across guest-facing screens.
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">04 // Data Presentation</div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 60px;">ID</th>
+          <th style="width: 240px;">Item Name</th>
+          <th>Availability</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-id">m01</td>
+          <td class="col-main">Chicken Parmesan</td>
+          <td><div class="tag" style="display:inline-block; border:none; padding:0;"><span>Available</span></div></td>
+          <td style="text-align: right;"><button class="btn-primary" style="padding: 4px 8px; font-size: 10px;">Edit</button></td>
+        </tr>
+        <tr>
+          <td class="col-id">m02</td>
+          <td class="col-main">Lobster Ravioli</td>
+          <td><div class="tag" style="display:inline-block; border:none; padding:0; color: #d45c5c;">86'd</div></td>
+          <td style="text-align: right;"><button class="btn-primary" style="padding: 4px 8px; font-size: 10px;">Edit</button></td>
+        </tr>
+        <tr>
+          <td class="col-id">m03</td>
+          <td class="col-main">Tiramisu</td>
+          <td><div class="tag" style="display:inline-block; border:none; padding:0;"><span>Featured</span></div></td>
+          <td style="text-align: right;"><button class="btn-primary" style="padding: 4px 8px; font-size: 10px;">Edit</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <span>Falcones Italian Restaurant // Brand Interface System</span>
+    <div class="footer-right">
+      <span>Style Guide // v1</span>
+      <label class="theme-toggle-inline">
+        Theme
+        <span class="theme-switch">
+          <input type="checkbox" id="themeToggle" checked onchange="toggleTheme()" />
+          <span class="slider"></span>
+        </span>
+      </label>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  function toggleTheme() {
+    const body = document.body;
+    const checkbox = document.getElementById('themeToggle');
+    if (!checkbox) return;
+    if (checkbox.checked) {
+      body.setAttribute('data-theme', 'dark');
+    } else {
+      body.setAttribute('data-theme', 'light');
+    }
+  }
+</script>
+
+</body>
+</html>
