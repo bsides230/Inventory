@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const STATIC_CACHE = `falcones-static-${CACHE_VERSION}`;
 const API_CACHE = `falcones-api-${CACHE_VERSION}`;
 
@@ -73,6 +73,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const isAppShell = requestUrl.pathname.endsWith('.js')
+    || requestUrl.pathname.endsWith('.css')
+    || requestUrl.pathname.endsWith('.html')
+    || requestUrl.pathname === '/'
+    || requestUrl.pathname === '/admin';
+
+  if (isAppShell) {
+    // Network-first for app files — always fetch fresh, fall back to cache offline
+    event.respondWith((async () => {
+      try {
+        const networkResponse = await fetch(request);
+        const cache = await caches.open(STATIC_CACHE);
+        cache.put(request, networkResponse.clone());
+        return networkResponse;
+      } catch (_error) {
+        const cached = await caches.match(request);
+        return cached || new Response('Offline', { status: 503 });
+      }
+    })());
+    return;
+  }
+
+  // Cache-first for assets (images, fonts, etc.)
   event.respondWith((async () => {
     const cached = await caches.match(request);
     if (cached) {

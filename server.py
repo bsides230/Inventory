@@ -259,6 +259,17 @@ async def request_context_middleware(request: Request, call_next):
 
 
 @app.middleware("http")
+async def no_cache_middleware(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path.endswith(('.html', '.js', '.css')) or path in ('/', '/admin'):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
+@app.middleware("http")
 async def security_guard_middleware(request: Request, call_next):
     if request.method in {"POST", "PUT", "PATCH"}:
         content_length = request.headers.get("content-length")
