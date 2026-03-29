@@ -84,7 +84,7 @@ def setup_env():
     load_dotenv(ENV_FILE)
 
     # Core Settings
-    app_domain = Prompt.ask("Enter your public domain (e.g., falcones.pizza)", default=os.getenv("APP_DOMAIN", "falcones.pizza"))
+    app_domain = Prompt.ask("Enter your public domain (e.g., example.com)", default=os.getenv("APP_DOMAIN", "example.com"))
     app_env = Prompt.ask("Environment", choices=["production", "development"], default=os.getenv("APP_ENV", "production"))
 
     # JWT Secret
