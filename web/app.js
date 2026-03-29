@@ -547,11 +547,9 @@ function renderDashboard() {
         const isLucideIcon = /^[a-z][a-z0-9-]*$/.test(cat.icon || '');
         const iconHtml = isLucideIcon
             ? `<i data-lucide="${cat.icon}" class="category-icon text-${cat.color}-400"></i>`
-            : `<span class="category-icon" style="font-size:1.5em;line-height:1;">${cat.icon || '📦'}</span>`;
+            : `<span class="category-icon" style="line-height:1; display:flex; align-items:center; justify-content:center;">${cat.icon || '📦'}</span>`;
         btn.innerHTML = `
-            <div class="category-icon-container bg-${cat.color}-900 border-${cat.color}-700">
-                ${iconHtml}
-            </div>
+            ${iconHtml}
             <div class="category-title-wrapper">
                 <span class="category-title">${displayLabel}</span>
             </div>
