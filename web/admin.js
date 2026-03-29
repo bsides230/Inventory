@@ -57,6 +57,9 @@ function showAdminApp() {
     loadEmailSettings();
     loadRecipients();
     loadAnalytics();
+    loadCategoryOrder();
+    loadUILabels();
+    loadBranding();
 }
 
 // --- Analytics ---
@@ -274,6 +277,224 @@ async function rebuildInventory() {
         if (window.lucide) lucide.createIcons();
     }
 }
+
+// --- Category Order ---
+let draggedCategory = null;
+
+async function loadCategoryOrder() {
+    const listEl = document.getElementById('categoryOrderList');
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/category-order`);
+        const data = await res.json();
+        if (data.success) {
+            renderCategoryOrderList(data.categories);
+        }
+    } catch (e) {
+        listEl.innerHTML = '<div class="text-falcone-red text-sm">Failed to load categories.</div>';
+    }
+}
+
+function renderCategoryOrderList(categories) {
+    const listEl = document.getElementById('categoryOrderList');
+    if (categories.length === 0) {
+        listEl.innerHTML = '<div class="text-[var(--color-text-secondary)] text-sm text-center py-4">No categories found.</div>';
+        return;
+    }
+    listEl.innerHTML = categories.map((cat, idx) => `
+        <div class="category-drag-item flex items-center justify-between bg-[var(--color-bg-body)] rounded-lg border border-[var(--color-border)] px-4 py-3 cursor-move transition-transform"
+             draggable="true"
+             data-id="${escapeHtml(cat.id)}">
+            <div class="flex items-center gap-4 pointer-events-none">
+                <i data-lucide="grip-vertical" class="w-5 h-5 text-[var(--color-text-secondary)]"></i>
+                <div class="font-medium text-sm sm:text-base">${escapeHtml(cat.label_en)} <span class="text-[var(--color-text-secondary)] text-xs ml-2">(${escapeHtml(cat.id)})</span></div>
+            </div>
+            <div class="text-[var(--color-text-secondary)] text-xs font-mono font-bold w-6 text-right pointer-events-none">${idx + 1}</div>
+        </div>
+    `).join('');
+
+    // Add drag and drop event listeners
+    const items = listEl.querySelectorAll('.category-drag-item');
+    items.forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('drop', handleDrop);
+        item.addEventListener('dragend', handleDragEnd);
+    });
+
+    if (window.lucide) lucide.createIcons();
+}
+
+function handleDragStart(e) {
+    draggedCategory = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+    this.classList.add('opacity-50');
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault(); // Necessary. Allows us to drop.
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation(); // Stops the browser from redirecting.
+    }
+    if (draggedCategory !== this) {
+        const list = document.getElementById('categoryOrderList');
+        const items = Array.from(list.querySelectorAll('.category-drag-item'));
+        const draggedIdx = items.indexOf(draggedCategory);
+        const droppedIdx = items.indexOf(this);
+
+        if (draggedIdx < droppedIdx) {
+            this.parentNode.insertBefore(draggedCategory, this.nextSibling);
+        } else {
+            this.parentNode.insertBefore(draggedCategory, this);
+        }
+
+        // Update numbers
+        const newItems = Array.from(list.querySelectorAll('.category-drag-item'));
+        newItems.forEach((item, idx) => {
+            item.querySelector('.text-right').textContent = idx + 1;
+        });
+    }
+    return false;
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('opacity-50');
+}
+
+async function saveCategoryOrder() {
+    const listEl = document.getElementById('categoryOrderList');
+    const items = listEl.querySelectorAll('.category-drag-item');
+    const order = Array.from(items).map(item => item.getAttribute('data-id'));
+
+    const resultEl = document.getElementById('categoryOrderResult');
+    resultEl.classList.add('hidden');
+
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/category-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order }),
+        });
+        const data = await res.json();
+        resultEl.textContent = data.success ? 'Category order saved.' : 'Failed to save.';
+        resultEl.className = `p-3 rounded-lg text-sm mt-4 ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.classList.remove('hidden');
+    } catch (e) {
+        resultEl.textContent = 'Request failed.';
+        resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.classList.remove('hidden');
+    }
+}
+
+
+// --- UI Labels ---
+async function loadUILabels() {
+    try {
+        const res = await adminApiFetch(`${API_BASE}/ui-labels`);
+        const data = await res.json();
+        if (data.success && data.labels) {
+            document.querySelectorAll('.ui-label-input').forEach(input => {
+                const key = input.getAttribute('data-key');
+                if (data.labels[key]) {
+                    input.value = data.labels[key];
+                } else {
+                    input.value = '';
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Failed to load UI labels:', e);
+    }
+}
+
+async function saveUILabels() {
+    const labels = {};
+    document.querySelectorAll('.ui-label-input').forEach(input => {
+        const key = input.getAttribute('data-key');
+        const val = input.value.trim();
+        if (val) {
+            labels[key] = val;
+        }
+    });
+
+    const resultEl = document.getElementById('uiLabelsResult');
+    resultEl.classList.add('hidden');
+
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/ui-labels`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ labels }),
+        });
+        const data = await res.json();
+        resultEl.textContent = data.success ? 'UI labels saved.' : 'Failed to save.';
+        resultEl.className = `p-3 rounded-lg text-sm mt-4 ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.classList.remove('hidden');
+    } catch (e) {
+        resultEl.textContent = 'Request failed.';
+        resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.classList.remove('hidden');
+    }
+}
+
+
+// --- Branding ---
+async function loadBranding() {
+    try {
+        const res = await adminApiFetch(`${API_BASE}/branding`);
+        const data = await res.json();
+        if (data.success && data.branding) {
+            document.querySelectorAll('.branding-input').forEach(input => {
+                const key = input.getAttribute('data-key');
+                if (data.branding[key]) {
+                    input.value = data.branding[key];
+                } else {
+                    input.value = '';
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Failed to load branding:', e);
+    }
+}
+
+async function saveBranding() {
+    const branding = {};
+    document.querySelectorAll('.branding-input').forEach(input => {
+        const key = input.getAttribute('data-key');
+        const val = input.value.trim();
+        if (val) {
+            branding[key] = val;
+        }
+    });
+
+    const resultEl = document.getElementById('brandingResult');
+    resultEl.classList.add('hidden');
+
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/branding`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ branding }),
+        });
+        const data = await res.json();
+        resultEl.textContent = data.success ? 'Branding settings saved.' : 'Failed to save.';
+        resultEl.className = `p-3 rounded-lg text-sm mt-4 ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.classList.remove('hidden');
+    } catch (e) {
+        resultEl.textContent = 'Request failed.';
+        resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.classList.remove('hidden');
+    }
+}
+
 
 // --- Locations ---
 async function loadLocations() {

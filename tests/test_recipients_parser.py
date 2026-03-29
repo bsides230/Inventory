@@ -28,5 +28,7 @@ def test_recipient_store_reloads_when_file_changes(tmp_path):
     store = RecipientConfigStore(path)
     assert store.get_recipients() == ["alpha@example.com"]
 
+    import time
+    time.sleep(0.01) # fast tests can write files within the same nanosecond causing signature to not update.
     path.write_text("bravo@example.com\n")
     assert store.get_recipients() == ["bravo@example.com"]
