@@ -111,7 +111,7 @@ def test_submit_rolls_back_if_export_fails(monkeypatch):
     for file in DRAFTS_DIR.glob("alpha_*.json"):
         with open(file, "r") as f:
             d = json.load(f)
-            if d.get("status") == "active":
+            if d.get("state", d.get("status")) == "active":
                 active_drafts += 1
     assert active_drafts == 1
 

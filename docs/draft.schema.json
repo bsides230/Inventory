@@ -11,8 +11,12 @@
         "draft_name": {
             "type": "string"
         },
-        "status": {
-            "type": "string"
+        "state": {
+            "type": "string",
+            "enum": ["active", "submitting", "submitted", "abandoned"]
+        },
+        "version": {
+            "type": "integer"
         },
         "is_rush": {
             "type": "boolean"

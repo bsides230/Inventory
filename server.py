@@ -392,6 +392,7 @@ class UpdateItemRequest(BaseModel):
     id: str
     qty: int
     unit: str
+    version: Optional[int] = None
 
 
 class SubmitOrderRequest(BaseModel):
@@ -458,8 +459,14 @@ async def auth_pin(body: PinAuthRequest):
 
     location_name = locations[pin]
 
+    # Create a unique session id
+    timestamp = int(time.time())
+    nonce = uuid.uuid4().hex[:8]
+    session_id = f"pin_{pin}_{timestamp}_{nonce}"
+
     payload = {
-        "sub": f"pin_{pin}",
+        "sub": session_id,
+        "external_id": f"pin_{pin}",
         "location_pin": pin,
         "location_name": location_name,
         "name": location_name,
@@ -562,15 +569,15 @@ async def get_inventory(
             order_manager = FileOrderManager(ORDERS_DIR)
 
             if draft_id:
-                draft = draft_manager.get_draft(user.id, draft_id)
+                draft = draft_manager.get_draft(user.external_id, draft_id)
             else:
-                draft = draft_manager.get_active_draft(user.id)
+                draft = draft_manager.get_active_draft(user.external_id)
 
             if draft:
                 draft_quantities = {item["item_id"]: (item["quantity"], item["unit"]) for item in draft.get("items", [])}
 
-            user_frequencies = order_manager.get_item_frequencies(user.id)
-            item_frequencies = user_frequencies.get(user.id, {})
+            user_frequencies = order_manager.get_item_frequencies(user.external_id)
+            item_frequencies = user_frequencies.get(user.external_id, {})
 
         response_items = []
         for item in items:
@@ -605,13 +612,13 @@ async def update_inventory(
     draft_manager = FileDraftManager(DRAFTS_DIR)
 
     if draft_id:
-        draft = draft_manager.get_draft(user.id, draft_id)
+        draft = draft_manager.get_draft(user.external_id, draft_id)
         if draft is None:
             raise HTTPException(status_code=404, detail="Draft not found")
     else:
-        draft = draft_manager.get_active_draft(user.id)
+        draft = draft_manager.get_active_draft(user.external_id)
         if not draft:
-            draft = draft_manager.create_draft(user.id)
+            draft = draft_manager.create_draft(user.external_id)
             draft_id = int(draft["id"])
 
     # Update items
@@ -634,7 +641,15 @@ async def update_inventory(
         else:
             items.append(new_item)
 
-    draft_manager.update_draft(user.id, int(draft["id"]), items=items)
+    try:
+        draft_manager.update_draft(
+            user.external_id,
+            int(draft["id"]),
+            items=items,
+            expected_version=request.version
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
     return {"success": True}
 
@@ -643,7 +658,7 @@ async def update_inventory(
 @app.get("/api/drafts")
 async def list_drafts(user: AuthenticatedUser = Depends(get_required_authenticated_user)):
     draft_manager = FileDraftManager(DRAFTS_DIR)
-    all_drafts = draft_manager.get_all_active_drafts(user.id)
+    all_drafts = draft_manager.get_all_active_drafts(user.external_id)
     result = []
     for d in all_drafts:
         result.append({
@@ -659,7 +674,7 @@ async def list_drafts(user: AuthenticatedUser = Depends(get_required_authenticat
 @app.post("/api/drafts/new")
 async def create_draft(body: NewDraftRequest, user: AuthenticatedUser = Depends(get_required_authenticated_user)):
     draft_manager = FileDraftManager(DRAFTS_DIR)
-    draft = draft_manager.create_draft(user.id, name=body.name)
+    draft = draft_manager.create_draft(user.external_id, name=body.name)
     return {"success": True, "draft": {"id": int(draft["id"]), "name": draft["draft_name"], "item_count": 0}}
 
 
@@ -670,7 +685,7 @@ async def rename_draft(
     user: AuthenticatedUser = Depends(get_required_authenticated_user),
 ):
     draft_manager = FileDraftManager(DRAFTS_DIR)
-    draft = draft_manager.update_draft(user.id, draft_id, name=body.name)
+    draft = draft_manager.update_draft(user.external_id, draft_id, name=body.name)
     if not draft:
         raise HTTPException(status_code=404, detail="Draft not found")
     return {"success": True}
@@ -679,7 +694,7 @@ async def rename_draft(
 @app.delete("/api/drafts/{draft_id}")
 async def delete_draft(draft_id: int, user: AuthenticatedUser = Depends(get_required_authenticated_user)):
     draft_manager = FileDraftManager(DRAFTS_DIR)
-    deleted = draft_manager.delete_draft(user.id, draft_id)
+    deleted = draft_manager.delete_draft(user.external_id, draft_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Draft not found")
     return {"success": True}
@@ -713,9 +728,9 @@ async def submit_order(
         order_manager = FileOrderManager(ORDERS_DIR)
 
         if request.draft_id:
-            draft = draft_manager.get_draft(user.id, request.draft_id)
+            draft = draft_manager.get_draft(user.external_id, request.draft_id)
         else:
-            draft = draft_manager.get_active_draft(user.id)
+            draft = draft_manager.get_active_draft(user.external_id)
 
         if draft is None or not draft.get("items"):
             return {"success": False, "message": "No items to order."}
@@ -753,15 +768,15 @@ async def submit_order(
             }
 
         order = order_manager.create_order(
-            user.id,
+            user.external_id,
             draft,
             export_filename=filename,
             location_pin=location_pin,
             location_name=location_name,
         )
 
-        # update draft status
-        draft_manager.update_draft(user.id, int(draft["id"]), status="submitted")
+        # update draft state
+        draft_manager.update_draft(user.external_id, int(draft["id"]), state="submitted")
 
         email_service = build_email_service()
         delivery = email_service.send_order_email(
@@ -774,7 +789,7 @@ async def submit_order(
         )
 
         order_manager.update_delivery_status(
-            user.id,
+            user.external_id,
             order["id"],
             status=delivery.status,
             attempts=delivery.attempts,

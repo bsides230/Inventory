@@ -32,7 +32,7 @@ def get_optional_authenticated_user(request: Request) -> Optional[AuthenticatedU
         payload = jwt.decode(token, settings.auth_jwt_secret, algorithms=[settings.auth_jwt_algorithm])
         return AuthenticatedUser(
             id=payload["sub"],
-            external_id=payload["sub"],
+            external_id=payload.get("external_id", payload["sub"]),
             email=payload.get("email", ""),
             display_name=payload.get("name", ""),
             role=payload.get("role", "user")

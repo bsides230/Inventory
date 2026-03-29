@@ -28,7 +28,7 @@ class FileDraftManager:
         drafts = []
         for file in self.drafts_dir.glob(f"{user_id}_*.json"):
             draft = self._read_json(file)
-            if draft and draft.get("status") == "active":
+            if draft and draft.get("state", draft.get("status")) == "active":
                 drafts.append(draft)
         drafts.sort(key=lambda d: d.get("updated_at", ""), reverse=True)
         return drafts
@@ -39,7 +39,7 @@ class FileDraftManager:
             active_id = active_id_path.read_text().strip()
             draft_path = self._get_draft_path(user_id, active_id)
             draft = self._read_json(draft_path)
-            if draft and draft.get("status") == "active":
+            if draft and draft.get("state", draft.get("status")) == "active":
                 return draft
         return None
 
@@ -61,7 +61,8 @@ class FileDraftManager:
             "id": str(draft_id),
             "user_id": user_id,
             "draft_name": name or f"Draft {len(existing) + 1}",
-            "status": "active",
+            "state": "active",
+            "version": 1,
             "is_rush": False,
             "needed_by": None,
             "items": [],
@@ -72,13 +73,16 @@ class FileDraftManager:
         self.set_active_draft(user_id, draft_id)
         return draft
 
-    def update_draft(self, user_id: str, draft_id: int, items=None, is_rush=None, needed_by=None, name=None, status=None):
+    def update_draft(self, user_id: str, draft_id: int, items=None, is_rush=None, needed_by=None, name=None, state=None, expected_version: int = None):
         path = self._get_draft_path(user_id, draft_id)
-        lock_path = self.drafts_dir / f".{user_id}_{draft_id}.lock"
+        lock_path = self.drafts_dir / f"{user_id}.lock"
         with with_lock(lock_path):
             draft = self._read_json(path)
             if not draft:
                 return None
+            if expected_version is not None and draft.get("version", 1) != expected_version:
+                raise ValueError(f"Version mismatch: expected {expected_version}, got {draft.get('version', 1)}")
+
             if items is not None:
                 draft["items"] = items
             if is_rush is not None:
@@ -87,8 +91,10 @@ class FileDraftManager:
                 draft["needed_by"] = needed_by
             if name is not None:
                 draft["draft_name"] = name
-            if status is not None:
-                draft["status"] = status
+            if state is not None:
+                draft["state"] = state
+
+            draft["version"] = draft.get("version", 1) + 1
             draft["updated_at"] = datetime.now(timezone.utc).isoformat()
             self._write_json(path, draft)
             return draft
