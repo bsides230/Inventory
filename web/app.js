@@ -263,20 +263,20 @@ function renderDraftDropdown() {
     state.drafts.forEach(draft => {
         const el = document.createElement('div');
         const isActive = draft.id === state.currentDraftId;
-        el.className = `flex items-center justify-between px-3 py-2 transition-colors ${isActive ? 'bg-[var(--color-border)]' : 'hover:bg-[var(--color-border)]'}`;
+        el.className = `flex items-center justify-between px-3 py-2 transition-colors ${isActive ? 'bg-[var(--border-color)]' : 'hover:bg-[var(--border-color)]'}`;
         el.innerHTML = `
             <div class="flex-1 min-w-0 cursor-pointer" onclick="selectDraft(${draft.id}, '${draft.name.replace(/'/g, "\\'")}')">
-                <div class="text-sm font-medium flex items-center gap-2 truncate">
-                    ${isActive ? '<i data-lucide="check" class="w-3 h-3 text-falcone-red shrink-0"></i>' : ''}
+                <div class="text-sm font-medium flex items-center gap-2 truncate mono">
+                    ${isActive ? '<i data-lucide="check" class="w-3 h-3 text-[var(--brand-red)] shrink-0"></i>' : ''}
                     <span class="truncate">${escapeHtml(draft.name)}</span>
                 </div>
-                <div class="text-xs text-[var(--color-text-secondary)]">${draft.item_count} item${draft.item_count !== 1 ? 's' : ''}</div>
+                <div class="text-xs text-[var(--text-dim)]">${draft.item_count} item${draft.item_count !== 1 ? 's' : ''}</div>
             </div>
             <div class="flex items-center gap-0.5 shrink-0 ml-1">
-                <button onclick="event.stopPropagation(); openRenameDraftModal(${draft.id}, '${draft.name.replace(/'/g, "\\'")}')" class="p-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded" title="Rename">
+                <button onclick="event.stopPropagation(); openRenameDraftModal(${draft.id}, '${draft.name.replace(/'/g, "\\'")}')" class="p-1.5 text-[var(--text-dim)] hover:text-[var(--text-head)] transition-colors rounded" title="Rename">
                     <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                 </button>
-                <button onclick="event.stopPropagation(); deleteDraft(${draft.id})" class="p-1.5 text-[var(--color-text-secondary)] hover:text-falcone-red transition-colors rounded" title="Delete">
+                <button onclick="event.stopPropagation(); deleteDraft(${draft.id})" class="p-1.5 text-[var(--text-dim)] hover:text-[var(--brand-red)] transition-colors rounded" title="Delete">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
             </div>
@@ -571,7 +571,7 @@ async function loadCategory(categoryId) {
     const catConfig = state.categories.find(c => c.id === categoryId);
     DOM.categoryTitle.textContent = catConfig ? (state.lang === 'es' ? catConfig.label_es : catConfig.label_en) : categoryId;
 
-    DOM.itemList.innerHTML = '<div class="text-center py-8 text-gray-400"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i>Loading...</div>';
+    DOM.itemList.innerHTML = '<div class="text-center py-8 text-[var(--text-dim)]"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i>Loading...</div>';
     if (window.lucide) lucide.createIcons();
 
     try {
@@ -584,7 +584,7 @@ async function loadCategory(categoryId) {
         }
     } catch (error) {
         console.error("Failed to load category:", error);
-        DOM.itemList.innerHTML = '<div class="text-center py-8 text-red-400">Error loading data.</div>';
+        DOM.itemList.innerHTML = '<div class="text-center py-8 text-[var(--brand-red)]">Error loading data.</div>';
     }
 }
 
@@ -595,7 +595,7 @@ function renderCategory(categoryId) {
     DOM.itemList.innerHTML = '';
 
     if (items.length === 0) {
-        DOM.itemList.innerHTML = '<div class="text-center py-8 text-gray-400">No items found.</div>';
+        DOM.itemList.innerHTML = '<div class="text-center py-8 text-[var(--text-dim)]">No items found.</div>';
         return;
     }
 
@@ -612,22 +612,22 @@ function renderCategory(categoryId) {
 
         itemEl.innerHTML = `
             <div class="flex-1 pr-4">
-                <h3 class="text-lg font-bold text-[var(--color-text-primary)] leading-tight">${escapeHtml(nameSafe)}</h3>
+                <h3 class="text-lg font-bold text-[var(--text-head)] leading-tight">${escapeHtml(nameSafe)}</h3>
                 <div class="mt-2">
-                    <select onchange="updateUnit('${categoryId}', ${index}, this.value)" class="bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-primary)] py-1 px-2 focus:ring-1 focus:ring-falcone-red outline-none">
+                    <select onchange="updateUnit('${categoryId}', ${index}, this.value)" class="bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-body)] py-1 px-2 focus:ring-1 focus:ring-[var(--brand-red)] outline-none mono">
                         <option value="each" ${isEachSelected}>${t.each}</option>
                         <option value="case" ${isCaseSelected}>${t.case}</option>
                     </select>
                 </div>
             </div>
             <div class="item-controls flex items-center gap-3 shrink-0">
-                <button class="qty-btn w-10 h-10 flex items-center justify-center hover:bg-[var(--color-border)] rounded-lg transition-colors" onclick="updateQty('${categoryId}', ${index}, -1)">
+                <button class="qty-btn w-10 h-10 flex items-center justify-center hover:bg-[var(--border-color)] rounded-lg transition-colors mono" onclick="updateQty('${categoryId}', ${index}, -1)">
                     <i data-lucide="minus" class="w-5 h-5"></i>
                 </button>
-                <input type="number" class="qty-input w-16 text-center bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg py-2 font-bold" value="${item.qty}" min="0"
+                <input type="number" class="qty-input w-16 text-center bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg py-2 font-bold mono" value="${item.qty}" min="0"
                     onchange="setQty('${categoryId}', ${index}, this.value)"
                     onfocus="this.select()">
-                <button class="qty-btn w-10 h-10 flex items-center justify-center hover:bg-[var(--color-border)] rounded-lg transition-colors" onclick="updateQty('${categoryId}', ${index}, 1)">
+                <button class="qty-btn w-10 h-10 flex items-center justify-center hover:bg-[var(--border-color)] rounded-lg transition-colors mono" onclick="updateQty('${categoryId}', ${index}, 1)">
                     <i data-lucide="plus" class="w-5 h-5"></i>
                 </button>
             </div>

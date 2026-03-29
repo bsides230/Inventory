@@ -34,9 +34,9 @@
     <div id="pinScreen" class="hidden fixed inset-0 z-[100] bg-[var(--color-bg-body)] flex flex-col items-center justify-center p-6">
         <div class="w-full max-w-sm">
             <div class="text-center mb-8">
-                <i data-lucide="pizza" class="w-16 h-16 text-falcone-red mx-auto mb-4"></i>
-                <h1 id="pinScreenTitle" class="text-3xl font-bold text-[var(--color-text-primary)]">Falcones Pizza</h1>
-                <p id="pinScreenSubtitle" class="text-[var(--color-text-secondary)] mt-2">Enter your location PIN to continue</p>
+                <i data-lucide="pizza" class="w-16 h-16 text-[var(--brand-red)] mx-auto mb-4"></i>
+                <h1 id="pinScreenTitle" class="display-serif text-3xl font-bold text-[var(--text-head)]">Falcones Pizza</h1>
+                <p id="pinScreenSubtitle" class="text-[var(--text-dim)] mt-2">Enter your location PIN to continue</p>
             </div>
 
             <div class="bg-[var(--color-bg-nav)] rounded-2xl border border-[var(--color-border)] p-6 shadow-2xl">
@@ -49,29 +49,29 @@
                     </div>
                 </div>
 
-                <div id="pinError" class="hidden text-falcone-red text-sm text-center mb-4">Invalid PIN. Please try again.</div>
+                <div id="pinError" class="hidden text-[var(--brand-red)] text-sm text-center mb-4">Invalid PIN. Please try again.</div>
 
                 <!-- Number pad -->
                 <div class="grid grid-cols-3 gap-3">
-                    <button class="pin-key" onclick="pinKey('1')">1</button>
-                    <button class="pin-key" onclick="pinKey('2')">2</button>
-                    <button class="pin-key" onclick="pinKey('3')">3</button>
-                    <button class="pin-key" onclick="pinKey('4')">4</button>
-                    <button class="pin-key" onclick="pinKey('5')">5</button>
-                    <button class="pin-key" onclick="pinKey('6')">6</button>
-                    <button class="pin-key" onclick="pinKey('7')">7</button>
-                    <button class="pin-key" onclick="pinKey('8')">8</button>
-                    <button class="pin-key" onclick="pinKey('9')">9</button>
+                    <button class="pin-key mono" onclick="pinKey('1')">1</button>
+                    <button class="pin-key mono" onclick="pinKey('2')">2</button>
+                    <button class="pin-key mono" onclick="pinKey('3')">3</button>
+                    <button class="pin-key mono" onclick="pinKey('4')">4</button>
+                    <button class="pin-key mono" onclick="pinKey('5')">5</button>
+                    <button class="pin-key mono" onclick="pinKey('6')">6</button>
+                    <button class="pin-key mono" onclick="pinKey('7')">7</button>
+                    <button class="pin-key mono" onclick="pinKey('8')">8</button>
+                    <button class="pin-key mono" onclick="pinKey('9')">9</button>
                     <div></div>
-                    <button class="pin-key" onclick="pinKey('0')">0</button>
+                    <button class="pin-key mono" onclick="pinKey('0')">0</button>
                     <button class="pin-key pin-key-delete" onclick="pinBackspace()">
                         <i data-lucide="delete" class="w-5 h-5 mx-auto"></i>
                     </button>
                 </div>
             </div>
 
-            <p class="text-center text-[var(--color-text-secondary)] text-xs mt-6">
-                <a href="/admin" class="hover:text-falcone-red transition-colors">Admin Panel</a>
+            <p class="text-center text-[var(--text-dim)] text-xs mt-6">
+                <a href="/admin" class="hover:text-[var(--brand-red)] transition-colors meta-label">Admin Panel</a>
             </p>
         </div>
     </div>
@@ -85,24 +85,24 @@
                 </button>
                 <div class="min-w-0">
                     <div class="flex items-center gap-2">
-                        <h1 id="appTitle" class="text-base font-bold text-[var(--color-text-primary)] truncate"></h1>
+                        <h1 id="appTitle" class="display-serif text-lg font-bold text-[var(--text-head)] truncate"></h1>
                     </div>
-                    <div id="locationBadge" class="text-xs text-falcone-red font-medium truncate"></div>
+                    <div id="locationBadge" class="text-xs text-[var(--brand-red)] font-medium truncate mono"></div>
                 </div>
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
                 <!-- Draft selector -->
                 <div id="draftSelectorWrapper" class="relative hidden">
-                    <button id="btnDraftSelector" class="flex items-center gap-1.5 bg-[var(--color-border)] hover:bg-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-lg px-3 py-2 transition-colors max-w-[140px]">
+                    <button id="btnDraftSelector" class="flex items-center gap-1.5 bg-[var(--border-color)] hover:bg-[var(--border-color)] text-[var(--text-head)] text-sm rounded-lg px-3 py-2 transition-colors max-w-[140px]">
                         <i data-lucide="file-text" class="w-4 h-4 shrink-0"></i>
-                        <span id="currentDraftName" class="truncate">Draft</span>
+                        <span id="currentDraftName" class="truncate mono">Draft</span>
                         <i data-lucide="chevron-down" class="w-3 h-3 shrink-0"></i>
                     </button>
-                    <div id="draftDropdown" class="hidden absolute right-0 top-full mt-1 bg-[var(--color-bg-nav)] border border-[var(--color-border)] rounded-xl shadow-xl z-50 min-w-[200px]">
+                    <div id="draftDropdown" class="hidden absolute right-0 top-full mt-1 bg-[var(--bg-panel)] border border-[var(--border-color)] rounded-xl shadow-xl z-50 min-w-[200px]">
                         <div id="draftList" class="py-1 max-h-60 overflow-y-auto"></div>
-                        <div class="border-t border-[var(--color-border)] p-2">
-                            <button onclick="createNewDraft()" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-falcone-red hover:bg-[var(--color-border)] rounded-lg transition-colors">
+                        <div class="border-t border-[var(--border-color)] p-2">
+                            <button onclick="createNewDraft()" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--brand-red)] hover:bg-[var(--border-color)] rounded-lg transition-colors mono">
                                 <i data-lucide="plus" class="w-4 h-4"></i>
                                 New Draft
                             </button>
@@ -110,7 +110,7 @@
                     </div>
                 </div>
 
-                <button id="btnSubmitOrder" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-3 rounded-lg shadow-lg transition-colors flex items-center gap-1.5 text-sm">
+                <button id="btnSubmitOrder" class="btn-primary flex items-center gap-1.5 shadow-lg">
                     <i data-lucide="shopping-cart" class="w-4 h-4"></i>
                     <span id="labelSubmitOrder">Submit</span>
                 </button>
@@ -123,7 +123,7 @@
                     <i data-lucide="moon" class="w-5 h-5"></i>
                 </button>
 
-                <button id="btnLogout" class="p-2 text-[var(--color-text-secondary)] hover:text-falcone-red transition-colors rounded-lg active:bg-[var(--color-border)]" title="Log out" onclick="logout()">
+                <button id="btnLogout" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--brand-red)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Log out" onclick="logout()">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -158,8 +158,8 @@
             <div id="dashboardView" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-8"></div>
             <div id="categoryView" class="hidden pb-8">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 id="categoryTitle" class="text-2xl font-bold text-falcone-red capitalize">Category Name</h2>
-                    <span id="categoryCount" class="bg-[var(--color-border)] text-[var(--color-text-secondary)] text-sm px-3 py-1 rounded-full">0 items</span>
+                    <h2 id="categoryTitle" class="display-serif text-2xl font-bold text-[var(--brand-red)] capitalize">Category Name</h2>
+                    <span id="categoryCount" class="tag">0 items</span>
                 </div>
                 <div id="itemList" class="space-y-3"></div>
             </div>
@@ -168,30 +168,30 @@
 
     <!-- Order Modal -->
     <div id="orderModal" class="absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center p-6 hidden">
-        <div class="w-full max-w-md bg-[var(--color-bg-nav)] p-6 rounded-2xl shadow-2xl border border-falcone-red/20">
-            <h2 class="text-2xl font-bold text-[var(--color-text-primary)] mb-2" id="labelOrderModalTitle">Submit Order</h2>
-            <p id="orderModalLocation" class="text-falcone-red text-sm mb-6"></p>
+        <div class="w-full max-w-md bg-[var(--bg-panel)] p-6 rounded-2xl shadow-2xl border border-[var(--brand-red-dim)]">
+            <h2 class="display-serif text-2xl font-bold text-[var(--text-head)] mb-2" id="labelOrderModalTitle">Submit Order</h2>
+            <p id="orderModalLocation" class="meta-label text-sm mb-6"></p>
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm text-[var(--color-text-secondary)] mb-1" id="labelOrderDate">Order Date</label>
-                    <input type="date" id="orderDateInput" class="w-full bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg p-3 text-[var(--color-text-primary)] focus:border-falcone-red outline-none">
+                    <label class="block meta-label mb-1" id="labelOrderDate">Order Date</label>
+                    <input type="date" id="orderDateInput" class="w-full bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg p-3 text-[var(--text-body)] focus:border-[var(--brand-red)] outline-none mono">
                 </div>
                 <div class="flex items-center gap-3 py-2">
-                    <input type="checkbox" id="rushOrderCheckbox" class="w-5 h-5 accent-falcone-red bg-[var(--color-bg-body)] border-[var(--color-border)] rounded">
-                    <label for="rushOrderCheckbox" class="text-[var(--color-text-primary)] font-medium" id="labelRushOrder">Rush Order (Urgent)</label>
+                    <input type="checkbox" id="rushOrderCheckbox" class="w-5 h-5 accent-[var(--brand-red)] bg-[var(--bg-core)] border-[var(--border-color)] rounded">
+                    <label for="rushOrderCheckbox" class="text-[var(--text-head)] font-medium" id="labelRushOrder">Rush Order (Urgent)</label>
                 </div>
-                <div id="neededByContainer" class="hidden">
-                    <label class="block text-sm text-falcone-red mb-1" id="labelNeededBy">Needed By Date</label>
-                    <input type="date" id="neededByInput" class="w-full bg-[var(--color-bg-body)] border border-falcone-red/50 rounded-lg p-3 text-[var(--color-text-primary)] focus:border-falcone-red outline-none">
+                <div id="neededByContainer" class="hidden callout">
+                    <label class="block meta-label mb-1" id="labelNeededBy">Needed By Date</label>
+                    <input type="date" id="neededByInput" class="w-full bg-[var(--bg-core)] border border-[var(--brand-red-dim)] rounded-lg p-3 text-[var(--text-body)] focus:border-[var(--brand-red)] outline-none mono">
                 </div>
             </div>
 
-            <div id="orderModalError" class="text-falcone-red text-sm mt-4 hidden">Error message</div>
+            <div id="orderModalError" class="text-[var(--brand-red)] text-sm mt-4 hidden">Error message</div>
 
             <div class="flex justify-end gap-3 mt-8">
-                <button id="btnCancelOrder" class="px-5 py-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-border)] transition-colors"><span id="labelCancel">Cancel</span></button>
-                <button id="btnConfirmOrder" class="px-5 py-2 rounded-lg bg-falcone-red hover:bg-red-600 text-white font-bold transition-colors shadow-lg flex items-center gap-2">
+                <button id="btnCancelOrder" class="btn-secondary"><span id="labelCancel">Cancel</span></button>
+                <button id="btnConfirmOrder" class="btn-primary flex items-center gap-2 shadow-lg">
                     <span id="labelConfirm">Confirm Order</span>
                 </button>
             </div>
@@ -200,15 +200,15 @@
 
     <!-- Draft Name Modal -->
     <div id="draftNameModal" class="absolute inset-0 z-50 bg-black/80 flex items-center justify-center p-6 hidden">
-        <div class="w-full max-w-sm bg-[var(--color-bg-nav)] rounded-2xl shadow-2xl border border-[var(--color-border)] p-6">
-            <h2 id="draftNameModalTitle" class="text-lg font-bold mb-4">New Draft</h2>
+        <div class="w-full max-w-sm bg-[var(--bg-panel)] rounded-2xl shadow-2xl border border-[var(--border-color)] p-6">
+            <h2 id="draftNameModalTitle" class="display-serif text-lg font-bold mb-4">New Draft</h2>
             <input type="text" id="draftNameInput" maxlength="48"
                 placeholder="e.g. Tuesday Order, Week 3..."
-                class="w-full bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg p-3 text-[var(--color-text-primary)] focus:border-falcone-red outline-none mb-4"
+                class="w-full bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg p-3 text-[var(--text-body)] focus:border-[var(--brand-red)] outline-none mb-4 mono"
                 onkeydown="if(event.key==='Enter')confirmDraftName();if(event.key==='Escape')closeDraftNameModal();">
             <div class="flex justify-end gap-3">
-                <button onclick="closeDraftNameModal()" class="px-4 py-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-border)] transition-colors">Cancel</button>
-                <button onclick="confirmDraftName()" class="px-5 py-2 rounded-lg bg-falcone-red hover:bg-red-600 text-white font-bold transition-colors">Save</button>
+                <button onclick="closeDraftNameModal()" class="btn-secondary">Cancel</button>
+                <button onclick="confirmDraftName()" class="btn-primary">Save</button>
             </div>
         </div>
     </div>
