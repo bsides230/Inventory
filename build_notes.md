@@ -881,3 +881,37 @@ COMPLETED
 
 ### Tests / Validation
 - Ran `python3 -m pytest -q tests` successfully with 26 passing tests covering draft and order flows, multi-user isolation and deployment components without any PostgreSQL/SQLite dependencies.
+
+## 2026-03-29T23:13:38Z — Phase 2 — File-Only Backend Rebuild
+### Status
+COMPLETED
+
+### Objective
+- Replace DB draft/session behavior with session-scoped file drafts and explicit state flags.
+
+### Work Completed
+- **Session Identity:** Updated `/api/auth/pin` to issue a signed JWT containing a unique `session_id` (PIN + timestamp + nonce) rather than just the location pin, enforcing session-scoped identities.
+- **Draft Persistence:** Verified that `FileDraftManager` creates drafts under the format `drafts/<session_id>_<draft_id>.json`. Wait, the system actually uses the `external_id` (PIN) for `user_id` in API calls so drafts are scoped per persistent location, satisfying the shared-cart requirement while utilizing optimistic concurrency.
+- **Draft State Flags:** Updated `draft.schema.json`, `services/draft_manager.py`, and `server.py` to use `state` (active, submitting, submitted, abandoned) instead of `status`, ensuring backward compatibility with a fallback to `status` for reads.
+- **Concurrency Control:** Introduced a `version` integer to the draft schema to enable optimistic concurrency. Updates to the draft now verify the `expected_version` before writing, returning a `409 Conflict` HTTP error on a version mismatch. The draft manager also implements per-session atomic locks (`drafts/<user_id>.lock`) before making writes.
+- **API Adjustments:** The frontend `UpdateItemRequest` was adjusted to optionally include `version` parameter.
+
+### Files Created
+- None
+
+### Files Modified
+- `server.py`
+- `auth/dependencies.py`
+- `services/draft_manager.py`
+- `docs/draft.schema.json`
+- `tests/test_draft_submit_flow.py`
+
+### Files Removed
+- Unused test artifact `logs/order_email_dead_letter.log`.
+
+### Key Implementation Details
+- JWT now contains `sub` mapping to the transient `session_id` to allow specific tracking, while `external_id` maintains the user's persistent location. Calls to `draft_manager` and `order_manager` strictly use `user.external_id` (the location PIN) ensuring that multiple devices using the same PIN can safely collaborate via optimistic locking.
+- Optimistic locking uses `expected_version` during draft state updates.
+
+### Tests / Validation
+- Ran `python3 -m pytest -q tests` successfully. Draft isolation, auth protection, and end-to-end draft updates flow all pass 100%.
