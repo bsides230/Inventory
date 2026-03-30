@@ -556,9 +556,25 @@ function applyBranding() {
 }
 
 function toggleLanguage() {
-    state.lang = state.lang === 'en' ? 'es' : 'en';
+    const dd = document.getElementById('langDropdown');
+    if (dd) dd.classList.toggle('hidden');
+}
+
+window.setLanguage = function(lang) {
+    state.lang = lang;
     localStorage.setItem('falcone_lang', state.lang);
+    const dd = document.getElementById('langDropdown');
+    if (dd) dd.classList.add('hidden');
+    updateLangDropdownHighlight();
     applyLanguage();
+};
+
+function updateLangDropdownHighlight() {
+    document.querySelectorAll('.lang-option').forEach(btn => {
+        const isActive = btn.getAttribute('data-lang') === state.lang;
+        btn.classList.toggle('text-[var(--brand-red)]', isActive);
+        btn.classList.toggle('font-bold', isActive);
+    });
 }
 
 function toggleTheme() {
@@ -604,7 +620,7 @@ function applyLanguage() {
     if (DOM.btnDismissIosInstall) DOM.btnDismissIosInstall.textContent = t.gotItCta;
     if (DOM.btnRefreshApp) DOM.btnRefreshApp.textContent = t.refreshCta;
 
-    document.querySelectorAll('#btnToggleLangApp span').forEach(span => span.textContent = t.langToggle);
+    updateLangDropdownHighlight();
 
     if (state.currentCategory) {
         const catConfig = state.categories.find(c => c.id === state.currentCategory);
@@ -823,6 +839,25 @@ async function submitOrderPayload(saveOnly = false) {
 
         if (data.success) {
             DOM.orderModal.classList.add('hidden');
+
+            if (data.filename) {
+                try {
+                    const dlRes = await apiFetch(`${API_BASE}/download/order/${encodeURIComponent(data.filename)}`);
+                    if (!dlRes.ok) throw new Error(`Download failed: ${dlRes.status}`);
+                    const blob = await dlRes.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = data.filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } catch (dlErr) {
+                    console.error("Download failed:", dlErr);
+                }
+            }
+
             if (saveOnly) {
                 alert(`Order saved!\nLocation: ${state.locationName}\nFile: ${data.filename}`);
             } else {
@@ -932,4 +967,12 @@ document.addEventListener('DOMContentLoaded', () => {
     updateConnectivityBanner();
     window.addEventListener('online', updateConnectivityBanner);
     window.addEventListener('offline', updateConnectivityBanner);
+
+    document.addEventListener('click', (e) => {
+        const langDd = document.getElementById('langDropdown');
+        const langBtn = document.getElementById('btnToggleLangApp');
+        if (langDd && !langDd.contains(e.target) && !langBtn.contains(e.target)) {
+            langDd.classList.add('hidden');
+        }
+    });
 });

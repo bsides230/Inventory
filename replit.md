@@ -51,6 +51,7 @@ All runtime state is stored on disk using crash-safe helpers in `file_safety.py`
 | `config/order_recipients.txt` | Email recipients, one per line, `#` comments allowed |
 | `config/locations.txt` | PIN → location name mappings |
 | `config/admin_password.txt` | Admin panel password |
+| `config/app_settings.json` | App settings (output_language: en/es) |
 
 ### Service Layer (`services/`)
 
@@ -81,7 +82,10 @@ Inventory data originates from `item master/Master.xlsx`. Each sheet tab becomes
 - Supports install prompts (`beforeinstallprompt`), offline banners, and update notifications.
 - Admin panel at `web/admin.html` / `web/admin.js` — separate login flow, protected by admin password JWT.
 - Styling via Tailwind CSS (CDN) and a custom `web/style.css`.
-- Bilingual UI (English/Spanish) driven by API-provided labels.
+- Bilingual UI (English/Spanish) driven by API-provided labels with language dropdown selector.
+- Order Excel output: multi-tab (one per category), columns Item/Quantity/Unit, single language controlled by admin setting.
+- Admin panel includes Settings tab with output language selector, Master.xlsx download, and frequency report download.
+- Branding color inputs use preset dropdown selectors with swatch previews.
 
 ### API Endpoints (Key)
 
@@ -96,6 +100,11 @@ Inventory data originates from `item master/Master.xlsx`. Each sheet tab becomes
 | `POST /api/inventory/{category}/update` | Required | Upsert/remove item in active draft |
 | `POST /api/submit_order` | Required | Submit draft → write order file → enqueue email IPC event |
 | `POST /api/admin/login` | None (password) | Returns admin JWT |
+| `GET /api/download/order/{filename}` | Required | Download order Excel file (path-traversal protected) |
+| `GET /api/admin/settings` | Admin JWT | Get app settings (output_language) |
+| `POST /api/admin/settings` | Admin JWT | Update app settings |
+| `GET /api/admin/download-master` | Admin JWT | Download current Master.xlsx |
+| `GET /api/admin/download-frequency-report` | Admin JWT | Download frequency report (optional `?location_pin=`) |
 | `POST /api/admin/upload-master` | Admin JWT | Upload new `Master.xlsx` and rebuild inventory |
 
 ### Deployment

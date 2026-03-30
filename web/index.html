@@ -115,9 +115,19 @@
                     <span id="labelSubmitOrder" class="hidden sm:inline">Submit</span>
                 </button>
 
-                <button id="btnToggleLangApp" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Toggle Language" aria-label="Toggle Language">
-                    <i data-lucide="languages" class="w-5 h-5"></i>
-                </button>
+                <div class="relative">
+                    <button id="btnToggleLangApp" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Language" aria-label="Language">
+                        <i data-lucide="languages" class="w-5 h-5"></i>
+                    </button>
+                    <div id="langDropdown" class="hidden absolute right-0 top-full mt-1 bg-[var(--bg-panel)] border border-[var(--border-color)] rounded-xl shadow-xl z-50 min-w-[140px] py-1">
+                        <button onclick="setLanguage('en')" class="lang-option w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)] transition-colors flex items-center gap-2" data-lang="en">
+                            <span class="text-base">🇺🇸</span> English
+                        </button>
+                        <button onclick="setLanguage('es')" class="lang-option w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)] transition-colors flex items-center gap-2" data-lang="es">
+                            <span class="text-base">🇲🇽</span> Español
+                        </button>
+                    </div>
+                </div>
 
                 <button id="btnToggleTheme" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Toggle Theme" aria-label="Toggle Theme">
                     <i data-lucide="moon" class="w-5 h-5"></i>

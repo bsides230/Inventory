@@ -95,6 +95,10 @@
                     <i data-lucide="mail" class="w-4 h-4"></i>
                     Email
                 </button>
+                <button class="admin-tab" data-tab="settings" onclick="switchTab('settings')">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    Settings
+                </button>
                 <button class="admin-tab" data-tab="security" onclick="switchTab('security')">
                     <i data-lucide="lock" class="w-4 h-4"></i>
                     Security
@@ -285,20 +289,20 @@
                             <input type="text" id="app_title" class="admin-input w-full branding-input" data-key="app_title" placeholder="Inventory">
                         </div>
                         <div>
-                            <label class="admin-label">Primary Color (Hex)</label>
-                            <input type="text" id="primary_color" class="admin-input w-full branding-input" data-key="primary_color" placeholder="#8e1f1f">
+                            <label class="admin-label">Primary / Accent Color</label>
+                            <select id="primary_color" class="admin-input w-full branding-input color-select" data-key="primary_color"></select>
                         </div>
                         <div>
-                            <label class="admin-label">Background Core Color (Hex)</label>
-                            <input type="text" id="bg_core" class="admin-input w-full branding-input" data-key="bg_core" placeholder="#0c0c0c">
+                            <label class="admin-label">Background Core Color</label>
+                            <select id="bg_core" class="admin-input w-full branding-input color-select" data-key="bg_core"></select>
                         </div>
                         <div>
-                            <label class="admin-label">Background Panel Color (Hex)</label>
-                            <input type="text" id="bg_panel" class="admin-input w-full branding-input" data-key="bg_panel" placeholder="#151515">
+                            <label class="admin-label">Background Panel Color</label>
+                            <select id="bg_panel" class="admin-input w-full branding-input color-select" data-key="bg_panel"></select>
                         </div>
                         <div>
-                            <label class="admin-label">Text Color (Hex)</label>
-                            <input type="text" id="text_color" class="admin-input w-full branding-input" data-key="text_color" placeholder="#f7f3ee">
+                            <label class="admin-label">Text Color</label>
+                            <select id="text_color" class="admin-input w-full branding-input color-select" data-key="text_color"></select>
                         </div>
                         <div>
                             <label class="admin-label">Icon Reference (Lucide)</label>
@@ -414,6 +418,67 @@
                         </button>
                     </div>
                     <div id="recipientsResult" class="hidden p-3 rounded-lg text-sm mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="tab-settings" class="tab-content hidden space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="settings" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">App Settings</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="admin-label">Order Output Language</label>
+                            <p class="text-[var(--color-text-secondary)] text-xs mb-2">The language used for item names and categories in exported order spreadsheets.</p>
+                            <select id="settingsOutputLang" class="admin-input w-full sm:w-64">
+                                <option value="en">English</option>
+                                <option value="es">Español</option>
+                            </select>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button onclick="saveAppSettings()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                Save Settings
+                            </button>
+                        </div>
+                        <div id="settingsResult" class="hidden p-3 rounded-lg text-sm"></div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="download" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">Download Master Inventory File</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">Download the current Master.xlsx file used to build the inventory.</p>
+                    <button onclick="downloadMasterFile()" class="bg-[var(--color-bg-body)] hover:bg-[var(--color-border)] border border-[var(--color-border)] text-[var(--color-text-primary)] font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2 text-sm">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                        Download Master.xlsx
+                    </button>
+                </div>
+
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="bar-chart" class="w-6 h-6 text-falcone-red"></i>
+                        <h2 class="text-lg font-bold">Download Frequency Report</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">Export a spreadsheet showing how often each item has been ordered, with categories as tabs.</p>
+                    <div class="flex flex-wrap items-end gap-3">
+                        <div>
+                            <label class="admin-label">Location</label>
+                            <select id="freqReportLocation" class="admin-input w-full sm:w-64">
+                                <option value="">All Locations</option>
+                            </select>
+                        </div>
+                        <button onclick="downloadFrequencyReport()" class="bg-[var(--color-bg-body)] hover:bg-[var(--color-border)] border border-[var(--color-border)] text-[var(--color-text-primary)] font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2 text-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            Download Report
+                        </button>
+                    </div>
                 </div>
             </div>
 

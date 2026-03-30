@@ -56,10 +56,11 @@ function showAdminApp() {
     loadLocations();
     loadEmailSettings();
     loadRecipients();
-    loadAnalytics();
+    loadAnalytics().then(() => populateFreqLocationDropdown());
     loadCategoryOrder();
     loadUILabels();
     loadBranding();
+    loadAppSettings();
 }
 
 // --- Analytics ---
@@ -709,8 +710,152 @@ function escapeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+
+// --- Color Presets ---
+const COLOR_PRESETS = [
+    { name: "Crimson Red", hex: "#8e1f1f" },
+    { name: "Tomato", hex: "#db594b" },
+    { name: "Burnt Orange", hex: "#c2410c" },
+    { name: "Amber", hex: "#d97706" },
+    { name: "Gold", hex: "#ca8a04" },
+    { name: "Lime Green", hex: "#65a30d" },
+    { name: "Emerald", hex: "#059669" },
+    { name: "Teal", hex: "#0d9488" },
+    { name: "Cyan", hex: "#0891b2" },
+    { name: "Sky Blue", hex: "#0284c7" },
+    { name: "Royal Blue", hex: "#2563eb" },
+    { name: "Indigo", hex: "#4f46e5" },
+    { name: "Violet", hex: "#7c3aed" },
+    { name: "Purple", hex: "#9333ea" },
+    { name: "Fuchsia", hex: "#c026d3" },
+    { name: "Rose", hex: "#e11d48" },
+    { name: "Pure White", hex: "#ffffff" },
+    { name: "Warm White", hex: "#f7f3ee" },
+    { name: "Light Gray", hex: "#d4d4d4" },
+    { name: "Medium Gray", hex: "#737373" },
+    { name: "Dark Gray", hex: "#404040" },
+    { name: "Charcoal", hex: "#262626" },
+    { name: "Near Black", hex: "#151515" },
+    { name: "Deep Black", hex: "#0c0c0c" },
+];
+
+function populateColorDropdowns() {
+    document.querySelectorAll('.color-select').forEach(select => {
+        select.innerHTML = '<option value="">Default</option>' +
+            COLOR_PRESETS.map(c =>
+                `<option value="${c.hex}" style="background:${c.hex};color:${isLight(c.hex)?'#000':'#fff'}">${c.name} (${c.hex})</option>`
+            ).join('');
+    });
+}
+
+function isLight(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return (r * 299 + g * 587 + b * 114) / 1000 > 128;
+}
+
+
+// --- App Settings ---
+async function loadAppSettings() {
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/settings`);
+        const data = await res.json();
+        if (data.success && data.settings) {
+            const langSel = document.getElementById('settingsOutputLang');
+            if (langSel) langSel.value = data.settings.output_language || 'en';
+        }
+    } catch (e) {
+        console.error('Failed to load settings:', e);
+    }
+}
+
+async function saveAppSettings() {
+    const resultEl = document.getElementById('settingsResult');
+    resultEl.classList.add('hidden');
+    const outputLang = document.getElementById('settingsOutputLang').value;
+
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/settings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ output_language: outputLang }),
+        });
+        const data = await res.json();
+        resultEl.textContent = data.success ? 'Settings saved.' : 'Failed to save.';
+        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.classList.remove('hidden');
+    } catch (e) {
+        resultEl.textContent = 'Request failed.';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.classList.remove('hidden');
+    }
+}
+
+
+// --- Downloads ---
+async function downloadMasterFile() {
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/download-master`);
+        if (!res.ok) {
+            alert('No Master.xlsx file found on server.');
+            return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Master.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        alert('Download failed.');
+    }
+}
+
+async function downloadFrequencyReport() {
+    const pin = document.getElementById('freqReportLocation').value;
+    try {
+        const url = `${API_BASE}/admin/download-frequency-report${pin ? '?location_pin=' + encodeURIComponent(pin) : ''}`;
+        const res = await adminApiFetch(url);
+        if (!res.ok) {
+            alert('Failed to generate report.');
+            return;
+        }
+        const blob = await res.blob();
+        const disposition = res.headers.get('content-disposition') || '';
+        let filename = 'Frequency Report.xlsx';
+        const match = disposition.match(/filename="(.+?)"/);
+        if (match) filename = match[1];
+        const dlUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = dlUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(dlUrl);
+    } catch (e) {
+        alert('Download failed.');
+    }
+}
+
+function populateFreqLocationDropdown() {
+    if (!analyticsData) return;
+    const select = document.getElementById('freqReportLocation');
+    if (!select) return;
+    select.innerHTML = '<option value="">All Locations</option>' +
+        (analyticsData.locations || []).map(loc =>
+            `<option value="${escapeHtml(loc.pin)}">${escapeHtml(loc.name)}</option>`
+        ).join('');
+}
+
+
 // --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
+    populateColorDropdowns();
     if (adminToken) {
         showAdminApp();
     }

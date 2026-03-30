@@ -1,3 +1,4 @@
+import io
 import os
 import re
 import json
@@ -15,7 +16,7 @@ import pandas as pd
 import uvicorn
 from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -104,6 +105,25 @@ RECIPIENTS_FILE = Path("config/order_recipients.txt")
 CATEGORY_ORDER_FILE = Path("config/category_order.json")
 UI_LABELS_FILE = Path("config/ui_labels.json")
 BRANDING_FILE = Path("config/branding.json")
+APP_SETTINGS_FILE = Path("config/app_settings.json")
+
+
+def load_app_settings() -> dict:
+    defaults = {"output_language": "en"}
+    if APP_SETTINGS_FILE.exists():
+        try:
+            with open(APP_SETTINGS_FILE, "r") as f:
+                saved = json.load(f)
+            defaults.update(saved)
+        except Exception:
+            pass
+    return defaults
+
+
+def save_app_settings(settings: dict):
+    APP_SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(APP_SETTINGS_FILE, "w") as f:
+        json.dump(settings, f, indent=4)
 
 
 # --- Config helpers ---
@@ -657,6 +677,7 @@ async def update_inventory(
             "item_id": request.id,
             "category_id": category_lower,
             "item_name": target_item.get("name_en", target_item.get("name", request.id)),
+            "item_name_es": target_item.get("name_es", ""),
             "quantity": request.qty,
             "unit": request.unit,
         }
@@ -776,19 +797,30 @@ async def submit_order(
         draft["needed_by"] = request.needed_by
         draft_items = draft.get("items", [])
 
-        order_items = []
+        app_settings = load_app_settings()
+        output_lang = app_settings.get("output_language", "en")
+
+        items_by_category = {}
         for draft_item in draft_items:
             category_data = get_inventory_category(draft_item["category_id"])
             category_label = category_data["label"] if category_data else draft_item["category_id"]
-            order_items.append({
-                "Category": category_label,
-                "Item Name": draft_item["item_name"],
+            if output_lang == "es" and category_data:
+                category_label = category_data.get("label_es", category_label)
+            item_name = draft_item.get("item_name", "")
+            if output_lang == "es":
+                item_name = draft_item.get("item_name_es") or draft_item.get("item_name", "")
+            items_by_category.setdefault(category_label, []).append({
+                "Item": item_name,
                 "Quantity": draft_item["quantity"],
                 "Unit": draft_item["unit"],
             })
 
-        df = pd.DataFrame(order_items).sort_values(by="Category")
-        df.to_excel(filepath, index=False)
+        with pd.ExcelWriter(filepath, engine="openpyxl") as writer:
+            for cat_label in sorted(items_by_category.keys()):
+                cat_items = items_by_category[cat_label]
+                df = pd.DataFrame(cat_items)
+                safe_sheet = re.sub(r'[\[\]:*?/\\]', '', cat_label)[:31] or "Sheet"
+                df.to_excel(writer, sheet_name=safe_sheet, index=False)
 
         if request.save_only:
             logger.info(
@@ -866,6 +898,113 @@ async def submit_order(
             filepath.unlink()
         logger.error("Error saving order: %s", exc, exc_info=True)
         return {"success": False, "message": f"Error saving order: {str(exc)}"}
+
+
+@app.get("/api/download/order/{filename:path}")
+async def download_order_file(
+    filename: str,
+    user: AuthenticatedUser = Depends(get_required_authenticated_user),
+):
+    safe_name = Path(filename).name
+    if not safe_name or safe_name != filename:
+        return JSONResponse(status_code=400, content={"detail": "Invalid filename"})
+    filepath = ORDERS_DIR / safe_name
+    if not filepath.exists():
+        saved_path = ORDERS_DIR / "saved" / safe_name
+        if saved_path.exists():
+            filepath = saved_path
+        else:
+            return JSONResponse(status_code=404, content={"detail": "File not found"})
+    resolved = filepath.resolve()
+    if not str(resolved).startswith(str(ORDERS_DIR.resolve())):
+        return JSONResponse(status_code=400, content={"detail": "Invalid filename"})
+    return FileResponse(
+        path=str(resolved),
+        filename=safe_name,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+# --- Admin Settings Endpoints ---
+@app.get("/api/admin/settings")
+async def admin_get_settings(_=Depends(get_required_admin)):
+    return {"success": True, "settings": load_app_settings()}
+
+
+@app.post("/api/admin/settings")
+async def admin_save_settings(request: Request, _=Depends(get_required_admin)):
+    body = await request.json()
+    settings = load_app_settings()
+    settings.update(body)
+    save_app_settings(settings)
+    return {"success": True}
+
+
+@app.get("/api/admin/download-master")
+async def admin_download_master(_=Depends(get_required_admin)):
+    master_path = ITEM_MASTER_DIR / "Master.xlsx"
+    if not master_path.exists():
+        return JSONResponse(status_code=404, content={"detail": "No Master.xlsx found"})
+    return FileResponse(
+        path=str(master_path),
+        filename="Master.xlsx",
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+@app.get("/api/admin/download-frequency-report")
+async def admin_download_frequency_report(
+    location_pin: str = "",
+    _=Depends(get_required_admin),
+):
+    locations = load_locations()
+    order_manager = FileOrderManager(ORDERS_DIR)
+    frequencies = order_manager.get_item_frequencies()
+
+    pin_frequencies = {}
+    for user_id, freqs in frequencies.items():
+        if user_id.startswith("pin_"):
+            pin = user_id.replace("pin_", "")
+            pin_frequencies[pin] = freqs
+
+    cat_ids = get_all_inventory_categories()
+    config = load_categories_config()
+
+    location_name = "All Locations"
+    if location_pin and location_pin in locations:
+        location_name = locations[location_pin]
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        for cat_id in cat_ids:
+            cat_data = get_inventory_category(cat_id)
+            if not cat_data:
+                continue
+            cat_config = config.get(cat_id, {})
+            cat_label = cat_config.get("label_en", cat_data.get("label", cat_id))
+            items = cat_data.get("items", [])
+            rows = []
+            for item in items:
+                freq = 0
+                if location_pin:
+                    freq = pin_frequencies.get(location_pin, {}).get(item["id"], 0)
+                else:
+                    for pin_freqs in pin_frequencies.values():
+                        freq += pin_freqs.get(item["id"], 0)
+                rows.append({"Item": item.get("name_en", item.get("name", "")), "Times Ordered": freq})
+            if rows:
+                df = pd.DataFrame(rows).sort_values(by="Times Ordered", ascending=False)
+                safe_sheet = re.sub(r'[\[\]:*?/\\]', '', cat_label)[:31] or "Sheet"
+                df.to_excel(writer, sheet_name=safe_sheet, index=False)
+
+    output.seek(0)
+    safe_loc = location_name.replace("/", "_").replace("\\", "_")
+    report_filename = f"Frequency Report - {safe_loc}.xlsx"
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{report_filename}"'},
+    )
 
 
 # --- Admin Endpoints ---
