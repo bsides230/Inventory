@@ -2,9 +2,8 @@
 
 ## Stack
 - `api`: FastAPI app container.
-- `db`: PostgreSQL persistent database.
 - `proxy`: Caddy reverse proxy with automated HTTPS certificates.
-- `backup_worker`: periodic backup job for DB volume snapshot and generated order files.
+- `backup_worker`: periodic backup job for config, drafts, and log files and generated order files.
 
 ## Prerequisites
 1. Public DNS record for your domain pointing to the host.
@@ -19,7 +18,6 @@ APP_DOMAIN=orders.example.com
 APP_ENV=production
 LOG_LEVEL=INFO
 APP_VERSION=0.1.0
-DATABASE_URL=postgresql+psycopg2://inventory:inventory@db:5432/inventory
 AUTH_JWT_SECRET=<strong-random-secret>
 AUTH_JWT_ALGORITHM=HS256
 ORDER_RECIPIENTS_FILE=config/order_recipients.txt
@@ -43,8 +41,6 @@ BACKUP_INTERVAL_SECONDS=3600
 ## Deploy
 1. Build and start:
    - `docker compose up -d --build`
-2. Run DB migrations:
-   - `docker compose exec api alembic upgrade head`
 3. Verify services:
    - `docker compose ps`
    - `curl -fsS https://$APP_DOMAIN/health/live`
@@ -54,18 +50,16 @@ BACKUP_INTERVAL_SECONDS=3600
 - The `backup_worker` service runs `scripts/backup.sh` every hour (configurable).
 - Backups are written under `/app/backups/<timestamp>/` inside `backups_data` volume.
 - Contents:
-  - `postgres_data.tar.gz`
   - `orders.tar.gz`
 - Retention: directories older than `BACKUP_RETENTION_DAYS` are removed.
 
 ## Restore Drill
 1. Stop API and DB containers:
-   - `docker compose stop api db`
+   - `docker compose stop api ipc_worker backup_worker`
 2. Restore order artifacts from backup:
    - `docker compose run --rm -e BACKUP_DIR=/app/backups backup_worker ./scripts/restore.sh <timestamp>`
-3. For DB restore, unpack `postgres_data.tar.gz` into `postgres_data` volume while DB is stopped.
 4. Restart services:
-   - `docker compose start db api proxy`
+   - `docker compose start proxy api ipc_worker backup_worker`
 5. Validate with live/ready endpoints and a test order submission.
 
 ## Abuse Protection

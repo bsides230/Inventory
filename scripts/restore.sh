@@ -7,7 +7,7 @@ if [[ $# -lt 1 ]]; then
 fi
 
 BACKUP_DIR="${BACKUP_DIR:-/app/backups}"
-ORDERS_DIR="${ORDERS_DIR:-/app/orders}"
+APP_DIR="${APP_DIR:-/app}"
 SOURCE_DIR="${BACKUP_DIR}/$1"
 
 if [[ ! -d "${SOURCE_DIR}" ]]; then
@@ -15,9 +15,22 @@ if [[ ! -d "${SOURCE_DIR}" ]]; then
   exit 1
 fi
 
-if [[ -f "${SOURCE_DIR}/orders.tar.gz" ]]; then
-  mkdir -p "${ORDERS_DIR}"
-  tar -xzf "${SOURCE_DIR}/orders.tar.gz" -C "${ORDERS_DIR}"
+# verify checksums
+cd "${SOURCE_DIR}"
+if [[ -f "checksums.txt" ]]; then
+  if ! sha256sum -c checksums.txt; then
+    echo "Checksum validation failed!"
+    exit 1
+  fi
+  echo "Checksum validation passed."
 fi
+
+for dir in config data drafts orders ipc logs; do
+  if [[ -f "${SOURCE_DIR}/${dir}.tar.gz" ]]; then
+    echo "Restoring ${dir}..."
+    mkdir -p "${APP_DIR}/${dir}"
+    tar -xzf "${SOURCE_DIR}/${dir}.tar.gz" -C "${APP_DIR}/${dir}"
+  fi
+done
 
 echo "restore completed from: ${SOURCE_DIR}"

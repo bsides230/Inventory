@@ -5,6 +5,20 @@ from server import app
 
 client = TestClient(app)
 
+from server import DATA_DIR, DRAFTS_DIR, ORDERS_DIR, CATEGORIES_FILE
+from pathlib import Path
+
+def setup_function():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    DRAFTS_DIR.mkdir(parents=True, exist_ok=True)
+    ORDERS_DIR.mkdir(parents=True, exist_ok=True)
+    Path("ipc/inbox").mkdir(parents=True, exist_ok=True)
+    if not CATEGORIES_FILE.exists():
+        with open(CATEGORIES_FILE, "w") as f:
+            f.write("{}")
+
+
+
 
 def test_health_live():
     response = client.get("/health/live")

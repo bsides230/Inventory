@@ -1,0 +1,2 @@
+{"timestamp": "2026-03-30T00:07:52.580081+00:00", "order_id": "f0819947-6b66-4e7c-a1e6-c911a1c819b7", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
+{"timestamp": "2026-03-30T00:59:02.661742+00:00", "order_id": "04d37951-0e36-440e-8b27-f6ca07ad922e", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}

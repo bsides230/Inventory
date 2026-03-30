@@ -940,3 +940,33 @@ COMPLETED
 
 ### Tests / Validation
 - Ran the test suite to ensure the updated submit_order endpoints and mocked IPC background worker performed smoothly and persisted accurate test results without breaking downstream processes.
+
+## Phase 4 — File-Only Backend Rebuild
+### Status
+COMPLETED
+
+### Objective
+- Harden operations, complete migration cutover, and remove obsolete DB-era artifacts.
+
+### Work Completed
+- **Data Integrity Check:** Created `scripts/data_integrity_check.py` to ensure all drafts and orders contain the necessary fields (like expected version) and have corresponding state flags before finishing cutover.
+- **Backup/Restore Script Enhancement:** Updated `scripts/backup.sh` and `scripts/restore.sh` to package/extract `config`, `data`, `drafts`, `orders`, `ipc`, and `logs` directories, completely bypassing `postgres_data`, and added automated checksum validation during restore.
+- **Health Verification:** Updated `/health/ready` endpoint in `server.py` to verify filesystem read access to data directories and explicitly verify write access to `orders`, `drafts`, and `ipc` inbox.
+- **Queue Health:** Added `/health/queue` endpoint to expose lengths of IPC file directories (`inbox`, `processing`, and `failed`). Updated tests in `test_api_baseline.py` to match the updated health payloads.
+- **Security Guardrails:** Hardened draft name inputs within `/api/drafts/new` and `/api/drafts/{draft_id}/rename` by performing explicit regex validation on the backend `([A-Za-z0-9\\s\\-_]+)` preventing cross-directory path transversal via draft filenames.
+- **Final DB Cleanup:** Confirmed total absence of `alembic` directory, `db` models or sessions, and deprecated `inventory_state.json`. Adjusted `docs/architecture.md` and `docs/deployment.md` to permanently decouple the documented environment from DB or PostgreSQL artifacts and define the finalized persistent flat-file mechanisms.
+
+### Files Created
+- `scripts/data_integrity_check.py`
+
+### Files Modified
+- `server.py`
+- `tests/test_api_baseline.py`
+- `scripts/backup.sh`
+- `scripts/restore.sh`
+- `docs/architecture.md`
+- `docs/deployment.md`
+- `build_notes.md`
+
+### Tests / Validation
+- Ran the test suite successfully covering updated baseline checks for `/health/ready` and verified new safe-name bounds for API endpoints.
