@@ -35,7 +35,7 @@ def parse_recipients_file(path: Path) -> list[str]:
     recipients: list[str] = []
     invalid_lines: list[str] = []
 
-    for line_number, raw in enumerate(path.read_text().splitlines(), start=1):
+    for line_number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
