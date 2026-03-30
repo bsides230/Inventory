@@ -4,12 +4,12 @@
 - **Backend:** FastAPI application served from `server.py`.
 - **Frontend:** Static assets under `web/` mounted at `/`.
 - **Inventory Data:** JSON category files under `data/`.
-- **Session State:** In-memory + persisted order draft values in `inventory_state.json`.
+- **Session State:** File-backed order drafts per user session in `drafts/` using explicit state flags and optimistic concurrency locking.
 - **Order Output:** Excel files generated under `orders/`.
 
 ## Request Flow (Current)
 1. Client requests category and inventory endpoints.
-2. API loads category JSON files and overlays in-progress quantities from `inventory_state.json`.
+2. API loads category JSON files and overlays in-progress quantities from the user's active file draft in `drafts/`.
 3. Client posts updates per item to `/api/inventory/{category}/update`.
 4. Client submits order to `/api/submit_order`.
 5. API collects non-zero line items and writes an Excel order file.
@@ -27,4 +27,4 @@
 - Add authenticated user identity and write protection.
 - Add robust admin controls and deployment hardening.
 
-Phase 0 intentionally preserves existing order behavior while creating safer observability and operational baselines.
+The backend now relies solely on file managers (FileDraftManager, FileOrderManager) without any database. Async tasks such as email delivery are handled by an IPC worker polling `ipc/inbox`.

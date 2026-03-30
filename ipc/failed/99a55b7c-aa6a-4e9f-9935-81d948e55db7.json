@@ -1,0 +1,13 @@
+{
+    "event_id": "99a55b7c-aa6a-4e9f-9935-81d948e55db7",
+    "event_type": "email_send",
+    "timestamp": "2026-03-30T00:59:02.740704+00:00",
+    "payload": {
+        "order_id": "0e533e0f-81c6-4dfd-8e7c-89ebc49abdb4",
+        "location": "Alpha",
+        "date": "2026-03-25",
+        "is_rush": false,
+        "needed_by": null,
+        "export_path": "orders/Falcones Pizza Falcones Order 2026-03-25.xlsx"
+    }
+}

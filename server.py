@@ -1,10 +1,12 @@
+import os
+import re
 import json
 import logging
 import shutil
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -495,7 +497,29 @@ async def health_live():
 
 @app.get("/health/ready")
 async def health_ready():
-    return {"status": "ready", "checks": {"data_dir": DATA_DIR.exists(), "categories_file": CATEGORIES_FILE.exists()}}
+    checks = {
+        "data_dir": DATA_DIR.exists() and os.access(DATA_DIR, os.R_OK),
+        "categories_file": CATEGORIES_FILE.exists() and os.access(CATEGORIES_FILE, os.R_OK),
+        "orders_dir_writable": ORDERS_DIR.exists() and os.access(ORDERS_DIR, os.W_OK),
+        "drafts_dir_writable": DRAFTS_DIR.exists() and os.access(DRAFTS_DIR, os.W_OK),
+        "ipc_dir_writable": Path("ipc/inbox").exists() and os.access(Path("ipc/inbox"), os.W_OK),
+    }
+    status = "ready" if all(checks.values()) else "not_ready"
+    return {"status": status, "checks": checks}
+
+@app.get("/health/queue")
+async def health_queue():
+    inbox = len(list(Path("ipc/inbox").glob("*.json"))) if Path("ipc/inbox").exists() else 0
+    processing = len(list(Path("ipc/processing").glob("*.json"))) if Path("ipc/processing").exists() else 0
+    failed = len(list(Path("ipc/failed").glob("*.json"))) if Path("ipc/failed").exists() else 0
+    return {
+        "status": "ok",
+        "counts": {
+            "inbox": inbox,
+            "processing": processing,
+            "failed": failed
+        }
+    }
 
 
 @app.get("/api/version")
@@ -674,7 +698,14 @@ async def list_drafts(user: AuthenticatedUser = Depends(get_required_authenticat
 @app.post("/api/drafts/new")
 async def create_draft(body: NewDraftRequest, user: AuthenticatedUser = Depends(get_required_authenticated_user)):
     draft_manager = FileDraftManager(DRAFTS_DIR)
-    draft = draft_manager.create_draft(user.external_id, name=body.name)
+
+    # Safe filename validation for draft name if provided
+    name = body.name
+    if name:
+        if not re.match(r"^[A-Za-z0-9\s\-_]+$", name):
+            raise HTTPException(status_code=400, detail="Invalid characters in draft name")
+
+    draft = draft_manager.create_draft(user.external_id, name=name)
     return {"success": True, "draft": {"id": int(draft["id"]), "name": draft["draft_name"], "item_count": 0}}
 
 
@@ -685,7 +716,13 @@ async def rename_draft(
     user: AuthenticatedUser = Depends(get_required_authenticated_user),
 ):
     draft_manager = FileDraftManager(DRAFTS_DIR)
-    draft = draft_manager.update_draft(user.external_id, draft_id, name=body.name)
+
+    # Safe filename validation for draft name
+    name = body.name
+    if not re.match(r"^[A-Za-z0-9\s\-_]+$", name):
+        raise HTTPException(status_code=400, detail="Invalid characters in draft name")
+
+    draft = draft_manager.update_draft(user.external_id, draft_id, name=name)
     if not draft:
         raise HTTPException(status_code=404, detail="Draft not found")
     return {"success": True}
