@@ -5,44 +5,17 @@ echo "======================================================="
 echo "Falcones Pizza Inventory - macOS/Linux Installer"
 echo "======================================================="
 
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    echo "Docker is not installed."
-    OS="$(uname -s)"
-
-    if [ "$OS" = "Linux" ]; then
-        echo "Attempting to install Docker for Linux..."
-        # Official convenience script for Linux
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sudo sh get-docker.sh
-        rm get-docker.sh
-
-        # Give user permission to use docker without sudo if possible
-        if ! groups | grep -q docker; then
-            echo "Adding current user to the 'docker' group..."
-            sudo usermod -aG docker "$USER"
-            echo "You may need to log out and log back in for group changes to take effect."
-        fi
-    elif [ "$OS" = "Darwin" ]; then
-        echo "Please install Docker Desktop for Mac."
-        echo "Opening Docker download page..."
-        open https://www.docker.com/products/docker-desktop/
-        echo "Once installed and running, run this script again or run start.sh."
-        exit 1
-    else
-        echo "Unsupported OS: $OS"
-        exit 1
-    fi
-fi
-
-# Check if docker daemon is running
-if ! docker info &> /dev/null; then
-    echo "Docker is installed but the daemon is not running. Please start Docker."
+# Check if Python is installed
+if ! command -v python3 &> /dev/null; then
+    echo "Python 3 is not installed. Please install Python 3.12 or later."
     exit 1
 fi
 
-echo "Building and starting the application..."
-docker compose up -d --build
+echo "Installing required Python dependencies..."
+python3 -m pip install -r requirements.txt --break-system-packages 2>/dev/null || python3 -m pip install -r requirements.txt
+
+echo "Starting the application..."
+./start.sh
 
 # Ask user if they want to install it as a system service
 OS="$(uname -s)"
@@ -58,15 +31,13 @@ if [ "$OS" = "Linux" ]; then
         sudo bash -c "cat > $SERVICE_FILE" <<EOF
 [Unit]
 Description=Falcones Pizza Inventory Service
-Requires=docker.service
-After=docker.service
+After=network.target
 
 [Service]
-Type=oneshot
-RemainAfterExit=yes
+Type=simple
 WorkingDirectory=$CURRENT_DIR
-ExecStart=/usr/bin/docker compose up -d
-ExecStop=/usr/bin/docker compose down
+ExecStart=$CURRENT_DIR/start.sh
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
