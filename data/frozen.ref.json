@@ -1,0 +1,115 @@
+{
+    "label": "FROZEN.REF",
+    "items": [
+        {
+            "id": "frozen.ref_0",
+            "name_en": "Cake Bundt",
+            "name_es": "Pastel Bundt"
+        },
+        {
+            "id": "frozen.ref_1",
+            "name_en": "Cake Chocolate",
+            "name_es": "Pastel de Chocolate"
+        },
+        {
+            "id": "frozen.ref_2",
+            "name_en": "Cake Italian Lemon",
+            "name_es": "Pastel de Limón Italiano"
+        },
+        {
+            "id": "frozen.ref_3",
+            "name_en": "Cake Strawberry",
+            "name_es": "Pastel de Fresa"
+        },
+        {
+            "id": "frozen.ref_4",
+            "name_en": "Cannoli Cream w/choc",
+            "name_es": "Crema de Cannoli con Chocolate"
+        },
+        {
+            "id": "frozen.ref_5",
+            "name_en": "Cannoli Shell Lg",
+            "name_es": "Concha de Cannoli Grande"
+        },
+        {
+            "id": "frozen.ref_6",
+            "name_en": "Cannoli Shell Lg (choc)",
+            "name_es": "Concha de Cannoli Grande (Choc)"
+        },
+        {
+            "id": "frozen.ref_7",
+            "name_en": "Cannoli Shell Sm",
+            "name_es": "Concha de Cannoli Pequeña"
+        },
+        {
+            "id": "frozen.ref_8",
+            "name_en": "Cannoli Shell Sm (choc)",
+            "name_es": "Concha de Cannoli Pequeña (Choc)"
+        },
+        {
+            "id": "frozen.ref_9",
+            "name_en": "Cheesecake NY",
+            "name_es": "Pastel de Queso estilo NY"
+        },
+        {
+            "id": "frozen.ref_10",
+            "name_en": "Cheesecake Oreo",
+            "name_es": "Pastel de Queso Oreo"
+        },
+        {
+            "id": "frozen.ref_11",
+            "name_en": "Cheesecake Turtle",
+            "name_es": "Pastel de Queso Tortuga"
+        },
+        {
+            "id": "frozen.ref_12",
+            "name_en": "French Fries Crinkle Cut",
+            "name_es": "Papas Fritas Onduladas"
+        },
+        {
+            "id": "frozen.ref_13",
+            "name_en": "French Fries Homestyle",
+            "name_es": "Papas Fritas Estilo Casero"
+        },
+        {
+            "id": "frozen.ref_14",
+            "name_en": "French Fries Shoestring",
+            "name_es": "Papas Fritas Finas"
+        },
+        {
+            "id": "frozen.ref_15",
+            "name_en": "Hashbrown 2/10lb.",
+            "name_es": "Papas Ralladas (Hashbrown) 2/10lb."
+        },
+        {
+            "id": "frozen.ref_16",
+            "name_en": "Pasta Tortellini",
+            "name_es": "Pasta Tortellini"
+        },
+        {
+            "id": "frozen.ref_17",
+            "name_en": "Pizza Crust Cauliflower",
+            "name_es": "Masa de Pizza de Coliflor"
+        },
+        {
+            "id": "frozen.ref_18",
+            "name_en": "Tater Tots",
+            "name_es": "Croquetas de Papa (Tater Tots)"
+        },
+        {
+            "id": "frozen.ref_19",
+            "name_en": "Tiramisu (ea.)",
+            "name_es": "Tiramisú (c/u)"
+        },
+        {
+            "id": "frozen.ref_20",
+            "name_en": "French Fries 3/8th\" Straight",
+            "name_es": "Papas Fritas Rectas 3/8\""
+        },
+        {
+            "id": "frozen.ref_21",
+            "name_en": "Biscuits 1/24 cs.",
+            "name_es": "Panecillos 1/24 caja"
+        }
+    ]
+}

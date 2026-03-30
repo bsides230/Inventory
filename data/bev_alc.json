@@ -1,0 +1,40 @@
+{
+    "label": "BEV-ALC",
+    "items": [
+        {
+            "id": "bev_alc_0",
+            "name_en": "Stella Artois 6pk",
+            "name_es": "Stella Artois 6pk"
+        },
+        {
+            "id": "bev_alc_1",
+            "name_en": "Yuengling Flight 6pk",
+            "name_es": "Yuengling Flight 6pk"
+        },
+        {
+            "id": "bev_alc_2",
+            "name_en": "Bud Light 6pk",
+            "name_es": "Bud Light 6pk"
+        },
+        {
+            "id": "bev_alc_3",
+            "name_en": "Modelo Negra 6pk",
+            "name_es": "Modelo Negra 6pk"
+        },
+        {
+            "id": "bev_alc_4",
+            "name_en": "F5 IPA 6pk",
+            "name_es": "F5 IPA 6pk"
+        },
+        {
+            "id": "bev_alc_5",
+            "name_en": "Corona 6pk",
+            "name_es": "Corona 6pk"
+        },
+        {
+            "id": "bev_alc_6",
+            "name_en": "Modelo 6pk.",
+            "name_es": "Modelo 6pk."
+        }
+    ]
+}

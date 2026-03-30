@@ -1,0 +1,45 @@
+{
+    "label": "BEV-BIB",
+    "items": [
+        {
+            "id": "bev_bib_0",
+            "name_en": "BIB Coca-Cola",
+            "name_es": "Caja de Jarabe Coca-Cola"
+        },
+        {
+            "id": "bev_bib_1",
+            "name_en": "BIB Coke Zero",
+            "name_es": "Caja de Jarabe Coke Zero"
+        },
+        {
+            "id": "bev_bib_2",
+            "name_en": "BIB Diet Coke",
+            "name_es": "Caja de Jarabe Diet Coke"
+        },
+        {
+            "id": "bev_bib_3",
+            "name_en": "BIB Diet Dr. Pepper",
+            "name_es": "Caja de Jarabe Diet Dr. Pepper"
+        },
+        {
+            "id": "bev_bib_4",
+            "name_en": "BIB Dr.Pepper",
+            "name_es": "Caja de Jarabe Dr. Pepper"
+        },
+        {
+            "id": "bev_bib_5",
+            "name_en": "BIB Lemonade",
+            "name_es": "Caja de Jarabe Limonada"
+        },
+        {
+            "id": "bev_bib_6",
+            "name_en": "BIB Root Beer",
+            "name_es": "Caja de Jarabe Cerveza de Raíz"
+        },
+        {
+            "id": "bev_bib_7",
+            "name_en": "BIB Sprite",
+            "name_es": "Caja de Jarabe Sprite"
+        }
+    ]
+}

@@ -970,3 +970,23 @@ COMPLETED
 
 ### Tests / Validation
 - Ran the test suite successfully covering updated baseline checks for `/health/ready` and verified new safe-name bounds for API endpoints.
+
+## 2026-03-30T22:20:00Z — Fix Category Translations
+### Status
+COMPLETED
+
+### Objective
+- Enable reading English and Spanish category translations from the first two rows of the Master Excel file, allowing translations to be kept cleanly inline with their items.
+
+### Work Completed
+- **Data Parsing:** Updated `update_inventory_data.py` to check row 1 for language headers ('en', 'es'). If present, it maps columns dynamically and extracts category translations from row 2, applying them to `label_en` and `label_es` in `categories.json`.
+- **Item Data Extraction:** Modified the script to begin reading inventory items from row 3 if language headers exist, mapping them to the correct data files. Empty items are preserved as placeholders to ensure row index alignment between languages.
+- **Backwards Compatibility:** Retained fallback logic so that spreadsheets without language headers in row 1 are processed using the previous logic (starting at row 1, using tab names for category labels).
+
+### Files Modified
+- `update_inventory_data.py`
+
+### Tests / Validation
+- Verified with dummy data mimicking the new 'en' and 'es' headers.
+- Verified with backwards-compatible (header-less) files.
+- Ensured category metadata mapped correctly to `categories.json` and item translations to their individual `data/*.json` files.

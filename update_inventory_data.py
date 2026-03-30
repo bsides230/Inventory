@@ -94,9 +94,48 @@ def convert_excel_to_json():
                 df = pd.read_excel(xls, sheet_name=sheet_name, header=None)
                 if df.empty or len(df.columns) == 0:
                     continue
-                items_en = df.iloc[:, 0].astype(str).tolist()
-                items_en = [v for v in items_en if v and v.lower() != 'nan']
-                items_es_col = df.iloc[:, 1].tolist() if len(df.columns) >= 2 else []
+
+                # Check for language headers in row 0
+                has_lang_headers = False
+                en_col_idx = 0
+                es_col_idx = 1 if len(df.columns) >= 2 else -1
+
+                if len(df) >= 2:
+                    row0 = df.iloc[0].astype(str).str.strip().str.lower().tolist()
+                    if 'en' in row0 or 'es' in row0:
+                        has_lang_headers = True
+                        if 'en' in row0:
+                            en_col_idx = row0.index('en')
+                        if 'es' in row0:
+                            es_col_idx = row0.index('es')
+
+                start_row = 2 if has_lang_headers else 0
+
+                cat_label_en = None
+                cat_label_es = None
+
+                if has_lang_headers and len(df) >= 2:
+                    val_en = df.iloc[1, en_col_idx] if en_col_idx >= 0 else None
+                    if pd.notna(val_en) and str(val_en).strip() and str(val_en).lower() != 'nan':
+                        cat_label_en = str(val_en).strip()
+
+                    val_es = df.iloc[1, es_col_idx] if es_col_idx >= 0 else None
+                    if pd.notna(val_es) and str(val_es).strip() and str(val_es).lower() != 'nan':
+                        cat_label_es = str(val_es).strip()
+
+                items_en = df.iloc[start_row:, en_col_idx].astype(str).tolist() if en_col_idx >= 0 else []
+                items_es_col = df.iloc[start_row:, es_col_idx].astype(str).tolist() if es_col_idx >= 0 else []
+
+                # Clean up items_en (remove 'nan' and empty strings)
+                items_en_clean = []
+                for val in items_en:
+                    if pd.notna(val) and str(val).lower() != 'nan' and str(val).strip():
+                        items_en_clean.append(str(val).strip())
+                    else:
+                        items_en_clean.append('') # Keep alignment
+
+                items_en = items_en_clean
+
             else:
                 df_en = pd.read_excel(xls_en, sheet_name=sheet_name, header=None)
                 if df_en.empty or len(df_en.columns) == 0:
@@ -107,20 +146,27 @@ def convert_excel_to_json():
                 if xls_es and sheet_name in xls_es.sheet_names:
                     df_es = pd.read_excel(xls_es, sheet_name=sheet_name, header=None)
                     items_es_col = df_es.iloc[:, 0].tolist()
+                cat_label_en = None
+                cat_label_es = None
 
-            if not items_en:
+            # Only proceed if there is at least one valid English item
+            if not any(items_en):
                 continue
 
-            cat_label, tab_icon = parse_tab_name(sheet_name)
-            cat_id = cat_label.lower().replace(" ", "_").replace("-", "_")
+            cat_label_tab, tab_icon = parse_tab_name(sheet_name)
+            cat_id = cat_label_tab.lower().replace(" ", "_").replace("-", "_")
+
+            # Fallback to tab name if not found in Excel row 1
+            final_label_en = cat_label_en if cat_label_en else cat_label_tab
+            final_label_es = cat_label_es if cat_label_es else cat_label_tab
 
             if cat_id not in config:
                 icon_val = tab_icon if tab_icon else fallback_icons[icon_idx % len(fallback_icons)]
                 config[cat_id] = {
                     "color": fallback_colors[icon_idx % len(fallback_colors)],
                     "icon": icon_val,
-                    "label_en": cat_label,
-                    "label_es": cat_label,
+                    "label_en": final_label_en,
+                    "label_es": final_label_es,
                 }
                 config_updated = True
                 icon_idx += 1
@@ -128,19 +174,24 @@ def convert_excel_to_json():
                 if tab_icon and config[cat_id].get("icon") != tab_icon:
                     config[cat_id]["icon"] = tab_icon
                     config_updated = True
-                if "label_en" not in config[cat_id]:
-                    config[cat_id]["label_en"] = cat_label
+                if config[cat_id].get("label_en") != final_label_en:
+                    config[cat_id]["label_en"] = final_label_en
                     config_updated = True
-                if "label_es" not in config[cat_id]:
-                    config[cat_id]["label_es"] = cat_label
+                if config[cat_id].get("label_es") != final_label_es:
+                    config[cat_id]["label_es"] = final_label_es
                     config_updated = True
-                if "label" in config[cat_id] and "label_en" in config[cat_id]:
+                if "label" in config[cat_id]:
                     del config[cat_id]["label"]
                     config_updated = True
 
-            category_data = {"label": cat_label, "items": []}
+            category_data = {"label": final_label_en, "items": []}
 
+            # Filter out empty items that were kept for alignment
+            valid_idx = 0
             for i, item_en in enumerate(items_en):
+                if not item_en:
+                    continue
+
                 item_es = item_en
                 if i < len(items_es_col):
                     val = items_es_col[i]
@@ -148,10 +199,11 @@ def convert_excel_to_json():
                         item_es = str(val).strip()
 
                 category_data["items"].append({
-                    "id": f"{cat_id}_{i}",
+                    "id": f"{cat_id}_{valid_idx}",
                     "name_en": item_en.strip(),
                     "name_es": item_es.strip(),
                 })
+                valid_idx += 1
 
             json_filepath = DATA_DIR / f"{cat_id}.json"
             current_data = None
