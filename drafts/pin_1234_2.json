@@ -1,0 +1,20 @@
+{
+    "id": "2",
+    "user_id": "pin_1234",
+    "draft_name": "Tuesday Produce Run",
+    "state": "active",
+    "version": 3,
+    "is_rush": false,
+    "needed_by": null,
+    "items": [
+        {
+            "item_id": "produce_0",
+            "category_id": "produce",
+            "item_name": "Basil Fresh (each)",
+            "quantity": 2,
+            "unit": "each"
+        }
+    ],
+    "created_at": "2026-03-30T01:26:39.570436+00:00",
+    "updated_at": "2026-03-30T01:26:53.574233+00:00"
+}
