@@ -56,10 +56,10 @@ def process_event(event_file: Path):
         # Transition state flag
         flag_path = ORDERS_DIR / "flags" / f"{order_id}.state"
         if delivery.status == "sent":
-            flag_path.write_text("emailed")
+            flag_path.write_text("emailed", encoding="utf-8")
             shutil.move(str(processing_file), str(IPC_DONE / processing_file.name))
         else:
-            flag_path.write_text("email_failed")
+            flag_path.write_text("email_failed", encoding="utf-8")
             shutil.move(str(processing_file), str(IPC_FAILED / processing_file.name))
 
         # Log transition

@@ -36,7 +36,7 @@ class FileDraftManager:
     def get_active_draft(self, user_id: str) -> dict:
         active_id_path = self._get_active_draft_id_path(user_id)
         if active_id_path.exists():
-            active_id = active_id_path.read_text().strip()
+            active_id = active_id_path.read_text(encoding="utf-8").strip()
             draft_path = self._get_draft_path(user_id, active_id)
             draft = self._read_json(draft_path)
             if draft and draft.get("state", draft.get("status")) == "active":
@@ -48,7 +48,7 @@ class FileDraftManager:
         return self._read_json(path)
 
     def set_active_draft(self, user_id: str, draft_id: int):
-        self._get_active_draft_id_path(user_id).write_text(str(draft_id))
+        self._get_active_draft_id_path(user_id).write_text(str(draft_id), encoding="utf-8")
 
     def create_draft(self, user_id: str, name: str = None) -> dict:
         existing = self.get_all_active_drafts(user_id)
@@ -106,7 +106,7 @@ class FileDraftManager:
 
             # Update active draft pointer if deleted
             active_id_path = self._get_active_draft_id_path(user_id)
-            if active_id_path.exists() and active_id_path.read_text().strip() == str(draft_id):
+            if active_id_path.exists() and active_id_path.read_text(encoding="utf-8").strip() == str(draft_id):
                 active_id_path.unlink()
                 existing = self.get_all_active_drafts(user_id)
                 if existing:

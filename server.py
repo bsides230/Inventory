@@ -112,7 +112,7 @@ def load_app_settings() -> dict:
     defaults = {"output_language": "en"}
     if APP_SETTINGS_FILE.exists():
         try:
-            with open(APP_SETTINGS_FILE, "r") as f:
+            with open(APP_SETTINGS_FILE, "r", encoding="utf-8") as f:
                 saved = json.load(f)
             defaults.update(saved)
         except Exception:
@@ -122,7 +122,7 @@ def load_app_settings() -> dict:
 
 def save_app_settings(settings: dict):
     APP_SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(APP_SETTINGS_FILE, "w") as f:
+    with open(APP_SETTINGS_FILE, "w", encoding="utf-8") as f:
         json.dump(settings, f, indent=4)
 
 
@@ -132,7 +132,7 @@ def load_locations() -> dict[str, str]:
     result = {}
     if not LOCATIONS_CONFIG.exists():
         return result
-    with open(LOCATIONS_CONFIG, "r") as f:
+    with open(LOCATIONS_CONFIG, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#"):
@@ -154,12 +154,12 @@ def save_locations(locations: dict[str, str]) -> None:
     ]
     for pin, name in sorted(locations.items()):
         lines.append(f"{pin}|{name}")
-    LOCATIONS_CONFIG.write_text("\n".join(lines) + "\n")
+    LOCATIONS_CONFIG.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def get_admin_password() -> str:
     if ADMIN_PASSWORD_FILE.exists():
-        return ADMIN_PASSWORD_FILE.read_text().strip()
+        return ADMIN_PASSWORD_FILE.read_text(encoding="utf-8").strip()
     return "admin"
 
 
@@ -174,7 +174,7 @@ def load_email_settings() -> dict:
     }
     if not EMAIL_SETTINGS_FILE.exists():
         return defaults
-    with open(EMAIL_SETTINGS_FILE, "r") as f:
+    with open(EMAIL_SETTINGS_FILE, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#"):
@@ -189,7 +189,7 @@ def save_email_settings(s: dict) -> None:
     lines = []
     for k, v in s.items():
         lines.append(f"{k}={v}")
-    EMAIL_SETTINGS_FILE.write_text("\n".join(lines) + "\n")
+    EMAIL_SETTINGS_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def build_email_service():
@@ -222,7 +222,7 @@ def load_recipients() -> list[str]:
     if not RECIPIENTS_FILE.exists():
         return []
     lines = []
-    with open(RECIPIENTS_FILE, "r") as f:
+    with open(RECIPIENTS_FILE, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line and not line.startswith("#"):
@@ -232,7 +232,7 @@ def load_recipients() -> list[str]:
 
 def save_recipients(recipients: list[str]) -> None:
     lines = ["# Order recipient emails (one per line)"] + recipients
-    RECIPIENTS_FILE.write_text("\n".join(lines) + "\n")
+    RECIPIENTS_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 @dataclass
@@ -246,7 +246,7 @@ class NullOrderEmailDeliveryService:
 
 def get_location_name():
     if LOCATION_FILE.exists():
-        with open(LOCATION_FILE, "r") as f:
+        with open(LOCATION_FILE, "r", encoding="utf-8") as f:
             return f.read().strip()
     return "Falcones Pizza"
 
@@ -346,13 +346,13 @@ def get_required_admin(credentials: HTTPAuthorizationCredentials | None = Depend
 # --- Data Loading ---
 def load_categories_config() -> Dict[str, dict]:
     if CATEGORIES_FILE.exists():
-        with open(CATEGORIES_FILE, "r") as f:
+        with open(CATEGORIES_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
 
 def save_categories_config(config: Dict[str, dict]):
-    with open(CATEGORIES_FILE, "w") as f:
+    with open(CATEGORIES_FILE, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
 
 
@@ -361,7 +361,7 @@ def get_inventory_category(category: str):
     cat_file = DATA_DIR / f"{category}.json"
     if cat_file.exists():
         try:
-            with open(cat_file, "r") as f:
+            with open(cat_file, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception as exc:
             logger.error("Error reading %s.json: %s", category, exc, exc_info=True)
@@ -379,7 +379,7 @@ def get_all_inventory_categories():
     # Sort categories based on config/category_order.json if it exists
     if CATEGORY_ORDER_FILE.exists():
         try:
-            with open(CATEGORY_ORDER_FILE, "r") as f:
+            with open(CATEGORY_ORDER_FILE, "r", encoding="utf-8") as f:
                 order_data = json.load(f)
                 order_list = order_data.get("order", [])
 
@@ -557,7 +557,7 @@ async def get_branding():
     branding = {}
     if BRANDING_FILE.exists():
         try:
-            with open(BRANDING_FILE, "r") as f:
+            with open(BRANDING_FILE, "r", encoding="utf-8") as f:
                 branding = json.load(f)
         except Exception as exc:
             logger.error("Error reading branding.json: %s", exc, exc_info=True)
@@ -569,7 +569,7 @@ async def get_ui_labels():
     labels = {}
     if UI_LABELS_FILE.exists():
         try:
-            with open(UI_LABELS_FILE, "r") as f:
+            with open(UI_LABELS_FILE, "r", encoding="utf-8") as f:
                 labels = json.load(f)
         except Exception as exc:
             logger.error("Error reading ui_labels.json: %s", exc, exc_info=True)
@@ -848,7 +848,7 @@ async def submit_order(
         flags_dir = ORDERS_DIR / "flags"
         flags_dir.mkdir(parents=True, exist_ok=True)
         flag_path = flags_dir / f"{order['id']}.state"
-        flag_path.write_text("submitted")
+        flag_path.write_text("submitted", encoding="utf-8")
 
         # update draft state
         draft_manager.update_draft(user.external_id, int(draft["id"]), state="submitted")
@@ -1147,7 +1147,7 @@ async def admin_get_category_order(_=Depends(get_required_admin)):
 @app.post("/api/admin/category-order")
 async def admin_update_category_order(body: UpdateCategoryOrderRequest, _=Depends(get_required_admin)):
     CATEGORY_ORDER_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(CATEGORY_ORDER_FILE, "w") as f:
+    with open(CATEGORY_ORDER_FILE, "w", encoding="utf-8") as f:
         json.dump({"order": body.order}, f, indent=4)
     return {"success": True}
 
@@ -1155,7 +1155,7 @@ async def admin_update_category_order(body: UpdateCategoryOrderRequest, _=Depend
 @app.post("/api/admin/ui-labels")
 async def admin_update_ui_labels(body: UpdateUILabelsRequest, _=Depends(get_required_admin)):
     UI_LABELS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(UI_LABELS_FILE, "w") as f:
+    with open(UI_LABELS_FILE, "w", encoding="utf-8") as f:
         json.dump(body.labels, f, indent=4)
     return {"success": True}
 
@@ -1165,7 +1165,7 @@ async def admin_update_branding(body: UpdateBrandingRequest, _=Depends(get_requi
     BRANDING_FILE.parent.mkdir(parents=True, exist_ok=True)
     safe_keys = ["brand_name", "app_title", "primary_color", "secondary_color", "bg_core", "bg_panel", "text_color", "icon_reference"]
     branding = {k: v for k, v in body.branding.items() if k in safe_keys}
-    with open(BRANDING_FILE, "w") as f:
+    with open(BRANDING_FILE, "w", encoding="utf-8") as f:
         json.dump(branding, f, indent=4)
     return {"success": True}
 
@@ -1177,7 +1177,7 @@ async def admin_change_password(body: UpdateAdminPasswordRequest, _=Depends(get_
         raise HTTPException(status_code=400, detail="Current password is incorrect")
     if len(body.new_password) < 4:
         raise HTTPException(status_code=400, detail="New password must be at least 4 characters")
-    ADMIN_PASSWORD_FILE.write_text(body.new_password + "\n")
+    ADMIN_PASSWORD_FILE.write_text(body.new_password + "\n", encoding="utf-8")
     return {"success": True}
 
 
@@ -1220,7 +1220,7 @@ app.mount("/", StaticFiles(directory="web", html=True), name="web")
 
 def get_port():
     try:
-        with open("port.txt", "r") as f:
+        with open("port.txt", "r", encoding="utf-8") as f:
             return int(f.read().strip())
     except (FileNotFoundError, ValueError):
         return 5000
