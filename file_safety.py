@@ -2,7 +2,34 @@ import json
 import os
 import tempfile
 from contextlib import contextmanager
-import fcntl
+import time
+
+try:
+    import fcntl
+    _has_fcntl = True
+except ImportError:
+    _has_fcntl = False
+    import msvcrt
+
+def _lock_file(f):
+    if _has_fcntl:
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+    else:
+        while True:
+            try:
+                msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+                break
+            except OSError:
+                time.sleep(0.01)
+
+def _unlock_file(f):
+    if _has_fcntl:
+        fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+    else:
+        try:
+            msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+        except OSError:
+            pass
 
 def write_json_atomic(path, payload):
     dir_name = os.path.dirname(path)
@@ -35,10 +62,10 @@ def with_lock(lock_path):
         os.makedirs(dir_name, exist_ok=True)
     lock_file = open(lock_path, 'w')
     try:
-        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        _lock_file(lock_file)
         yield
     finally:
-        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+        _unlock_file(lock_file)
         lock_file.close()
     try:
         os.remove(lock_path)
