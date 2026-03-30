@@ -1,0 +1,190 @@
+{
+    "label": "Alcohol",
+    "items": [
+        {
+            "id": "alcohol_0",
+            "name_en": "l1: English",
+            "name_es": "l2: Español"
+        },
+        {
+            "id": "alcohol_1",
+            "name_en": "@category: Alcohol",
+            "name_es": "@category: Alcohol"
+        },
+        {
+            "id": "alcohol_2",
+            "name_en": "Blue Moon 6pk.",
+            "name_es": "Blue Moon 6 paquetes"
+        },
+        {
+            "id": "alcohol_3",
+            "name_en": "Bud Light 6pk",
+            "name_es": "Bud Light 6 paquetes"
+        },
+        {
+            "id": "alcohol_4",
+            "name_en": "Budweiser 6pk.",
+            "name_es": "Budweiser 6 paquetes"
+        },
+        {
+            "id": "alcohol_5",
+            "name_en": "Coors Light 6pk.",
+            "name_es": "Coors Light 6 paquetes"
+        },
+        {
+            "id": "alcohol_6",
+            "name_en": "Corona 6pk",
+            "name_es": "Corona 6 paquetes"
+        },
+        {
+            "id": "alcohol_7",
+            "name_en": "Fat Tire Ale 6pk.",
+            "name_es": "Fat Tire Ale 6 paquetes"
+        },
+        {
+            "id": "alcohol_8",
+            "name_en": "Heineken 6pk.",
+            "name_es": "Heineken 6 paquetes"
+        },
+        {
+            "id": "alcohol_9",
+            "name_en": "Heineken Zero 6pk.",
+            "name_es": "Heineken Zero 6 paquetes"
+        },
+        {
+            "id": "alcohol_10",
+            "name_en": "IPA DNR 6pk.",
+            "name_es": "IPA DNR 6 paquetes"
+        },
+        {
+            "id": "alcohol_11",
+            "name_en": "IPA F5 6pk",
+            "name_es": "IPA F5 6 paquetes"
+        },
+        {
+            "id": "alcohol_12",
+            "name_en": "IPA Native Amber",
+            "name_es": "IPA Native Amber"
+        },
+        {
+            "id": "alcohol_13",
+            "name_en": "Michelob Ultra 6pk.",
+            "name_es": "Michelob Ultra 6 paquetes"
+        },
+        {
+            "id": "alcohol_14",
+            "name_en": "Michelob Ultra Zero 6pk.",
+            "name_es": "Michelob Ultra Zero 6 paquetes"
+        },
+        {
+            "id": "alcohol_15",
+            "name_en": "Miller Lite 6pk.",
+            "name_es": "Miller Lite 6 paquetes"
+        },
+        {
+            "id": "alcohol_16",
+            "name_en": "Modelo 6pk.",
+            "name_es": "Modelo 6 paquetes"
+        },
+        {
+            "id": "alcohol_17",
+            "name_en": "Modelo Negra 6pk",
+            "name_es": "Modelo Negra 6 paquetes"
+        },
+        {
+            "id": "alcohol_18",
+            "name_en": "Peroni 6pk.",
+            "name_es": "Peroni 6 paquetes"
+        },
+        {
+            "id": "alcohol_19",
+            "name_en": "Sam Adams Lager",
+            "name_es": "Sam Adams Lager"
+        },
+        {
+            "id": "alcohol_20",
+            "name_en": "Shiner Bock 6pk.",
+            "name_es": "Shiner Bock 6 paquetes"
+        },
+        {
+            "id": "alcohol_21",
+            "name_en": "Shock Top 6pk.",
+            "name_es": "Shock Top 6 paquetes"
+        },
+        {
+            "id": "alcohol_22",
+            "name_en": "Stella Artois 6pk",
+            "name_es": "Stella Artois 6 paquetes"
+        },
+        {
+            "id": "alcohol_23",
+            "name_en": "Truly Cherry",
+            "name_es": "Truly cereza"
+        },
+        {
+            "id": "alcohol_24",
+            "name_en": "Truly Strawberry Lime",
+            "name_es": "Truly fresa-limón"
+        },
+        {
+            "id": "alcohol_25",
+            "name_en": "XX Chelada 6pk.",
+            "name_es": "XX Chelada 6 paquetes"
+        },
+        {
+            "id": "alcohol_26",
+            "name_en": "XX Lager 6pk.",
+            "name_es": "XX Lager 6 paquetes"
+        },
+        {
+            "id": "alcohol_27",
+            "name_en": "XX Lager Dark 6pk.",
+            "name_es": "XX Lager Dark 6 paquetes"
+        },
+        {
+            "id": "alcohol_28",
+            "name_en": "Yuengling Flight 6pk",
+            "name_es": "Yuengling Flight 6 paquetes"
+        },
+        {
+            "id": "alcohol_29",
+            "name_en": "Yuengling Lager 6pk",
+            "name_es": "Yuengling Lager 6 paquetes"
+        },
+        {
+            "id": "alcohol_30",
+            "name_en": "Apothic Red",
+            "name_es": "Apothic Red"
+        },
+        {
+            "id": "alcohol_31",
+            "name_en": "Bread & Butter Pinot Noir",
+            "name_es": "Bread & Butter Pinot Noir"
+        },
+        {
+            "id": "alcohol_32",
+            "name_en": "Gabbiano Chianti",
+            "name_es": "Gabbiano Chianti"
+        },
+        {
+            "id": "alcohol_33",
+            "name_en": "Gallo .187 Cabernet Sauvignon 4pk.",
+            "name_es": "Gallo .187 Cabernet Sauvignon 4 paquetes"
+        },
+        {
+            "id": "alcohol_34",
+            "name_en": "Josh Cabernet Sauvignon",
+            "name_es": "Josh Cabernet Sauvignon"
+        },
+        {
+            "id": "alcohol_35",
+            "name_en": "Sutter Home .187 Sauvignon Blanc 4pk.",
+            "name_es": "Sutter Home .187 Sauvignon Blanc 4 paquetes"
+        },
+        {
+            "id": "alcohol_36",
+            "name_en": "Yellowtail Pinot Noir",
+            "name_es": "Yellowtail Pinot Noir"
+        }
+    ]
+}

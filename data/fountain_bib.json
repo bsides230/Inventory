@@ -1,0 +1,55 @@
+{
+    "label": "Fountain BIB",
+    "items": [
+        {
+            "id": "fountain_bib_0",
+            "name_en": "l1: English",
+            "name_es": "l2: Español"
+        },
+        {
+            "id": "fountain_bib_1",
+            "name_en": "@category: Fountain BIB",
+            "name_es": "@category: BIB de Fuente"
+        },
+        {
+            "id": "fountain_bib_2",
+            "name_en": "BIB Coca-Cola",
+            "name_es": "BIB Coca-Cola"
+        },
+        {
+            "id": "fountain_bib_3",
+            "name_en": "BIB Coke Zero",
+            "name_es": "BIB Coke Zero"
+        },
+        {
+            "id": "fountain_bib_4",
+            "name_en": "BIB Diet Coke",
+            "name_es": "BIB Diet Coke"
+        },
+        {
+            "id": "fountain_bib_5",
+            "name_en": "BIB Diet Dr. Pepper",
+            "name_es": "BIB Diet Dr. Pepper"
+        },
+        {
+            "id": "fountain_bib_6",
+            "name_en": "BIB Dr.Pepper",
+            "name_es": "BIB Dr Pepper"
+        },
+        {
+            "id": "fountain_bib_7",
+            "name_en": "BIB Lemonade",
+            "name_es": "BIB limonada"
+        },
+        {
+            "id": "fountain_bib_8",
+            "name_en": "BIB Root Beer",
+            "name_es": "BIB root beer"
+        },
+        {
+            "id": "fountain_bib_9",
+            "name_en": "BIB Sprite",
+            "name_es": "BIB Sprite"
+        }
+    ]
+}
