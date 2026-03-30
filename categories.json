@@ -1,80 +1,74 @@
 {
     "produce": {
-        "color": "gray",
+        "color": "green",
         "icon": "🥦",
-        "label_en": "PRODUCE",
+        "label_en": "Produce",
         "label_es": "Productos Frescos"
     },
-    "meats": {
-        "color": "zinc",
-        "icon": "🥩",
-        "label_en": "MEATS",
-        "label_es": "Carnes"
-    },
     "dairy": {
-        "color": "neutral",
+        "color": "blue",
         "icon": "🧀",
-        "label_en": "DAIRY",
+        "label_en": "Dairy",
         "label_es": "Lácteos"
     },
-    "bev_alc": {
+    "meats": {
+        "color": "red",
+        "icon": "🥩",
+        "label_en": "Meats",
+        "label_es": "Carnes"
+    },
+    "beverages": {
         "color": "gray",
-        "icon": "box",
-        "label_en": "BEV-ALC",
-        "label_es": "BEV-ALC"
+        "icon": "🥤",
+        "label_en": "Beverages",
+        "label_es": "Beverages"
     },
-    "bev_bib": {
+    "alcohol": {
+        "color": "gray",
+        "icon": "🍺",
+        "label_en": "Alcohol",
+        "label_es": "Alcohol"
+    },
+    "fountain_bib": {
         "color": "zinc",
-        "icon": "package",
-        "label_en": "BEV-BIB",
-        "label_es": "BEV-BIB"
-    },
-    "bev_rtd": {
-        "color": "neutral",
-        "icon": "shopping-cart",
-        "label_en": "BEV-RTD",
-        "label_es": "BEV-RTD"
+        "icon": "🧃",
+        "label_en": "Fountain BIB",
+        "label_es": "Fountain BIB"
     },
     "cleaning": {
-        "color": "stone",
-        "icon": "archive",
-        "label_en": "CLEANING",
-        "label_es": "CLEANING"
+        "color": "neutral",
+        "icon": "🧹",
+        "label_en": "Cleaning",
+        "label_es": "Cleaning"
     },
     "disposables": {
+        "color": "stone",
+        "icon": "🥡",
+        "label_en": "Disposables",
+        "label_es": "Disposables"
+    },
+    "frozen_&_refrigerated": {
         "color": "gray",
-        "icon": "layers",
-        "label_en": "DISPOSABLES",
-        "label_es": "DISPOSABLES"
+        "icon": "❄️",
+        "label_en": "Frozen & Refrigerated",
+        "label_es": "Frozen & Refrigerated"
     },
-    "frozen.ref": {
+    "dry_grocery": {
         "color": "zinc",
-        "icon": "box",
-        "label_en": "FROZEN.REF",
-        "label_es": "FROZEN.REF"
-    },
-    "grocery_dry": {
-        "color": "neutral",
-        "icon": "package",
-        "label_en": "GROCERY DRY",
-        "label_es": "GROCERY DRY"
+        "icon": "🌾",
+        "label_en": "Dry Grocery",
+        "label_es": "Dry Grocery"
     },
     "prepared": {
-        "color": "stone",
-        "icon": "shopping-cart",
-        "label_en": "PREPARED",
-        "label_es": "PREPARED"
+        "color": "neutral",
+        "icon": "🍲",
+        "label_en": "Prepared",
+        "label_es": "Prepared"
     },
     "smallwares": {
-        "color": "gray",
-        "icon": "archive",
-        "label_en": "SMALLWARES",
-        "label_es": "SMALLWARES"
-    },
-    "bakery": {
-        "color": "zinc",
-        "icon": "layers",
-        "label_en": "BAKERY",
-        "label_es": "BAKERY"
+        "color": "stone",
+        "icon": "🍴",
+        "label_en": "Smallwares",
+        "label_es": "Smallwares"
     }
 }

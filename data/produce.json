@@ -1,30 +1,30 @@
 {
-    "label": "PRODUCE",
+    "label": "Produce",
     "items": [
         {
             "id": "produce_0",
-            "name_en": "Basil Fresh",
-            "name_es": "Albahaca Fresca"
+            "name_en": "Basil Fresh (each)",
+            "name_es": "Albahaca fresca (unidad)"
         },
         {
             "id": "produce_1",
-            "name_en": "Bell Peppers (Yellow, Red,Orange) 6 pk",
-            "name_es": "Pimientos (Amarillo, Rojo, Naranja) 6 paq."
+            "name_en": "Bell Peppers (Yellow, Red,Orange) 6 pk (each)",
+            "name_es": "Pimientos morrones (amarillo, rojo, naranja) paquete de 6 (unidad)"
         },
         {
             "id": "produce_2",
-            "name_en": "Bell Peppers Choppers",
-            "name_es": "Pimientos para Picar"
+            "name_en": "Bell Peppers Choppers (case)",
+            "name_es": "Pimientos morrones picados (caja)"
         },
         {
             "id": "produce_3",
-            "name_en": "Broccoli Florets (fresh)",
-            "name_es": "Flores de Brócoli (frescas)"
+            "name_en": "Broccoli Florets (fresh) (case)",
+            "name_es": "Floretes de brócoli (fresco) (caja)"
         },
         {
             "id": "produce_4",
-            "name_en": "Broccoli Florets (frozen)",
-            "name_es": "Flores de Brócoli (congeladas)"
+            "name_en": "Broccoli Florets (frozen) (case)",
+            "name_es": "Floretes de brócoli (congelado) (caja)"
         },
         {
             "id": "produce_5",
@@ -33,53 +33,58 @@
         },
         {
             "id": "produce_6",
-            "name_en": "Constellation Cherry Tomatoes",
-            "name_es": "Tomates Cherry Constellation"
+            "name_en": "Cucumber English 2 pk (each)",
+            "name_es": "Pepino inglés paquete de 2 (unidad)"
         },
         {
             "id": "produce_7",
-            "name_en": "Cucumber English 2 pk",
-            "name_es": "Pepino Inglés 2 paq."
+            "name_en": "Lettuce Romaine (case)",
+            "name_es": "Lechuga romana (caja)"
         },
         {
             "id": "produce_8",
-            "name_en": "Lettuce Romaine",
-            "name_es": "Lechuga Romana"
+            "name_en": "Mushroom Medium (case)",
+            "name_es": "Champiñón mediano (caja)"
         },
         {
             "id": "produce_9",
-            "name_en": "Mushroom Medium",
-            "name_es": "Champiñones Medianos"
+            "name_en": "Onion Red (case)",
+            "name_es": "Cebolla roja (caja)"
         },
         {
             "id": "produce_10",
-            "name_en": "Onion Red",
-            "name_es": "Cebolla Roja"
+            "name_en": "Onion Yellow (case)",
+            "name_es": "Cebolla amarilla (caja)"
         },
         {
             "id": "produce_11",
-            "name_en": "Onion Yellow",
-            "name_es": "Cebolla Amarilla"
+            "name_en": "Potato Idaho 70 ct./50 lb. (case)",
+            "name_es": "Papa Idaho 70 ct./50 lb. (caja)"
         },
         {
             "id": "produce_12",
-            "name_en": "Potato Idaho 70 ct./50 lb.",
-            "name_es": "Papas Idaho 70 ct./50 lb."
+            "name_en": "Spinach Fresh (each)",
+            "name_es": "Espinaca fresca (unidad)"
         },
         {
             "id": "produce_13",
-            "name_en": "Spinach Fresh",
-            "name_es": "Espinaca Fresca"
+            "name_en": "Tomato Cherry (case)",
+            "name_es": "Tomate cherry (caja)"
         },
         {
             "id": "produce_14",
-            "name_en": "Tomato Cherry",
-            "name_es": "Tomates Cherry"
+            "name_en": "Tomato Cherry Constellation (each)",
+            "name_es": "Tomate cherry Constellation (unidad)"
         },
         {
             "id": "produce_15",
-            "name_en": "Tomato Roma",
-            "name_es": "Tomates Roma"
+            "name_en": "Tomato Roma (each)",
+            "name_es": "Tomate Roma (unidad)"
+        },
+        {
+            "id": "produce_16",
+            "name_en": "Tomato Slicer (case)",
+            "name_es": "Tomate para rebanar (caja)"
         }
     ]
 }

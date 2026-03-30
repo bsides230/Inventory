@@ -1,5 +1,5 @@
 {
-    "label": "CLEANING",
+    "label": "Cleaning",
     "items": [
         {
             "id": "cleaning_0",
@@ -9,22 +9,37 @@
         {
             "id": "cleaning_1",
             "name_en": "Dish Detergent (dawn)",
-            "name_es": "Detergente para Platos (Dawn)"
+            "name_es": "Detergente para platos (Dawn)"
         },
         {
             "id": "cleaning_2",
             "name_en": "Floor cleaner (fabuloso purple)",
-            "name_es": "Limpiador de Pisos (Fabuloso morado)"
+            "name_es": "Limpiador de pisos (Fabuloso morado)"
         },
         {
             "id": "cleaning_3",
             "name_en": "Scrubber Stainless Steel 12/1 ct.",
-            "name_es": "Esponjas de Acero Inoxidable 12/1 ct."
+            "name_es": "Fibra de acero inoxidable 12/1 ct."
         },
         {
             "id": "cleaning_4",
             "name_en": "Dining Room Sanitizer",
-            "name_es": "Desinfectante para Comedor"
+            "name_es": "Sanitizante para comedor"
+        },
+        {
+            "id": "cleaning_5",
+            "name_en": "Stainless Steel cleaner",
+            "name_es": "Limpiador para acero inoxidable"
+        },
+        {
+            "id": "cleaning_6",
+            "name_en": "Magic Eraser",
+            "name_es": "Borrador mágico"
+        },
+        {
+            "id": "cleaning_7",
+            "name_en": "Window cleaner",
+            "name_es": "Limpiavidrios"
         }
     ]
 }

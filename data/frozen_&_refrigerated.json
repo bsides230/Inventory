@@ -1,0 +1,120 @@
+{
+    "label": "Frozen & Refrigerated",
+    "items": [
+        {
+            "id": "frozen_&_refrigerated_0",
+            "name_en": "Biscuits 1/24 cs.",
+            "name_es": "Biscuits 1/24 caja"
+        },
+        {
+            "id": "frozen_&_refrigerated_1",
+            "name_en": "Cake Bundt",
+            "name_es": "Pastel bundt"
+        },
+        {
+            "id": "frozen_&_refrigerated_2",
+            "name_en": "Cake Chocolate",
+            "name_es": "Pastel de chocolate"
+        },
+        {
+            "id": "frozen_&_refrigerated_3",
+            "name_en": "Cake Italian Lemon Crème",
+            "name_es": "Pastel italiano de limón crème"
+        },
+        {
+            "id": "frozen_&_refrigerated_4",
+            "name_en": "Cake Strawberry",
+            "name_es": "Pastel de fresa"
+        },
+        {
+            "id": "frozen_&_refrigerated_5",
+            "name_en": "Cannoli Cream w/choc",
+            "name_es": "Crema de cannoli con chocolate"
+        },
+        {
+            "id": "frozen_&_refrigerated_6",
+            "name_en": "Cannoli Shell Lg",
+            "name_es": "Concha de cannoli grande"
+        },
+        {
+            "id": "frozen_&_refrigerated_7",
+            "name_en": "Cannoli Shell Lg (choc)",
+            "name_es": "Concha de cannoli grande (chocolate)"
+        },
+        {
+            "id": "frozen_&_refrigerated_8",
+            "name_en": "Cannoli Shell Sm",
+            "name_es": "Concha de cannoli pequeña"
+        },
+        {
+            "id": "frozen_&_refrigerated_9",
+            "name_en": "Cannoli Shell Sm (choc)",
+            "name_es": "Concha de cannoli pequeña (chocolate)"
+        },
+        {
+            "id": "frozen_&_refrigerated_10",
+            "name_en": "Cheesecake NY",
+            "name_es": "Cheesecake estilo Nueva York"
+        },
+        {
+            "id": "frozen_&_refrigerated_11",
+            "name_en": "Cheesecake Oreo",
+            "name_es": "Cheesecake de Oreo"
+        },
+        {
+            "id": "frozen_&_refrigerated_12",
+            "name_en": "Cheesecake Turtle",
+            "name_es": "Cheesecake Turtle"
+        },
+        {
+            "id": "frozen_&_refrigerated_13",
+            "name_en": "French Fries 3/8th\" Straight",
+            "name_es": "Papas fritas rectas de 3/8\""
+        },
+        {
+            "id": "frozen_&_refrigerated_14",
+            "name_en": "French Fries Crinkle Cut",
+            "name_es": "Papas fritas corte ondulado"
+        },
+        {
+            "id": "frozen_&_refrigerated_15",
+            "name_en": "French Fries Homestyle",
+            "name_es": "Papas fritas estilo casero"
+        },
+        {
+            "id": "frozen_&_refrigerated_16",
+            "name_en": "French Fries Shoestring",
+            "name_es": "Papas fritas tipo shoestring"
+        },
+        {
+            "id": "frozen_&_refrigerated_17",
+            "name_en": "Hashbrown 2/10lb.",
+            "name_es": "Hashbrown 2/10 lb."
+        },
+        {
+            "id": "frozen_&_refrigerated_18",
+            "name_en": "Pasta Tortellini",
+            "name_es": "Pasta tortellini"
+        },
+        {
+            "id": "frozen_&_refrigerated_19",
+            "name_en": "Pizza Crust Cauliflower",
+            "name_es": "Base de pizza de coliflor"
+        },
+        {
+            "id": "frozen_&_refrigerated_20",
+            "name_en": "Tater Tots",
+            "name_es": "Tater tots"
+        },
+        {
+            "id": "frozen_&_refrigerated_21",
+            "name_en": "Tiramisu (ea.)",
+            "name_es": "Tiramisú (unidad)"
+        },
+        {
+            "id": "frozen_&_refrigerated_22",
+            "name_en": "Tortillas Chips uncooked",
+            "name_es": "Totopos sin cocinar"
+        }
+    ]
+}

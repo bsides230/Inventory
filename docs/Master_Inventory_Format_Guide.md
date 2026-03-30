@@ -17,9 +17,9 @@ The inventory system uses a **single Excel file** called `Master.xlsx`. Each she
 |---|---|
 | File name | `Master.xlsx` |
 | File format | Excel 2007+ (.xlsx) |
-| Row 1 | **Language Codes** (`en`, `es`) |
-| Row 2 | **Category Translations** |
-| Row 3+ | **Item Translations** |
+| Header row | **None** — data starts on row 1 |
+| Column A | English item name |
+| Column B | Spanish item name |
 
 ---
 
@@ -55,17 +55,16 @@ If no icon is provided, the app assigns a default placeholder icon.
 
 ---
 
-## Row Layout
+## Column Layout
 
-To support robust category translations, each sheet must follow this layout:
-
-| Row | Language | Notes |
+| Column | Language | Notes |
 |---|---|---|
-| 1 | `en`, `es` | **Language Codes.** These tell the system which column is English and which is Spanish. |
-| 2 | Category Names | **Category Translations.** e.g., "Produce" in the `en` column, "Productos Frescos" in the `es` column. |
-| 3+ | Item Names | **Item Translations.** One item per row. Blank cells use the English name as fallback. |
+| A | English | Required. One item name per row. |
+| B | Spanish | Optional. If blank, the English name is used as fallback. |
 
-*(Note: If Row 1 does not contain `en` and `es`, the system falls back to a legacy mode where Row 1 is the first item and the tab name is used for both English and Spanish category labels.)*
+- **No header row.** Row 1 is the first item.
+- **No empty rows between items.** Blank rows stop item reading for that column.
+- Item names can include brand names, descriptions, or packaging sizes (e.g. `Mozzarella Shredded 5lb`).
 
 ---
 
@@ -73,17 +72,15 @@ To support robust category translations, each sheet must follow this layout:
 
 **Sheet tab name:** `Produce (🥦)`
 
-| Row | A (English) | B (Spanish) |
-|---|---|---|
-| 1 | en | es |
-| 2 | Produce | Productos Frescos |
-| 3 | Broccoli | Brócoli |
-| 4 | Tomatoes | Tomates |
-| 5 | Romaine Lettuce | Lechuga Romana |
-| 6 | Roma Tomatoes | Tomates Roma |
-| 7 | Yellow Onions | Cebollas Amarillas |
-| 8 | Green Bell Peppers | Pimientos Verdes |
-| 9 | Jalapeños | Jalapeños |
+| A (English) | B (Spanish) |
+|---|---|
+| Broccoli | Brócoli |
+| Tomatoes | Tomates |
+| Romaine Lettuce | Lechuga Romana |
+| Roma Tomatoes | Tomates Roma |
+| Yellow Onions | Cebollas Amarillas |
+| Green Bell Peppers | Pimientos Verdes |
+| Jalapeños | Jalapeños |
 
 ---
 
@@ -116,8 +113,8 @@ Master.xlsx
 ## Important Rules
 
 1. **Every sheet tab must have a unique name.**
-2. **Row 1 must contain language codes (`en`, `es`).** Row 2 contains the category translations, and Row 3 starts the items.
-3. **English is required.** The Spanish column is optional, and individual Spanish item cells can be blank to fallback to English.
+2. **Do not include a header row.** Row 1 is always item 1.
+3. **Column A is required.** Column B is optional.
 4. **When a new Master.xlsx is uploaded**, all old categories are replaced. Categories not present in the new file are removed from the app. This is intentional — the file is the single source of truth.
 5. **Each upload creates a backup** of the previous file (e.g. `Master_20260328_142301.bak`) stored in the `item master/` folder. This can be recovered manually if needed.
 6. **Sheet names become category IDs** in the system. Spaces are converted to underscores. The icon is stripped from the ID (e.g. `Produce (🥦)` → category ID `produce`).
@@ -152,34 +149,26 @@ wb = openpyxl.Workbook()
 wb.remove(wb.active)  # remove default sheet
 
 categories = {
-    "Produce (🥦)": {
-        "label_en": "Produce",
-        "label_es": "Productos Frescos",
-        "items": [
-            ("Broccoli", "Brócoli"),
-            ("Tomatoes", "Tomates"),
-            ("Romaine Lettuce", "Lechuga Romana"),
-        ]
-    },
-    "Meats (🥩)": {
-        "label_en": "Meats",
-        "label_es": "Carnes",
-        "items": [
-            ("Pepperoni Sliced 25lb", "Pepperoni Rebanado 25lb"),
-            ("Italian Sausage", "Salchicha Italiana"),
-            ("Ground Beef 80/20", "Carne Molida 80/20"),
-        ]
-    },
+    "Produce (🥦)": [
+        ("Broccoli", "Brócoli"),
+        ("Tomatoes", "Tomates"),
+        ("Romaine Lettuce", "Lechuga Romana"),
+    ],
+    "Meats (🥩)": [
+        ("Pepperoni Sliced 25lb", "Pepperoni Rebanado 25lb"),
+        ("Italian Sausage", "Salchicha Italiana"),
+        ("Ground Beef 80/20", "Carne Molida 80/20"),
+    ],
+    "Dairy (🧀)": [
+        ("Mozzarella Shredded 5lb", "Mozzarella Rallada 5lb"),
+        ("Ricotta Cheese", "Queso Ricotta"),
+        ("Parmesan Grated", "Parmesano Rallado"),
+    ],
 }
 
-for tab_name, data in categories.items():
+for tab_name, items in categories.items():
     ws = wb.create_sheet(title=tab_name)
-    # Row 1: Language codes
-    ws.append(["en", "es"])
-    # Row 2: Category translations
-    ws.append([data["label_en"], data["label_es"]])
-    # Row 3+: Items
-    for english, spanish in data["items"]:
+    for english, spanish in items:
         ws.append([english, spanish])
 
 wb.save("Master.xlsx")
@@ -192,27 +181,13 @@ print("Master.xlsx created successfully.")
 import pandas as pd
 
 categories = {
-    "Produce (🥦)": {
-        "label_en": "Produce",
-        "label_es": "Productos Frescos",
-        "items": [("Broccoli", "Brócoli"), ("Tomatoes", "Tomates")]
-    },
-    "Meats (🥩)": {
-        "label_en": "Meats",
-        "label_es": "Carnes",
-        "items": [("Pepperoni", "Pepperoni"), ("Ground Beef", "Carne Molida")]
-    },
+    "Produce (🥦)": [("Broccoli", "Brócoli"), ("Tomatoes", "Tomates")],
+    "Meats (🥩)": [("Pepperoni", "Pepperoni"), ("Ground Beef", "Carne Molida")],
 }
 
 with pd.ExcelWriter("Master.xlsx", engine="openpyxl") as writer:
-    for tab_name, data in categories.items():
-        # Build rows: [Row 1, Row 2, Row 3...]
-        rows = [
-            ["en", "es"],
-            [data["label_en"], data["label_es"]]
-        ] + data["items"]
-
-        df = pd.DataFrame(rows)
+    for tab_name, items in categories.items():
+        df = pd.DataFrame(items)
         df.to_excel(writer, sheet_name=tab_name, index=False, header=False)
 
 print("Master.xlsx created.")
