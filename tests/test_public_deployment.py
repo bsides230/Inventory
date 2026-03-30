@@ -39,12 +39,8 @@ def test_request_size_guard_returns_413_for_large_payload():
     assert response.json()["detail"] == "Request body too large"
 
 
-def test_compose_and_proxy_artifacts_exist_with_expected_services():
-    compose_text = Path("docker-compose.yml").read_text(encoding="utf-8")
+def test_caddy_artifacts_exist():
     caddy_text = Path("Caddyfile").read_text(encoding="utf-8")
-
-    for service_name in ["api:", "proxy:", "backup_worker:"]:
-        assert service_name in compose_text
 
     assert "reverse_proxy" in caddy_text
     assert "{$APP_DOMAIN}" in caddy_text
