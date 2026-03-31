@@ -3,303 +3,293 @@
     "items": [
         {
             "id": "dry_grocery_0",
-            "name_en": "l1: English",
-            "name_es": "l2: Español"
+            "name_english": "Banana Peppers sliced 1gal.",
+            "name_espa_ol": "Chiles banana rebanados 1 gal."
         },
         {
             "id": "dry_grocery_1",
-            "name_en": "@category: Dry Grocery",
-            "name_es": "@category: Abarrotes Secos"
+            "name_english": "Barbecue Sauce 1 gal.",
+            "name_espa_ol": "Salsa barbecue 1 gal."
         },
         {
             "id": "dry_grocery_2",
-            "name_en": "Banana Peppers sliced 1gal.",
-            "name_es": "Chiles banana rebanados 1 gal."
+            "name_english": "Basalmic Glaze",
+            "name_espa_ol": "Glaseado balsámico"
         },
         {
             "id": "dry_grocery_3",
-            "name_en": "Barbecue Sauce 1 gal.",
-            "name_es": "Salsa barbecue 1 gal."
+            "name_english": "Black Olives Sliced #10 can/cs.",
+            "name_espa_ol": "Aceitunas negras rebanadas lata #10/caja"
         },
         {
             "id": "dry_grocery_4",
-            "name_en": "Basalmic Glaze",
-            "name_es": "Glaseado balsámico"
+            "name_english": "Bread Baguettes",
+            "name_espa_ol": "Baguettes"
         },
         {
             "id": "dry_grocery_5",
-            "name_en": "Black Olives Sliced #10 can/cs.",
-            "name_es": "Aceitunas negras rebanadas lata #10/caja"
+            "name_english": "Bread Brioche Buns",
+            "name_espa_ol": "Pan brioche para hamburguesa"
         },
         {
             "id": "dry_grocery_6",
-            "name_en": "Bread Baguettes",
-            "name_es": "Baguettes"
+            "name_english": "Bread Crumbs Panko 25lb.",
+            "name_espa_ol": "Pan molido panko 25 lb."
         },
         {
             "id": "dry_grocery_7",
-            "name_en": "Bread Brioche Buns",
-            "name_es": "Pan brioche para hamburguesa"
+            "name_english": "Bread Hawaiian",
+            "name_espa_ol": "Pan hawaiano"
         },
         {
             "id": "dry_grocery_8",
-            "name_en": "Bread Crumbs Panko 25lb.",
-            "name_es": "Pan molido panko 25 lb."
+            "name_english": "Bread Sliced Sandwich",
+            "name_espa_ol": "Pan de sándwich rebanado"
         },
         {
             "id": "dry_grocery_9",
-            "name_en": "Bread Hawaiian",
-            "name_es": "Pan hawaiano"
+            "name_english": "Brown Sugar 1lb.",
+            "name_espa_ol": "Azúcar morena 1 lb."
         },
         {
             "id": "dry_grocery_10",
-            "name_en": "Bread Sliced Sandwich",
-            "name_es": "Pan de sándwich rebanado"
+            "name_english": "Buns Hamburger",
+            "name_espa_ol": "Pan para hamburguesa"
         },
         {
             "id": "dry_grocery_11",
-            "name_en": "Brown Sugar 1lb.",
-            "name_es": "Azúcar morena 1 lb."
+            "name_english": "Buns Hot Dog",
+            "name_espa_ol": "Pan para hot dog"
         },
         {
             "id": "dry_grocery_12",
-            "name_en": "Buns Hamburger",
-            "name_es": "Pan para hamburguesa"
+            "name_english": "Chocolate for Cannoli #10 can",
+            "name_espa_ol": "Chocolate para cannoli lata #10"
         },
         {
             "id": "dry_grocery_13",
-            "name_en": "Buns Hot Dog",
-            "name_es": "Pan para hot dog"
+            "name_english": "Cole Slaw Dressing 1gal.",
+            "name_espa_ol": "Aderezo para cole slaw 1 gal."
         },
         {
             "id": "dry_grocery_14",
-            "name_en": "Chocolate for Cannoli #10 can",
-            "name_es": "Chocolate para cannoli lata #10"
+            "name_english": "Cole Slaw mix bag",
+            "name_espa_ol": "Bolsa de mezcla para cole slaw"
         },
         {
             "id": "dry_grocery_15",
-            "name_en": "Cole Slaw Dressing 1gal.",
-            "name_es": "Aderezo para cole slaw 1 gal."
+            "name_english": "Croutons 4/2.5lbs.",
+            "name_espa_ol": "Crutones 4/2.5 lb."
         },
         {
             "id": "dry_grocery_16",
-            "name_en": "Cole Slaw mix bag",
-            "name_es": "Bolsa de mezcla para cole slaw"
+            "name_english": "Dressing Caesar 1 gal",
+            "name_espa_ol": "Aderezo César 1 gal."
         },
         {
             "id": "dry_grocery_17",
-            "name_en": "Croutons 4/2.5lbs.",
-            "name_es": "Crutones 4/2.5 lb."
+            "name_english": "Dressing Italian 1 gal.",
+            "name_espa_ol": "Aderezo italiano 1 gal."
         },
         {
             "id": "dry_grocery_18",
-            "name_en": "Dressing Caesar 1 gal",
-            "name_es": "Aderezo César 1 gal."
+            "name_english": "Dressing Mix Italian packet",
+            "name_espa_ol": "Mezcla para aderezo italiano, sobre"
         },
         {
             "id": "dry_grocery_19",
-            "name_en": "Dressing Italian 1 gal.",
-            "name_es": "Aderezo italiano 1 gal."
+            "name_english": "Dressing Mix Ranch cs.",
+            "name_espa_ol": "Mezcla para aderezo ranch (caja)"
         },
         {
             "id": "dry_grocery_20",
-            "name_en": "Dressing Mix Italian packet",
-            "name_es": "Mezcla para aderezo italiano, sobre"
+            "name_english": "Dressing Mix Ranch packet",
+            "name_espa_ol": "Mezcla para aderezo ranch, sobre"
         },
         {
             "id": "dry_grocery_21",
-            "name_en": "Dressing Mix Ranch cs.",
-            "name_es": "Mezcla para aderezo ranch (caja)"
+            "name_english": "Dressing Vinagrette 1 gal.",
+            "name_espa_ol": "Vinagreta 1 gal."
         },
         {
             "id": "dry_grocery_22",
-            "name_en": "Dressing Mix Ranch packet",
-            "name_es": "Mezcla para aderezo ranch, sobre"
+            "name_english": "Everything Bagel",
+            "name_espa_ol": "Bagel everything"
         },
         {
             "id": "dry_grocery_23",
-            "name_en": "Dressing Vinagrette 1 gal.",
-            "name_es": "Vinagreta 1 gal."
+            "name_english": "Flour High Gluten All Trump 25lb.",
+            "name_espa_ol": "Harina alta en gluten All Trump 25 lb."
         },
         {
             "id": "dry_grocery_24",
-            "name_en": "Everything Bagel",
-            "name_es": "Bagel everything"
+            "name_english": "Flour High Gluten All Trump 50lb.",
+            "name_espa_ol": "Harina alta en gluten All Trump 50 lb."
         },
         {
             "id": "dry_grocery_25",
-            "name_en": "Flour High Gluten All Trump 25lb.",
-            "name_es": "Harina alta en gluten All Trump 25 lb."
+            "name_english": "Fry Oil",
+            "name_espa_ol": "Aceite para freír"
         },
         {
             "id": "dry_grocery_26",
-            "name_en": "Flour High Gluten All Trump 50lb.",
-            "name_es": "Harina alta en gluten All Trump 50 lb."
+            "name_english": "Garlic Minced in water",
+            "name_espa_ol": "Ajo picado en agua"
         },
         {
             "id": "dry_grocery_27",
-            "name_en": "Fry Oil",
-            "name_es": "Aceite para freír"
+            "name_english": "Garlic Powder 5lb.",
+            "name_espa_ol": "Ajo en polvo 5 lb."
         },
         {
             "id": "dry_grocery_28",
-            "name_en": "Garlic Minced in water",
-            "name_es": "Ajo picado en agua"
+            "name_english": "Hot Sauce Red Hot 1 gal.",
+            "name_espa_ol": "Salsa picante Red Hot 1 gal."
         },
         {
             "id": "dry_grocery_29",
-            "name_en": "Garlic Powder 5lb.",
-            "name_es": "Ajo en polvo 5 lb."
+            "name_english": "Jalapeno Sliced #10",
+            "name_espa_ol": "Jalapeño rebanado #10"
         },
         {
             "id": "dry_grocery_30",
-            "name_en": "Hot Sauce Red Hot 1 gal.",
-            "name_es": "Salsa picante Red Hot 1 gal."
+            "name_english": "Mayonnaise 4/1 gal.",
+            "name_espa_ol": "Mayonesa 4/1 gal."
         },
         {
             "id": "dry_grocery_31",
-            "name_en": "Jalapeno Sliced #10",
-            "name_es": "Jalapeño rebanado #10"
+            "name_english": "Olive Ripe Sliced #10",
+            "name_espa_ol": "Aceituna madura rebanada #10"
         },
         {
             "id": "dry_grocery_32",
-            "name_en": "Mayonnaise 4/1 gal.",
-            "name_es": "Mayonesa 4/1 gal."
+            "name_english": "Onion minced dried",
+            "name_espa_ol": "Cebolla seca picada"
         },
         {
             "id": "dry_grocery_33",
-            "name_en": "Olive Ripe Sliced #10",
-            "name_es": "Aceituna madura rebanada #10"
+            "name_english": "Onion Powder",
+            "name_espa_ol": "Cebolla en polvo"
         },
         {
             "id": "dry_grocery_34",
-            "name_en": "Onion minced dried",
-            "name_es": "Cebolla seca picada"
+            "name_english": "Oreos pkg.",
+            "name_espa_ol": "Galletas Oreo, paquete"
         },
         {
             "id": "dry_grocery_35",
-            "name_en": "Onion Powder",
-            "name_es": "Cebolla en polvo"
+            "name_english": "Packets Parmesan",
+            "name_espa_ol": "Sobres de parmesano"
         },
         {
             "id": "dry_grocery_36",
-            "name_en": "Oreos pkg.",
-            "name_es": "Galletas Oreo, paquete"
+            "name_english": "Packets Red Pepper cs.",
+            "name_espa_ol": "Sobres de chile rojo (caja)"
         },
         {
             "id": "dry_grocery_37",
-            "name_en": "Packets Parmesan",
-            "name_es": "Sobres de parmesano"
+            "name_english": "Pan Spray cs",
+            "name_espa_ol": "Spray para sartén (caja)"
         },
         {
             "id": "dry_grocery_38",
-            "name_en": "Packets Red Pepper cs.",
-            "name_es": "Sobres de chile rojo (caja)"
+            "name_english": "Parsley minced dried",
+            "name_espa_ol": "Perejil seco picado"
         },
         {
             "id": "dry_grocery_39",
-            "name_en": "Pan Spray cs",
-            "name_es": "Spray para sartén (caja)"
+            "name_english": "Pasta Fettucine 10\"",
+            "name_espa_ol": "Pasta fettuccine 10\""
         },
         {
             "id": "dry_grocery_40",
-            "name_en": "Parsley minced dried",
-            "name_es": "Perejil seco picado"
+            "name_english": "Pasta Lasagna 10\"",
+            "name_espa_ol": "Pasta para lasaña 10\""
         },
         {
             "id": "dry_grocery_41",
-            "name_en": "Pasta Fettucine 10\"",
-            "name_es": "Pasta fettuccine 10\""
+            "name_english": "Pasta Penne Rigate",
+            "name_espa_ol": "Pasta penne rigate"
         },
         {
             "id": "dry_grocery_42",
-            "name_en": "Pasta Lasagna 10\"",
-            "name_es": "Pasta para lasaña 10\""
+            "name_english": "Pasta Rotini Tri Color",
+            "name_espa_ol": "Pasta rotini tricolor"
         },
         {
             "id": "dry_grocery_43",
-            "name_en": "Pasta Penne Rigate",
-            "name_es": "Pasta penne rigate"
+            "name_english": "Pasta Spaghetti 10\"",
+            "name_espa_ol": "Pasta espagueti 10\""
         },
         {
             "id": "dry_grocery_44",
-            "name_en": "Pasta Rotini Tri Color",
-            "name_es": "Pasta rotini tricolor"
+            "name_english": "Pepperoncini Whole 1 gal.",
+            "name_espa_ol": "Pepperoncini entero 1 gal."
         },
         {
             "id": "dry_grocery_45",
-            "name_en": "Pasta Spaghetti 10\"",
-            "name_es": "Pasta espagueti 10\""
+            "name_english": "Pineapple tidbits #10",
+            "name_espa_ol": "Piña en trozos #10"
         },
         {
             "id": "dry_grocery_46",
-            "name_en": "Pepperoncini Whole 1 gal.",
-            "name_es": "Pepperoncini entero 1 gal."
+            "name_english": "Plain Bagel",
+            "name_espa_ol": "Bagel natural"
         },
         {
             "id": "dry_grocery_47",
-            "name_en": "Pineapple tidbits #10",
-            "name_es": "Piña en trozos #10"
+            "name_english": "Salsa Fire Roasted #10",
+            "name_espa_ol": "Salsa fire roasted #10"
         },
         {
             "id": "dry_grocery_48",
-            "name_en": "Plain Bagel",
-            "name_es": "Bagel natural"
+            "name_english": "Salt 50lb.",
+            "name_espa_ol": "Sal 50 lb."
         },
         {
             "id": "dry_grocery_49",
-            "name_en": "Salsa Fire Roasted #10",
-            "name_es": "Salsa fire roasted #10"
+            "name_english": "Sugar 50lb.",
+            "name_espa_ol": "Azúcar 50 lb."
         },
         {
             "id": "dry_grocery_50",
-            "name_en": "Salt 50lb.",
-            "name_es": "Sal 50 lb."
+            "name_english": "Sugar Powdered bag",
+            "name_espa_ol": "Azúcar glass, bolsa"
         },
         {
             "id": "dry_grocery_51",
-            "name_en": "Sugar 50lb.",
-            "name_es": "Azúcar 50 lb."
+            "name_english": "Texas Toast",
+            "name_espa_ol": "Texas toast"
         },
         {
             "id": "dry_grocery_52",
-            "name_en": "Sugar Powdered bag",
-            "name_es": "Azúcar glass, bolsa"
+            "name_english": "Tomato Paste cs.",
+            "name_espa_ol": "Pasta de tomate (caja)"
         },
         {
             "id": "dry_grocery_53",
-            "name_en": "Texas Toast",
-            "name_es": "Texas toast"
+            "name_english": "Tomato Sauce cs.",
+            "name_espa_ol": "Salsa de tomate (caja)"
         },
         {
             "id": "dry_grocery_54",
-            "name_en": "Tomato Paste cs.",
-            "name_es": "Pasta de tomate (caja)"
+            "name_english": "Tortillas Flour 10\"",
+            "name_espa_ol": "Tortillas de harina 10\""
         },
         {
             "id": "dry_grocery_55",
-            "name_en": "Tomato Sauce cs.",
-            "name_es": "Salsa de tomate (caja)"
+            "name_english": "Vinegar Red 1 gal",
+            "name_espa_ol": "Vinagre rojo 1 gal."
         },
         {
             "id": "dry_grocery_56",
-            "name_en": "Tortillas Flour 10\"",
-            "name_es": "Tortillas de harina 10\""
+            "name_english": "Vinegar White 1 gal",
+            "name_espa_ol": "Vinagre blanco 1 gal."
         },
         {
             "id": "dry_grocery_57",
-            "name_en": "Vinegar Red 1 gal",
-            "name_es": "Vinagre rojo 1 gal."
-        },
-        {
-            "id": "dry_grocery_58",
-            "name_en": "Vinegar White 1 gal",
-            "name_es": "Vinagre blanco 1 gal."
-        },
-        {
-            "id": "dry_grocery_59",
-            "name_en": "Yeast",
-            "name_es": "Levadura"
+            "name_english": "Yeast",
+            "name_espa_ol": "Levadura"
         }
     ]
 }

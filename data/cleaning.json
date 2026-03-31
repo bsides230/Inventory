@@ -3,53 +3,43 @@
     "items": [
         {
             "id": "cleaning_0",
-            "name_en": "l1: English",
-            "name_es": "l2: Español"
+            "name_english": "Bleach",
+            "name_espa_ol": "Cloro"
         },
         {
             "id": "cleaning_1",
-            "name_en": "@category: Cleaning",
-            "name_es": "@category: Limpieza"
+            "name_english": "Dish Detergent (dawn)",
+            "name_espa_ol": "Detergente para platos (Dawn)"
         },
         {
             "id": "cleaning_2",
-            "name_en": "Bleach",
-            "name_es": "Cloro"
+            "name_english": "Floor cleaner (fabuloso purple)",
+            "name_espa_ol": "Limpiador de pisos (Fabuloso morado)"
         },
         {
             "id": "cleaning_3",
-            "name_en": "Dish Detergent (dawn)",
-            "name_es": "Detergente para platos (Dawn)"
+            "name_english": "Scrubber Stainless Steel 12/1 ct.",
+            "name_espa_ol": "Fibra de acero inoxidable 12/1 ct."
         },
         {
             "id": "cleaning_4",
-            "name_en": "Floor cleaner (fabuloso purple)",
-            "name_es": "Limpiador de pisos (Fabuloso morado)"
+            "name_english": "Dining Room Sanitizer",
+            "name_espa_ol": "Sanitizante para comedor"
         },
         {
             "id": "cleaning_5",
-            "name_en": "Scrubber Stainless Steel 12/1 ct.",
-            "name_es": "Fibra de acero inoxidable 12/1 ct."
+            "name_english": "Stainless Steel cleaner",
+            "name_espa_ol": "Limpiador para acero inoxidable"
         },
         {
             "id": "cleaning_6",
-            "name_en": "Dining Room Sanitizer",
-            "name_es": "Sanitizante para comedor"
+            "name_english": "Magic Eraser",
+            "name_espa_ol": "Borrador mágico"
         },
         {
             "id": "cleaning_7",
-            "name_en": "Stainless Steel cleaner",
-            "name_es": "Limpiador para acero inoxidable"
-        },
-        {
-            "id": "cleaning_8",
-            "name_en": "Magic Eraser",
-            "name_es": "Borrador mágico"
-        },
-        {
-            "id": "cleaning_9",
-            "name_en": "Window cleaner",
-            "name_es": "Limpiavidrios"
+            "name_english": "Window cleaner",
+            "name_espa_ol": "Limpiavidrios"
         }
     ]
 }

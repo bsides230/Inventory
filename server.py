@@ -106,6 +106,17 @@ CATEGORY_ORDER_FILE = Path("config/category_order.json")
 UI_LABELS_FILE = Path("config/ui_labels.json")
 BRANDING_FILE = Path("config/branding.json")
 APP_SETTINGS_FILE = Path("config/app_settings.json")
+LANGUAGES_FILE = Path("config/languages.json")
+
+
+def get_available_languages() -> list[dict]:
+    if LANGUAGES_FILE.exists():
+        try:
+            with open(LANGUAGES_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as exc:
+            logger.error("Error reading languages.json: %s", exc, exc_info=True)
+    return [{"code": "english", "name": "English"}, {"code": "espa_ol", "name": "Español"}]
 
 
 def load_app_settings() -> dict:
@@ -576,11 +587,19 @@ async def get_ui_labels():
     return {"success": True, "labels": labels}
 
 
+@app.get("/api/languages")
+async def get_languages():
+    return {"success": True, "languages": get_available_languages()}
+
+
 @app.get("/api/categories")
 async def get_categories():
     cat_ids = get_all_inventory_categories()
     config = load_categories_config()
     categories = []
+    langs = get_available_languages()
+    primary_lang = langs[0]["code"] if langs else "english"
+
     for cat_id in cat_ids:
         cat_data = get_inventory_category(cat_id)
         if cat_data:
@@ -680,11 +699,16 @@ async def update_inventory(
         new_item = {
             "item_id": request.id,
             "category_id": category_lower,
-            "item_name": target_item.get("name_en", target_item.get("name", request.id)),
-            "item_name_es": target_item.get("name_es", ""),
             "quantity": request.qty,
             "unit": request.unit,
         }
+        # Copy over name translations dynamically
+        for k, v in target_item.items():
+            if k.startswith("name_"):
+                new_item[f"item_{k}"] = v
+        # Fallback item_name for backwards compatibility
+        primary_lang = get_available_languages()[0]["code"] if get_available_languages() else "english"
+        new_item["item_name"] = target_item.get(f"name_{primary_lang}", target_item.get("name", request.id))
         if item_idx is not None:
             items[item_idx] = new_item
         else:
@@ -1032,6 +1056,8 @@ async def admin_get_aggregation(_=Depends(get_required_admin)):
     cat_ids = get_all_inventory_categories()
     config = load_categories_config()
     categories_data = []
+    langs = get_available_languages()
+    primary_lang = langs[0]["code"] if langs else "english"
 
     for cat_id in cat_ids:
         cat_data = get_inventory_category(cat_id)
@@ -1040,8 +1066,8 @@ async def admin_get_aggregation(_=Depends(get_required_admin)):
             items = cat_data.get("items", [])
             categories_data.append({
                 "id": cat_id,
-                "label": cat_config.get("label_en", cat_config.get("label", cat_data["label"])),
-                "items": [{"id": item["id"], "name": item["name_en"]} for item in items]
+                "label": cat_config.get(f"label_{primary_lang}", cat_config.get("label", cat_data["label"])),
+                "items": [{"id": item["id"], "name": item.get(f"name_{primary_lang}", item.get("name"))} for item in items]
             })
 
     return {
@@ -1171,7 +1197,56 @@ async def admin_update_branding(body: UpdateBrandingRequest, _=Depends(get_requi
     branding = {k: v for k, v in body.branding.items() if k in safe_keys}
     with open(BRANDING_FILE, "w", encoding="utf-8") as f:
         json.dump(branding, f, indent=4)
+
+    # Update manifest.json with new branding
+    manifest_path = WEB_DIR / "manifest.json"
+    if manifest_path.exists():
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+
+            manifest["name"] = branding.get("brand_name", "Ordering App")
+            manifest["short_name"] = branding.get("app_title", "Ordering App")
+            manifest["description"] = f"Ordering app for {manifest['name']}"
+            if branding.get("primary_color"):
+                manifest["theme_color"] = branding["primary_color"]
+            if branding.get("bg_core"):
+                manifest["background_color"] = branding["bg_core"]
+
+            with open(manifest_path, "w", encoding="utf-8") as f:
+                json.dump(manifest, f, indent=2)
+        except Exception as e:
+            logger.error(f"Error updating manifest.json: {e}")
+
     return {"success": True}
+
+
+@app.post("/api/admin/upload-favicon")
+async def admin_upload_favicon(file: UploadFile = File(...), _=Depends(get_required_admin)):
+    if not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="Only image files are supported")
+
+    try:
+        content = await file.read()
+        image = Image.open(io.BytesIO(content))
+
+        # Convert to RGBA for consistent PNG rendering
+        if image.mode != "RGBA":
+            image = image.convert("RGBA")
+
+        assets_dir = WEB_DIR / "assets"
+        assets_dir.mkdir(exist_ok=True)
+
+        # Resize and save
+        sizes = [32, 192, 512]
+        for size in sizes:
+            resized = image.resize((size, size), Image.Resampling.LANCZOS)
+            resized.save(assets_dir / f"icon-{size}.png", "PNG")
+
+        return {"success": True}
+    except Exception as e:
+        logger.error(f"Error processing favicon upload: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/admin/password")

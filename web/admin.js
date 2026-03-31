@@ -313,7 +313,7 @@ function renderCategoryOrderList(categories) {
             <div class="pointer-events-none w-full h-full flex flex-col">
                 ${iconHtml}
                 <div class="category-title-wrapper flex-1">
-                    <span class="category-title">${escapeHtml(cat.label_en)}</span>
+                    <span class="category-title">${escapeHtml(cat.label || cat.id)}</span>
                 </div>
             </div>
             <div class="absolute top-2 right-2 bg-[var(--color-bg-nav)] rounded-full w-5 h-5 flex items-center justify-center text-[var(--color-text-secondary)] text-[10px] font-mono font-bold border border-[var(--color-border)] shadow-sm pointer-events-none index-badge">${idx + 1}</div>
@@ -502,6 +502,88 @@ async function saveBranding() {
         resultEl.textContent = 'Request failed.';
         resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-falcone-red border border-red-700';
         resultEl.classList.remove('hidden');
+    }
+}
+
+let _selectedFaviconFile = null;
+
+function handleFaviconSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.png')) {
+        alert('Please select a .png image file.');
+        input.value = '';
+        return;
+    }
+
+    // Check image dimensions client side if needed
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            if (img.width > 500 || img.height > 500) {
+                alert('Image must be 500x500 pixels or smaller.');
+                input.value = '';
+                return;
+            }
+            if (img.width !== img.height) {
+                alert('Warning: Image is not square, it may appear distorted.');
+            }
+
+            _selectedFaviconFile = file;
+            document.getElementById('currentFaviconPreview').src = e.target.result;
+            const fnameEl = document.getElementById('faviconFileName');
+            fnameEl.textContent = file.name;
+            fnameEl.classList.remove('hidden');
+            document.getElementById('btnUploadFavicon').disabled = false;
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+async function uploadFavicon() {
+    if (!_selectedFaviconFile) return;
+
+    const btn = document.getElementById('btnUploadFavicon');
+    const resultEl = document.getElementById('faviconResult');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Uploading...';
+    if (window.lucide) lucide.createIcons();
+    resultEl.classList.add('hidden');
+
+    try {
+        const formData = new FormData();
+        formData.append('file', _selectedFaviconFile);
+
+        const res = await adminApiFetch(`${API_BASE}/admin/upload-favicon`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        const data = await res.json();
+        resultEl.textContent = data.success ? 'Favicon updated successfully. Reload page to see changes.' : 'Failed to update favicon.';
+        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.classList.remove('hidden');
+
+        if (data.success) {
+            _selectedFaviconFile = null;
+            document.getElementById('faviconInput').value = '';
+            document.getElementById('faviconFileName').classList.add('hidden');
+
+            // Force refresh image cache by adding timestamp
+            const preview = document.getElementById('currentFaviconPreview');
+            preview.src = `/assets/icon-192.png?t=${new Date().getTime()}`;
+        }
+    } catch (e) {
+        resultEl.textContent = 'Upload failed. Check server logs.';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.classList.remove('hidden');
+    } finally {
+        btn.innerHTML = '<i data-lucide="upload" class="w-4 h-4"></i> Upload';
+        btn.disabled = !_selectedFaviconFile;
+        if (window.lucide) lucide.createIcons();
     }
 }
 
@@ -768,11 +850,22 @@ function isLight(hex) {
 // --- App Settings ---
 async function loadAppSettings() {
     try {
+        const resLangs = await adminApiFetch(`${API_BASE}/languages`);
+        const dataLangs = await resLangs.json();
+        if (dataLangs.success && dataLangs.languages) {
+            const langSel = document.getElementById('settingsOutputLang');
+            if (langSel) {
+                langSel.innerHTML = dataLangs.languages.map(l =>
+                    `<option value="${l.code}">${escapeHtml(l.name)}</option>`
+                ).join('');
+            }
+        }
+
         const res = await adminApiFetch(`${API_BASE}/admin/settings`);
         const data = await res.json();
         if (data.success && data.settings) {
             const langSel = document.getElementById('settingsOutputLang');
-            if (langSel) langSel.value = data.settings.output_language || 'en';
+            if (langSel) langSel.value = data.settings.output_language || 'english';
         }
     } catch (e) {
         console.error('Failed to load settings:', e);

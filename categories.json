@@ -2,73 +2,73 @@
     "produce": {
         "color": "gray",
         "icon": "🥦",
-        "label_en": "Produce",
-        "label_es": "Produce"
+        "label_english": "Produce",
+        "label_espa_ol": "Frutas y Verduras"
     },
     "meats": {
         "color": "zinc",
         "icon": "🥩",
-        "label_en": "Meats",
-        "label_es": "Meats"
+        "label_english": "Meats",
+        "label_espa_ol": "Carnes"
     },
     "dairy": {
         "color": "neutral",
         "icon": "🧀",
-        "label_en": "Dairy",
-        "label_es": "Dairy"
+        "label_english": "Dairy",
+        "label_espa_ol": "Lácteos"
     },
     "cleaning": {
         "color": "stone",
         "icon": "🧹",
-        "label_en": "Cleaning",
-        "label_es": "Cleaning"
+        "label_english": "Cleaning",
+        "label_espa_ol": "Limpieza"
     },
     "disposables": {
         "color": "gray",
         "icon": "🥡",
-        "label_en": "Disposables",
-        "label_es": "Disposables"
+        "label_english": "Disposables",
+        "label_espa_ol": "Desechables"
     },
     "prepared": {
         "color": "stone",
         "icon": "🍲",
-        "label_en": "Prepared",
-        "label_es": "Prepared"
+        "label_english": "Prepared",
+        "label_espa_ol": "Preparados"
     },
     "smallwares": {
         "color": "gray",
         "icon": "🍴",
-        "label_en": "Smallwares",
-        "label_es": "Smallwares"
+        "label_english": "Smallwares",
+        "label_espa_ol": "Utensilios"
     },
     "alcohol": {
         "color": "gray",
         "icon": "🍺",
-        "label_en": "Alcohol",
-        "label_es": "Alcohol"
+        "label_english": "Alcohol",
+        "label_espa_ol": "Alcohol"
     },
     "fountain_bib": {
         "color": "zinc",
         "icon": "🧃",
-        "label_en": "Fountain BIB",
-        "label_es": "Fountain BIB"
+        "label_english": "Fountain BIB",
+        "label_espa_ol": "BIB de Fuente"
     },
     "beverages": {
         "color": "neutral",
         "icon": "🥤",
-        "label_en": "Beverages",
-        "label_es": "Beverages"
+        "label_english": "Beverages",
+        "label_espa_ol": "Bebidas"
     },
     "frozen_&_refrigerated": {
         "color": "stone",
         "icon": "❄️",
-        "label_en": "Frozen & Refrigerated",
-        "label_es": "Frozen & Refrigerated"
+        "label_english": "Frozen & Refrigerated",
+        "label_espa_ol": "Congelados y Refrigerados"
     },
     "dry_grocery": {
         "color": "gray",
         "icon": "🌾",
-        "label_en": "Dry Grocery",
-        "label_es": "Dry Grocery"
+        "label_english": "Dry Grocery",
+        "label_espa_ol": "Abarrotes Secos"
     }
 }

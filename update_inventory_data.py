@@ -13,6 +13,12 @@ CATEGORIES_FILE = Path("categories.json")
 DATA_DIR = Path("data")
 FLAG_FILE = Path("global_flags/update_inventory.txt")
 MASTER_FILE = ITEM_MASTER_DIR / "Master.xlsx"
+LANGUAGES_FILE = Path("config/languages.json")
+
+def save_languages(langs: list):
+    LANGUAGES_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(LANGUAGES_FILE, "w", encoding="utf-8") as f:
+        json.dump(langs, f, indent=4, ensure_ascii=False)
 
 
 def load_categories_config() -> dict:
@@ -89,6 +95,8 @@ def convert_excel_to_json():
         fallback_colors = ["gray", "zinc", "neutral", "stone"]
         icon_idx = 0
 
+        global_languages = []
+
         for sheet_name in sheet_names:
             if use_master:
                 df = pd.read_excel(xls, sheet_name=sheet_name, header=None)
@@ -100,52 +108,34 @@ def convert_excel_to_json():
                 lang_cols = {} # { lang_code: col_idx }
 
                 if len(df) >= 2:
-                    row0 = df.iloc[0].astype(str).str.strip().str.lower().tolist()
+                    row0_raw = df.iloc[0].astype(str).str.strip().tolist()
 
-                    # Instead of hardcoding EN and ES indicators, extract the language codes directly
-                    # Look for l1: english, l2: español format, or just "en", "es"
-                    # The prompt says: "row 1 defines language codes (e.g., 'en', 'es')" in AGENTS.md, but screenshot shows "l1: English"
-
-                    for i, val in enumerate(row0):
-                        if not val or val == 'nan':
+                    for i, val in enumerate(row0_raw):
+                        if not val or val.lower() == 'nan':
                             continue
-
-                        lang_code = None
-                        if val.startswith('l1:') or val == 'en' or val == 'english':
-                            lang_code = 'en'
-                        elif val.startswith('l2:') or val == 'es' or val == 'español' or val == 'spanish':
-                            lang_code = 'es'
-                        elif re.match(r'^l\d+:\s*(.+)$', val):
-                            m = re.match(r'^l\d+:\s*(.+)$', val)
-                            # E.g. l3: French -> fr
-                            lang_name = m.group(1).lower()
-                            if lang_name == 'french': lang_code = 'fr'
-                            elif lang_name == 'german': lang_code = 'de'
-                            elif lang_name == 'italian': lang_code = 'it'
-                            else: lang_code = lang_name[:2]
-                        elif len(val) == 2:
-                            # Just "en", "es", "fr", etc.
-                            lang_code = val
-
-                        if lang_code:
-                            lang_cols[lang_code] = i
-                            has_lang_headers = True
+                        # Remove 'L1: ', 'L2: ', etc if present
+                        name = re.sub(r'^l\d+:\s*', '', val, flags=re.IGNORECASE).strip()
+                        code = re.sub(r'[^a-z0-9]', '_', name.lower())
+                        lang_cols[code] = {"col_idx": i, "name": name}
+                        has_lang_headers = True
 
                 if not has_lang_headers:
-                    # Fallback to col 0 = en, col 1 = es if possible
-                    lang_cols['en'] = 0
+                    # Fallback to col 0 = english, col 1 = spanish if possible
+                    lang_cols['english'] = {"col_idx": 0, "name": "English"}
                     if len(df.columns) > 1:
-                        lang_cols['es'] = 1
+                        lang_cols['espa_ol'] = {"col_idx": 1, "name": "Español"}
 
-                en_col_idx = lang_cols.get('en', 0)
+                # Update global languages based on the first processed sheet
+                if not global_languages:
+                    for code, info in lang_cols.items():
+                        global_languages.append({"code": code, "name": info["name"]})
 
-                # Categories translation is always in row 1, so items start at row 2
                 start_row = 2 if has_lang_headers else 0
-
                 cat_labels = {}
 
                 if has_lang_headers and len(df) >= 2:
-                    for lang_code, col_idx in lang_cols.items():
+                    for lang_code, info in lang_cols.items():
+                        col_idx = info["col_idx"]
                         if col_idx < len(df.columns):
                             val = df.iloc[1, col_idx]
                             if pd.notna(val) and str(val).strip() and str(val).lower() != 'nan':
@@ -155,50 +145,57 @@ def convert_excel_to_json():
                                 cat_labels[lang_code] = label
 
                 items_by_lang = {}
-                for lang_code, col_idx in lang_cols.items():
+                for lang_code, info in lang_cols.items():
+                    col_idx = info["col_idx"]
                     if col_idx < len(df.columns):
                         items_by_lang[lang_code] = df.iloc[start_row:, col_idx].astype(str).tolist()
                     else:
                         items_by_lang[lang_code] = []
 
-                items_en = items_by_lang.get('en', [])
+                primary_lang_code = list(lang_cols.keys())[0] if lang_cols else "english"
+                items_primary = items_by_lang.get(primary_lang_code, [])
 
-                # Clean up items_en (remove 'nan' and empty strings)
-                items_en_clean = []
-                for val in items_en:
+                # Clean up items_primary (remove 'nan' and empty strings)
+                items_primary_clean = []
+                for val in items_primary:
                     if pd.notna(val) and str(val).lower() != 'nan' and str(val).strip():
-                        items_en_clean.append(str(val).strip())
+                        items_primary_clean.append(str(val).strip())
                     else:
-                        items_en_clean.append('') # Keep alignment
+                        items_primary_clean.append('') # Keep alignment
 
-                items_en = items_en_clean
-                items_by_lang['en'] = items_en_clean
+                items_primary = items_primary_clean
+                items_by_lang[primary_lang_code] = items_primary_clean
 
             else:
+                # Legacy handling for separated English/Spanish Master files
                 df_en = pd.read_excel(xls_en, sheet_name=sheet_name, header=None)
                 if df_en.empty or len(df_en.columns) == 0:
                     continue
                 items_en = df_en.iloc[:, 0].dropna().astype(str).tolist()
                 items_en = [v for v in items_en if v and v.lower() != 'nan']
-                items_by_lang = {'en': items_en}
+                items_by_lang = {'english': items_en}
+                lang_cols = {'english': {"col_idx": 0, "name": "English"}}
 
                 if xls_es and sheet_name in xls_es.sheet_names:
                     df_es = pd.read_excel(xls_es, sheet_name=sheet_name, header=None)
-                    items_by_lang['es'] = df_es.iloc[:, 0].tolist()
-                cat_labels = {}
-                lang_cols = {'en': 0}
-                if 'es' in items_by_lang:
-                    lang_cols['es'] = 1
+                    items_by_lang['espa_ol'] = df_es.iloc[:, 0].tolist()
+                    lang_cols['espa_ol'] = {"col_idx": 1, "name": "Español"}
 
-            # Only proceed if there is at least one valid English item
-            if not any(items_en):
+                if not global_languages:
+                    for code, info in lang_cols.items():
+                        global_languages.append({"code": code, "name": info["name"]})
+
+                cat_labels = {}
+                primary_lang_code = 'english'
+                items_primary = items_en
+
+            if not any(items_primary):
                 continue
 
             cat_label_tab, tab_icon = parse_tab_name(sheet_name)
             cat_id = cat_label_tab.lower().replace(" ", "_").replace("-", "_")
 
-            # Fallback to tab name if not found in Excel row 1
-            final_label_en = cat_labels.get('en') if cat_labels.get('en') else cat_label_tab
+            final_label_primary = cat_labels.get(primary_lang_code) if cat_labels.get(primary_lang_code) else cat_label_tab
 
             if cat_id not in config:
                 icon_val = tab_icon if tab_icon else fallback_icons[icon_idx % len(fallback_icons)]
@@ -206,10 +203,8 @@ def convert_excel_to_json():
                     "color": fallback_colors[icon_idx % len(fallback_colors)],
                     "icon": icon_val,
                 }
-                config[cat_id]["label_en"] = final_label_en
                 for lang in lang_cols:
-                    if lang != 'en':
-                        config[cat_id][f"label_{lang}"] = cat_labels.get(lang) if cat_labels.get(lang) else cat_label_tab
+                    config[cat_id][f"label_{lang}"] = cat_labels.get(lang) if cat_labels.get(lang) else cat_label_tab
                 config_updated = True
                 icon_idx += 1
             else:
@@ -217,43 +212,41 @@ def convert_excel_to_json():
                     config[cat_id]["icon"] = tab_icon
                     config_updated = True
 
-                if config[cat_id].get("label_en") != final_label_en:
-                    config[cat_id]["label_en"] = final_label_en
-                    config_updated = True
-
                 for lang in lang_cols:
-                    if lang != 'en':
-                        final_label_lang = cat_labels.get(lang) if cat_labels.get(lang) else cat_label_tab
-                        if config[cat_id].get(f"label_{lang}") != final_label_lang:
-                            config[cat_id][f"label_{lang}"] = final_label_lang
-                            config_updated = True
+                    final_label_lang = cat_labels.get(lang) if cat_labels.get(lang) else cat_label_tab
+                    if config[cat_id].get(f"label_{lang}") != final_label_lang:
+                        config[cat_id][f"label_{lang}"] = final_label_lang
+                        config_updated = True
 
                 if "label" in config[cat_id]:
                     del config[cat_id]["label"]
                     config_updated = True
+                if "label_en" in config[cat_id]:
+                    del config[cat_id]["label_en"]
+                    config_updated = True
+                if "label_es" in config[cat_id]:
+                    del config[cat_id]["label_es"]
+                    config_updated = True
 
-            category_data = {"label": final_label_en, "items": []}
+            category_data = {"label": final_label_primary, "items": []}
 
-            # Filter out empty items that were kept for alignment
             valid_idx = 0
-            for i, item_en in enumerate(items_en):
-                if not item_en:
+            for i, item_primary in enumerate(items_primary):
+                if not item_primary:
                     continue
 
                 item_data = {
                     "id": f"{cat_id}_{valid_idx}",
-                    "name_en": item_en.strip()
                 }
 
                 for lang in lang_cols:
-                    if lang != 'en':
-                        items_lang_col = items_by_lang.get(lang, [])
-                        item_lang = item_en
-                        if i < len(items_lang_col):
-                            val = items_lang_col[i]
-                            if pd.notna(val) and str(val).lower() != 'nan' and str(val).strip():
-                                item_lang = str(val).strip()
-                        item_data[f"name_{lang}"] = item_lang.strip()
+                    items_lang_col = items_by_lang.get(lang, [])
+                    item_lang = item_primary
+                    if i < len(items_lang_col):
+                        val = items_lang_col[i]
+                        if pd.notna(val) and str(val).lower() != 'nan' and str(val).strip():
+                            item_lang = str(val).strip()
+                    item_data[f"name_{lang}"] = item_lang.strip()
 
                 category_data["items"].append(item_data)
                 valid_idx += 1
@@ -271,6 +264,9 @@ def convert_excel_to_json():
                 logging.info(f"Saving {json_filepath.name}")
                 with open(json_filepath, "w", encoding="utf-8") as f:
                     json.dump(category_data, f, indent=4, ensure_ascii=False)
+
+        if global_languages:
+            save_languages(global_languages)
 
         if config_updated:
             logging.info("Updating categories.json")
