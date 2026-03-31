@@ -3,6 +3,116 @@
 const API_BASE = '/api';
 let adminToken = sessionStorage.getItem('admin_token') || null;
 
+// --- Admin Language ---
+const adminTranslations = {
+    en: {
+        'nav-data': 'Data', 'nav-appui': 'App UI', 'nav-config': 'Configuration',
+        'tab-analytics': 'Data Viewer', 'tab-inventory': 'Inventory',
+        'tab-category-order': 'Category Order', 'tab-ui-labels': 'UI Labels',
+        'tab-branding': 'Branding', 'tab-locations': 'Locations',
+        'tab-email': 'Email', 'tab-settings': 'Settings', 'tab-security': 'Security',
+        'header-back': 'Ordering App', 'header-logout': 'Log Out',
+        'hdr-analytics': 'Order Frequencies per Location',
+        'hdr-upload': 'Upload Master Inventory File',
+        'hdr-category-order': 'Category Display Order',
+        'hdr-ui-labels': 'UI Labels',
+        'hdr-branding': 'Business Branding & Config',
+        'hdr-locations': 'Location PINs',
+        'hdr-smtp': 'SMTP Settings',
+        'hdr-recipients': 'Order Recipients',
+        'hdr-settings': 'App Settings',
+        'hdr-download-master': 'Download Master Inventory File',
+        'hdr-frequency': 'Download Frequency Report',
+        'hdr-reset': 'Reset Inventory Data',
+        'hdr-security': 'Change Admin Password',
+        'btn-save-branding': 'Save Branding',
+        'btn-save-settings': 'Save Settings',
+        'btn-save-labels': 'Save Labels',
+        'btn-save-order': 'Save Order',
+        'btn-save-email': 'Save Settings',
+        'btn-save-recipients': 'Save Recipients',
+        'btn-download-master': 'Download Master.xlsx',
+        'btn-download-freq': 'Download Report',
+        'btn-reset-inventory': 'Reset Inventory Data',
+        'btn-upload-rebuild': 'Upload & Rebuild',
+        'btn-rebuild': 'Rebuild from Existing File',
+        'lbl-output-lang': 'Order Output Language',
+        'lbl-dark-colors': '🌙 Dark Mode Colors',
+        'lbl-light-colors': '☀️ Light Mode Colors',
+        'lbl-accent-color': 'Accent / Primary Color',
+        'lbl-bg': 'Background',
+        'lbl-panel': 'Panel / Card',
+        'lbl-text': 'Text',
+    },
+    es: {
+        'nav-data': 'Datos', 'nav-appui': 'Interfaz', 'nav-config': 'Configuración',
+        'tab-analytics': 'Visor de Datos', 'tab-inventory': 'Inventario',
+        'tab-category-order': 'Orden de Categorías', 'tab-ui-labels': 'Etiquetas',
+        'tab-branding': 'Marca', 'tab-locations': 'Ubicaciones',
+        'tab-email': 'Correo', 'tab-settings': 'Ajustes', 'tab-security': 'Seguridad',
+        'header-back': 'Aplicación', 'header-logout': 'Cerrar Sesión',
+        'hdr-analytics': 'Frecuencias de Pedidos por Ubicación',
+        'hdr-upload': 'Subir Archivo Maestro de Inventario',
+        'hdr-category-order': 'Orden de Visualización de Categorías',
+        'hdr-ui-labels': 'Etiquetas de Interfaz',
+        'hdr-branding': 'Marca y Configuración',
+        'hdr-locations': 'PINs de Ubicación',
+        'hdr-smtp': 'Configuración SMTP',
+        'hdr-recipients': 'Destinatarios de Pedidos',
+        'hdr-settings': 'Ajustes de la Aplicación',
+        'hdr-download-master': 'Descargar Archivo Maestro',
+        'hdr-frequency': 'Descargar Reporte de Frecuencia',
+        'hdr-reset': 'Restablecer Datos de Inventario',
+        'hdr-security': 'Cambiar Contraseña de Admin',
+        'btn-save-branding': 'Guardar Marca',
+        'btn-save-settings': 'Guardar Ajustes',
+        'btn-save-labels': 'Guardar Etiquetas',
+        'btn-save-order': 'Guardar Orden',
+        'btn-save-email': 'Guardar Ajustes',
+        'btn-save-recipients': 'Guardar Destinatarios',
+        'btn-download-master': 'Descargar Master.xlsx',
+        'btn-download-freq': 'Descargar Reporte',
+        'btn-reset-inventory': 'Restablecer Inventario',
+        'btn-upload-rebuild': 'Subir y Reconstruir',
+        'btn-rebuild': 'Reconstruir desde Archivo Existente',
+        'lbl-output-lang': 'Idioma de Salida de Pedidos',
+        'lbl-dark-colors': '🌙 Colores Modo Oscuro',
+        'lbl-light-colors': '☀️ Colores Modo Claro',
+        'lbl-accent-color': 'Color de Acento / Principal',
+        'lbl-bg': 'Fondo',
+        'lbl-panel': 'Panel / Tarjeta',
+        'lbl-text': 'Texto',
+    },
+};
+
+let adminCurrentLang = localStorage.getItem('app_lang') || 'en';
+
+function applyAdminLanguage() {
+    const t = adminTranslations[adminCurrentLang] || adminTranslations.en;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key] !== undefined) el.textContent = t[key];
+    });
+    document.querySelectorAll('.admin-lang-opt').forEach(btn => {
+        const isActive = btn.getAttribute('data-lang') === adminCurrentLang;
+        btn.classList.toggle('font-bold', isActive);
+        btn.classList.toggle('text-brand-primary', isActive);
+    });
+}
+
+function toggleAdminLang() {
+    const dd = document.getElementById('adminLangDropdown');
+    if (dd) dd.classList.toggle('hidden');
+}
+
+function setAdminLanguage(lang) {
+    adminCurrentLang = lang;
+    localStorage.setItem('app_lang', lang);
+    const dd = document.getElementById('adminLangDropdown');
+    if (dd) dd.classList.add('hidden');
+    applyAdminLanguage();
+}
+
 async function adminApiFetch(url, options = {}) {
     options.headers = options.headers || {};
     if (adminToken) {
@@ -52,6 +162,7 @@ function adminLogout() {
 function showAdminApp() {
     document.getElementById('adminLoginScreen').classList.add('hidden');
     document.getElementById('adminApp').classList.remove('hidden');
+    applyAdminLanguage();
     switchTab('analytics');
     loadLocations();
     loadEmailSettings();
@@ -823,37 +934,31 @@ function applyPreset(presetName) {
     const form = document.getElementById('brandingForm');
     const presets = {
         'default': {
-            'primary_color': '#db594b',
-            'bg_core': '#0a0a0a',
-            'bg_panel': '#1f1f1f',
-            'text_color': '#ffffff'
-        },
-        'light': {
-            'primary_color': '#0284c7',
-            'bg_core': '#f7f3ee',
-            'bg_panel': '#ffffff',
-            'text_color': '#151515'
+            primary_color: '#db594b',
+            dark_bg_core: '#0a0a0a', dark_bg_panel: '#1f1f1f', dark_text_color: '#ffffff',
+            light_bg_core: '#f5f1eb', light_bg_panel: '#fffdfa', light_text_color: '#181412',
         },
         'ocean': {
-            'primary_color': '#0891b2',
-            'bg_core': '#0c0c0c',
-            'bg_panel': '#0891b2',
-            'text_color': '#ffffff'
+            primary_color: '#0891b2',
+            dark_bg_core: '#0a1929', dark_bg_panel: '#0d2137', dark_text_color: '#e0f2fe',
+            light_bg_core: '#e0f7fa', light_bg_panel: '#ffffff', light_text_color: '#01579b',
         },
         'forest': {
-            'primary_color': '#059669',
-            'bg_core': '#151515',
-            'bg_panel': '#059669',
-            'text_color': '#ffffff'
-        }
+            primary_color: '#059669',
+            dark_bg_core: '#071a0f', dark_bg_panel: '#0d2b18', dark_text_color: '#d1fae5',
+            light_bg_core: '#f0fdf4', light_bg_panel: '#ffffff', light_text_color: '#14532d',
+        },
+        'warm': {
+            primary_color: '#d97706',
+            dark_bg_core: '#1a1209', dark_bg_panel: '#2a1e0f', dark_text_color: '#fef3c7',
+            light_bg_core: '#fffbeb', light_bg_panel: '#ffffff', light_text_color: '#78350f',
+        },
     };
 
     if (presets[presetName]) {
         for (const [key, value] of Object.entries(presets[presetName])) {
             const input = form.querySelector(`[data-key="${key}"]`);
-            if (input) {
-                input.value = value;
-            }
+            if (input) input.value = value;
         }
     }
 }
@@ -1012,11 +1117,53 @@ function populateFreqLocationDropdown() {
 }
 
 
+// --- Reset Inventory ---
+async function resetInventoryData() {
+    const msg = adminCurrentLang === 'es'
+        ? '⚠️ Esto borrará TODAS las categorías y artículos del inventario.\n\nEl archivo Master.xlsx NO se eliminará. La aplicación mostrará un error hasta que el maestro sea reprocesado.\n\n¿Está seguro?'
+        : '⚠️ This will erase ALL inventory categories and items from the app.\n\nThe Master.xlsx file is NOT deleted. The app will show an error until the master is reprocessed in the Inventory tab.\n\nAre you sure?';
+    if (!confirm(msg)) return;
+
+    const resultEl = document.getElementById('resetInventoryResult');
+    resultEl.classList.add('hidden');
+
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/reset-inventory`, { method: 'POST' });
+        const data = await res.json();
+        const successMsg = adminCurrentLang === 'es'
+            ? `Inventario restablecido. ${data.count || 0} archivo(s) eliminado(s).`
+            : `Inventory reset. ${data.count || 0} file(s) deleted.`;
+        const failMsg = adminCurrentLang === 'es' ? 'Error al restablecer.' : 'Reset failed.';
+        resultEl.textContent = data.success ? successMsg : failMsg;
+        resultEl.className = `p-3 rounded-lg text-sm mt-4 ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
+        resultEl.classList.remove('hidden');
+    } catch (e) {
+        resultEl.textContent = 'Request failed.';
+        resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-brand-primary border border-red-700';
+        resultEl.classList.remove('hidden');
+    }
+}
+
+
 // --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
     populateColorDropdowns();
+    applyAdminLanguage();
     if (adminToken) {
         showAdminApp();
     }
     if (window.lucide) lucide.createIcons();
+
+    document.addEventListener('click', (e) => {
+        const dd = document.getElementById('adminLangDropdown');
+        const btn = document.getElementById('btnAdminLang');
+        if (dd && btn && !dd.contains(e.target) && !btn.contains(e.target)) {
+            dd.classList.add('hidden');
+        }
+        const ddLogin = document.getElementById('adminLangDropdownLogin');
+        const btnLogin = document.getElementById('btnAdminLangLogin');
+        if (ddLogin && btnLogin && !ddLogin.contains(e.target) && !btnLogin.contains(e.target)) {
+            ddLogin.classList.add('hidden');
+        }
+    });
 });

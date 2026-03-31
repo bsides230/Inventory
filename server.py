@@ -981,6 +981,25 @@ async def admin_save_settings(request: Request, _=Depends(get_required_admin)):
     return {"success": True}
 
 
+@app.post("/api/admin/reset-inventory")
+async def admin_reset_inventory(_=Depends(get_required_admin)):
+    deleted = []
+    for f in DATA_DIR.glob("*.json"):
+        try:
+            f.unlink()
+            deleted.append(f.name)
+        except Exception:
+            pass
+    if CATEGORIES_FILE.exists():
+        try:
+            CATEGORIES_FILE.unlink()
+            deleted.append(CATEGORIES_FILE.name)
+        except Exception:
+            pass
+    logger.info("Inventory reset: deleted %d files", len(deleted))
+    return {"success": True, "deleted": deleted, "count": len(deleted)}
+
+
 @app.get("/api/admin/download-master")
 async def admin_download_master(_=Depends(get_required_admin)):
     master_path = ITEM_MASTER_DIR / "Master.xlsx"

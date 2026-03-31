@@ -556,6 +556,7 @@ async function initAppAfterAuth() {
 function applyBranding() {
     const b = state.branding;
     if (!b) return;
+    const isDark = state.theme === 'dark';
 
     if (b.brand_name) {
         const titleEl = document.getElementById('pinScreenTitle');
@@ -583,28 +584,30 @@ function applyBranding() {
         }
     }
 
-    // Apply CSS Variables to :root
+    // Apply CSS Variables to :root — use dark/light variants, fall back to flat fields
     const root = document.documentElement;
     if (b.primary_color) {
         root.style.setProperty('--brand-red', b.primary_color);
         root.style.setProperty('--color-red', b.primary_color);
-        // Approximation for dim
         root.style.setProperty('--brand-red-dim', `${b.primary_color}20`);
     }
-    if (b.bg_core) {
-        root.style.setProperty('--bg-core', b.bg_core);
-        root.style.setProperty('--color-bg-body', b.bg_core);
-        root.style.setProperty('--color-dark', b.bg_core);
+    const bgCore = isDark ? (b.dark_bg_core || b.bg_core) : (b.light_bg_core || b.bg_core);
+    const bgPanel = isDark ? (b.dark_bg_panel || b.bg_panel) : (b.light_bg_panel || b.bg_panel);
+    const textColor = isDark ? (b.dark_text_color || b.text_color) : (b.light_text_color || b.text_color);
+    if (bgCore) {
+        root.style.setProperty('--bg-core', bgCore);
+        root.style.setProperty('--color-bg-body', bgCore);
+        root.style.setProperty('--color-dark', bgCore);
     }
-    if (b.bg_panel) {
-        root.style.setProperty('--bg-panel', b.bg_panel);
-        root.style.setProperty('--color-bg-nav', b.bg_panel);
-        root.style.setProperty('--color-gray', b.bg_panel);
+    if (bgPanel) {
+        root.style.setProperty('--bg-panel', bgPanel);
+        root.style.setProperty('--color-bg-nav', bgPanel);
+        root.style.setProperty('--color-gray', bgPanel);
     }
-    if (b.text_color) {
-        root.style.setProperty('--text-head', b.text_color);
-        root.style.setProperty('--color-text-primary', b.text_color);
-        root.style.setProperty('--color-light', b.text_color);
+    if (textColor) {
+        root.style.setProperty('--text-head', textColor);
+        root.style.setProperty('--color-text-primary', textColor);
+        root.style.setProperty('--color-light', textColor);
     }
 }
 
@@ -641,6 +644,7 @@ function toggleTheme() {
 
 function applyTheme() {
     document.documentElement.setAttribute('data-theme', state.theme);
+    applyBranding();
     if (DOM.btnToggleTheme) {
         const icon = state.theme === 'dark' ? 'sun' : 'moon';
         DOM.btnToggleTheme.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i>`;
