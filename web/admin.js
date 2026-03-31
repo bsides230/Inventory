@@ -298,20 +298,28 @@ async function loadCategoryOrder() {
 function renderCategoryOrderList(categories) {
     const listEl = document.getElementById('categoryOrderList');
     if (categories.length === 0) {
-        listEl.innerHTML = '<div class="text-[var(--color-text-secondary)] text-sm text-center py-4">No categories found.</div>';
+        listEl.innerHTML = '<div class="text-[var(--color-text-secondary)] text-sm text-center py-4 col-span-full">No categories found.</div>';
         return;
     }
-    listEl.innerHTML = categories.map((cat, idx) => `
-        <div class="category-drag-item flex items-center justify-between bg-[var(--color-bg-body)] rounded-lg border border-[var(--color-border)] px-4 py-3 cursor-move transition-transform"
+    listEl.innerHTML = categories.map((cat, idx) => {
+        const isLucideIcon = /^[a-z][a-z0-9-]*$/.test(cat.icon || 'box');
+        const iconHtml = isLucideIcon
+            ? `<i data-lucide="${cat.icon || 'box'}" class="category-icon text-${cat.color || 'gray'}-400"></i>`
+            : `<span class="category-icon" style="line-height:1; display:flex; align-items:center; justify-content:center;">${cat.icon || '📦'}</span>`;
+        return `
+        <div class="category-drag-item category-btn cursor-move relative"
              draggable="true"
              data-id="${escapeHtml(cat.id)}">
-            <div class="flex items-center gap-4 pointer-events-none">
-                <i data-lucide="grip-vertical" class="w-5 h-5 text-[var(--color-text-secondary)]"></i>
-                <div class="font-medium text-sm sm:text-base">${escapeHtml(cat.label_en)} <span class="text-[var(--color-text-secondary)] text-xs ml-2">(${escapeHtml(cat.id)})</span></div>
+            <div class="pointer-events-none w-full h-full flex flex-col">
+                ${iconHtml}
+                <div class="category-title-wrapper flex-1">
+                    <span class="category-title">${escapeHtml(cat.label_en)}</span>
+                </div>
             </div>
-            <div class="text-[var(--color-text-secondary)] text-xs font-mono font-bold w-6 text-right pointer-events-none">${idx + 1}</div>
+            <div class="absolute top-2 right-2 bg-[var(--color-bg-nav)] rounded-full w-5 h-5 flex items-center justify-center text-[var(--color-text-secondary)] text-[10px] font-mono font-bold border border-[var(--color-border)] shadow-sm pointer-events-none index-badge">${idx + 1}</div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 
     // Add drag and drop event listeners
     const items = listEl.querySelectorAll('.category-drag-item');
@@ -359,7 +367,8 @@ function handleDrop(e) {
         // Update numbers
         const newItems = Array.from(list.querySelectorAll('.category-drag-item'));
         newItems.forEach((item, idx) => {
-            item.querySelector('.text-right').textContent = idx + 1;
+            const badge = item.querySelector('.index-badge');
+            if (badge) badge.textContent = idx + 1;
         });
     }
     return false;
