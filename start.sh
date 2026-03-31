@@ -2,7 +2,7 @@
 set -e
 
 echo "======================================================="
-echo "Starting Falcone's Pizza Inventory"
+echo "Starting brand's Pizza Inventory"
 echo "======================================================="
 
 # Ensure log directory exists

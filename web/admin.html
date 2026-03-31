@@ -9,7 +9,7 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { falcone: { red: '#db594b' } },
+                    colors: { brand: { primary: '#db594b' } },
                     fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] }
                 }
             }
@@ -24,20 +24,20 @@
     <div id="adminLoginScreen" class="fixed inset-0 z-50 bg-[var(--color-bg-body)] flex items-center justify-center p-6">
         <div class="w-full max-w-sm">
             <div class="text-center mb-8">
-                <i data-lucide="shield" class="w-14 h-14 text-falcone-red mx-auto mb-4"></i>
+                <i data-lucide="shield" class="w-14 h-14 text-brand-primary mx-auto mb-4"></i>
                 <h1 class="text-2xl font-bold">Admin Panel</h1>
                 <p class="text-[var(--color-text-secondary)] mt-1 text-sm">Ordering App</p>
             </div>
             <div class="bg-[var(--color-bg-nav)] rounded-2xl border border-[var(--color-border)] p-6">
                 <label class="block text-sm text-[var(--color-text-secondary)] mb-2">Admin Password</label>
-                <input type="password" id="adminPasswordInput" placeholder="Enter password" class="w-full bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg p-3 text-[var(--color-text-primary)] focus:border-falcone-red outline-none mb-3" onkeydown="if(event.key==='Enter')adminLogin()">
-                <div id="adminLoginError" class="hidden text-falcone-red text-sm mb-3">Incorrect password.</div>
-                <button onclick="adminLogin()" class="w-full bg-falcone-red hover:bg-red-600 text-white font-bold py-3 rounded-lg transition-colors">
+                <input type="password" id="adminPasswordInput" placeholder="Enter password" class="w-full bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg p-3 text-[var(--color-text-primary)] focus:border-brand-primary outline-none mb-3" onkeydown="if(event.key==='Enter')adminLogin()">
+                <div id="adminLoginError" class="hidden text-brand-primary text-sm mb-3">Incorrect password.</div>
+                <button onclick="adminLogin()" class="w-full bg-brand-primary hover:bg-red-600 text-white font-bold py-3 rounded-lg transition-colors">
                     Log In
                 </button>
             </div>
             <p class="text-center text-[var(--color-text-secondary)] text-xs mt-4">
-                <a href="/" class="hover:text-falcone-red transition-colors">← Back to Ordering App</a>
+                <a href="/" class="hover:text-brand-primary transition-colors">← Back to Ordering App</a>
             </p>
         </div>
     </div>
@@ -48,7 +48,7 @@
         <header class="bg-[var(--color-bg-nav)] border-b border-[var(--color-border)] px-6 py-4 sticky top-0 z-40">
             <div class="max-w-4xl mx-auto flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="shield" class="w-6 h-6 text-falcone-red"></i>
+                    <i data-lucide="shield" class="w-6 h-6 text-brand-primary"></i>
                     <h1 class="text-lg font-bold">Admin Panel</h1>
                 </div>
                 <div class="flex items-center gap-3">
@@ -56,7 +56,7 @@
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
                         Ordering App
                     </a>
-                    <button onclick="adminLogout()" class="text-sm text-[var(--color-text-secondary)] hover:text-falcone-red transition-colors flex items-center gap-1">
+                    <button onclick="adminLogout()" class="text-sm text-[var(--color-text-secondary)] hover:text-brand-primary transition-colors flex items-center gap-1">
                         <i data-lucide="log-out" class="w-4 h-4"></i>
                         Log Out
                     </button>
@@ -68,11 +68,11 @@
         <div class="bg-[var(--color-bg-nav)] border-b border-[var(--color-border)] px-6 relative">
             <div class="max-w-4xl mx-auto flex gap-2 overflow-visible py-2">
                 <!-- Data Group -->
-                <div class="relative group">
-                    <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-border)] transition-colors">
+                <div class="relative dropdown-group">
+                    <button class="dropdown-toggle flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-border)] transition-colors" onclick="toggleAdminDropdown(this)">
                         <i data-lucide="database" class="w-4 h-4"></i> Data <i data-lucide="chevron-down" class="w-3 h-3"></i>
                     </button>
-                    <div class="absolute left-0 top-full mt-1 hidden group-hover:block bg-[var(--color-bg-nav)] border border-[var(--color-border)] rounded-lg shadow-xl z-50 min-w-[160px] py-1">
+                    <div class="dropdown-menu absolute left-0 top-full mt-1 hidden bg-[var(--color-bg-nav)] border border-[var(--color-border)] rounded-lg shadow-xl z-50 min-w-[160px] py-1">
                         <button class="admin-tab active w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-border)] transition-colors flex items-center gap-2" data-tab="analytics" onclick="switchTab('analytics')">
                             <i data-lucide="bar-chart-2" class="w-4 h-4"></i> Data Viewer
                         </button>
@@ -83,11 +83,11 @@
                 </div>
 
                 <!-- App UI Group -->
-                <div class="relative group">
-                    <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-border)] transition-colors">
+                <div class="relative dropdown-group">
+                    <button class="dropdown-toggle flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-border)] transition-colors" onclick="toggleAdminDropdown(this)">
                         <i data-lucide="layout" class="w-4 h-4"></i> App UI <i data-lucide="chevron-down" class="w-3 h-3"></i>
                     </button>
-                    <div class="absolute left-0 top-full mt-1 hidden group-hover:block bg-[var(--color-bg-nav)] border border-[var(--color-border)] rounded-lg shadow-xl z-50 min-w-[160px] py-1">
+                    <div class="dropdown-menu absolute left-0 top-full mt-1 hidden bg-[var(--color-bg-nav)] border border-[var(--color-border)] rounded-lg shadow-xl z-50 min-w-[160px] py-1">
                         <button class="admin-tab w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-border)] transition-colors flex items-center gap-2" data-tab="category-order" onclick="switchTab('category-order')">
                             <i data-lucide="list-ordered" class="w-4 h-4"></i> Category Order
                         </button>
@@ -101,11 +101,11 @@
                 </div>
 
                 <!-- Configuration Group -->
-                <div class="relative group">
-                    <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-border)] transition-colors">
+                <div class="relative dropdown-group">
+                    <button class="dropdown-toggle flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-border)] transition-colors" onclick="toggleAdminDropdown(this)">
                         <i data-lucide="settings" class="w-4 h-4"></i> Configuration <i data-lucide="chevron-down" class="w-3 h-3"></i>
                     </button>
-                    <div class="absolute left-0 top-full mt-1 hidden group-hover:block bg-[var(--color-bg-nav)] border border-[var(--color-border)] rounded-lg shadow-xl z-50 min-w-[160px] py-1">
+                    <div class="dropdown-menu absolute left-0 top-full mt-1 hidden bg-[var(--color-bg-nav)] border border-[var(--color-border)] rounded-lg shadow-xl z-50 min-w-[160px] py-1">
                         <button class="admin-tab w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-border)] transition-colors flex items-center gap-2" data-tab="locations" onclick="switchTab('locations')">
                             <i data-lucide="map-pin" class="w-4 h-4"></i> Locations
                         </button>
@@ -130,22 +130,23 @@
             <div id="tab-analytics" class="tab-content space-y-6">
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="bar-chart-2" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="bar-chart-2" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">Order Frequencies per Location</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">View how often items are ordered by each location. Select a location below and browse categories to see frequency counts.</p>
 
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">Select Location:</label>
-                        <select id="analyticsLocationSelect" class="w-full sm:w-64 bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg p-2 text-[var(--color-text-primary)] focus:border-falcone-red outline-none" onchange="renderAnalytics()">
-                            <option value="">Loading locations...</option>
-                        </select>
-                    </div>
-
-                    <!-- Analytics Tabs for Categories -->
-                    <div class="border-b border-[var(--color-border)] mb-4">
-                        <div id="analyticsCategoryTabs" class="flex gap-4 overflow-x-auto pb-2">
-                            <!-- Category tabs will be rendered here -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 border-b border-[var(--color-border)] pb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">Location</label>
+                            <select id="analyticsLocationSelect" class="w-full bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg p-2 text-[var(--color-text-primary)] focus:border-brand-primary outline-none" onchange="renderAnalytics()">
+                                <option value="">Loading locations...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">Category</label>
+                            <select id="analyticsCategorySelect" class="w-full bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg p-2 text-[var(--color-text-primary)] focus:border-brand-primary outline-none" onchange="setAnalyticsCategory(this.value)">
+                                <option value="">Loading categories...</option>
+                            </select>
                         </div>
                     </div>
 
@@ -163,7 +164,7 @@
                 <!-- Upload Master -->
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="upload-cloud" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="upload-cloud" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">Upload Master Inventory File</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">
@@ -187,13 +188,13 @@
 
                     <!-- Drop zone -->
                     <div id="uploadDropZone"
-                         class="border-2 border-dashed border-[var(--color-border)] rounded-xl p-8 text-center cursor-pointer transition-colors hover:border-falcone-red mb-4"
+                         class="border-2 border-dashed border-[var(--color-border)] rounded-xl p-8 text-center cursor-pointer transition-colors hover:border-brand-primary mb-4"
                          onclick="document.getElementById('masterFileInput').click()"
-                         ondragover="event.preventDefault();this.classList.add('border-falcone-red','bg-falcone-red/5')"
-                         ondragleave="this.classList.remove('border-falcone-red','bg-falcone-red/5')"
+                         ondragover="event.preventDefault();this.classList.add('border-brand-primary','bg-brand-primary/5')"
+                         ondragleave="this.classList.remove('border-brand-primary','bg-brand-primary/5')"
                          ondrop="handleMasterDrop(event)">
                         <i data-lucide="file-spreadsheet" class="w-10 h-10 text-[var(--color-text-secondary)] mx-auto mb-3"></i>
-                        <p class="font-medium text-sm">Drop Master.xlsx here or <span class="text-falcone-red">click to browse</span></p>
+                        <p class="font-medium text-sm">Drop Master.xlsx here or <span class="text-brand-primary">click to browse</span></p>
                         <p class="text-xs text-[var(--color-text-secondary)] mt-1">Only .xlsx files accepted</p>
                         <input type="file" id="masterFileInput" accept=".xlsx" class="hidden" onchange="handleMasterFileSelect(this)">
                     </div>
@@ -201,13 +202,13 @@
                     <div id="uploadSelectedFile" class="hidden flex items-center gap-3 bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg px-4 py-3 mb-4">
                         <i data-lucide="file-check" class="w-5 h-5 text-green-400 flex-shrink-0"></i>
                         <span id="uploadFileName" class="text-sm font-medium flex-1 truncate"></span>
-                        <button onclick="clearMasterFile()" class="text-[var(--color-text-secondary)] hover:text-falcone-red ml-auto flex-shrink-0">
+                        <button onclick="clearMasterFile()" class="text-[var(--color-text-secondary)] hover:text-brand-primary ml-auto flex-shrink-0">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </div>
 
                     <div class="flex gap-3 flex-wrap">
-                        <button onclick="uploadMasterFile()" id="btnUpload" disabled class="bg-falcone-red hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
+                        <button onclick="uploadMasterFile()" id="btnUpload" disabled class="bg-brand-primary hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
                             <i data-lucide="upload" class="w-4 h-4"></i>
                             Upload &amp; Rebuild
                         </button>
@@ -224,7 +225,7 @@
             <div id="tab-category-order" class="tab-content hidden space-y-6">
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="list-ordered" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="list-ordered" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">Category Display Order</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">
@@ -236,7 +237,7 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <button onclick="saveCategoryOrder()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                        <button onclick="saveCategoryOrder()" class="bg-brand-primary hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
                             <i data-lucide="save" class="w-4 h-4"></i>
                             Save Order
                         </button>
@@ -249,7 +250,7 @@
             <div id="tab-ui-labels" class="tab-content hidden space-y-6">
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="type" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="type" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">UI Labels</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">
@@ -276,7 +277,7 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <button onclick="saveUILabels()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                        <button onclick="saveUILabels()" class="bg-brand-primary hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
                             <i data-lucide="save" class="w-4 h-4"></i>
                             Save Labels
                         </button>
@@ -289,12 +290,19 @@
             <div id="tab-branding" class="tab-content hidden space-y-6">
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="palette" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="palette" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">Business Branding & Config</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">
-                        Configure global business identity values used throughout the app. Leave fields blank to use default settings.
+                        Configure global business identity values used throughout the app. Leave fields blank to use default settings. Or select a preset theme to get started quickly.
                     </p>
+
+                    <div class="mb-6 flex flex-wrap gap-2">
+                        <button onclick="applyPreset('default')" class="px-4 py-2 bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg text-sm hover:border-brand-primary transition-colors">Dark Default</button>
+                        <button onclick="applyPreset('light')" class="px-4 py-2 bg-[#f7f3ee] text-[#151515] border border-[#d4d4d4] rounded-lg text-sm hover:border-brand-primary transition-colors">Light Clean</button>
+                        <button onclick="applyPreset('ocean')" class="px-4 py-2 bg-[#0284c7] text-white border border-[#0891b2] rounded-lg text-sm hover:bg-opacity-90 transition-colors">Ocean Blue</button>
+                        <button onclick="applyPreset('forest')" class="px-4 py-2 bg-[#059669] text-white border border-[#65a30d] rounded-lg text-sm hover:bg-opacity-90 transition-colors">Forest Green</button>
+                    </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="brandingForm">
                         <div>
@@ -328,7 +336,7 @@
                     </div>
 
                     <div class="flex gap-3 mb-6 border-b border-[var(--color-border)] pb-6">
-                        <button onclick="saveBranding()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                        <button onclick="saveBranding()" class="bg-brand-primary hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
                             <i data-lucide="save" class="w-4 h-4"></i>
                             Save Branding
                         </button>
@@ -353,7 +361,7 @@
                                 <div id="faviconFileName" class="text-xs text-[var(--color-text-secondary)] hidden"></div>
                             </div>
 
-                            <button id="btnUploadFavicon" onclick="uploadFavicon()" disabled class="bg-falcone-red hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2 text-sm shrink-0">
+                            <button id="btnUploadFavicon" onclick="uploadFavicon()" disabled class="bg-brand-primary hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2 text-sm shrink-0">
                                 <i data-lucide="upload" class="w-4 h-4"></i>
                                 Upload
                             </button>
@@ -368,7 +376,7 @@
                 <div class="admin-card">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-3">
-                            <i data-lucide="map-pin" class="w-6 h-6 text-falcone-red"></i>
+                            <i data-lucide="map-pin" class="w-6 h-6 text-brand-primary"></i>
                             <h2 class="text-lg font-bold">Location PINs</h2>
                         </div>
                     </div>
@@ -382,12 +390,12 @@
                         <div class="flex gap-3 flex-wrap">
                             <input type="text" id="newPin" maxlength="4" placeholder="PIN (4 digits)" class="admin-input w-36" oninput="this.value=this.value.replace(/\D/g,'')">
                             <input type="text" id="newLocationName" placeholder="Location name" class="admin-input flex-1 min-w-[200px]">
-                            <button onclick="addLocation()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm flex items-center gap-2">
+                            <button onclick="addLocation()" class="bg-brand-primary hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm flex items-center gap-2">
                                 <i data-lucide="plus" class="w-4 h-4"></i>
                                 Add
                             </button>
                         </div>
-                        <div id="addLocationError" class="hidden text-falcone-red text-xs mt-2"></div>
+                        <div id="addLocationError" class="hidden text-brand-primary text-xs mt-2"></div>
                     </div>
 
                     <!-- Locations list -->
@@ -401,7 +409,7 @@
             <div id="tab-email" class="tab-content hidden space-y-6">
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="server" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="server" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">SMTP Settings</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">Configure outgoing email for order delivery. Settings are saved immediately.</p>
@@ -433,12 +441,12 @@
                                 <input type="email" id="smtpSenderEmail" class="admin-input w-full" placeholder="inventory@example.com">
                             </div>
                             <div class="flex items-center gap-3 pt-6">
-                                <input type="checkbox" id="smtpUseTls" class="w-5 h-5 accent-falcone-red">
+                                <input type="checkbox" id="smtpUseTls" class="w-5 h-5 accent-brand-primary">
                                 <label for="smtpUseTls" class="text-sm font-medium">Use TLS (STARTTLS)</label>
                             </div>
                         </div>
                         <div class="flex gap-3 pt-2">
-                            <button onclick="saveEmailSettings()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                            <button onclick="saveEmailSettings()" class="bg-brand-primary hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
                                 <i data-lucide="save" class="w-4 h-4"></i>
                                 Save Settings
                             </button>
@@ -449,13 +457,13 @@
 
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="users" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="users" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">Order Recipients</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">One email address per line. Orders will be sent to all listed addresses.</p>
                     <textarea id="recipientsList" rows="6" class="admin-input w-full font-mono text-sm" placeholder="ops@example.com&#10;manager@example.com"></textarea>
                     <div class="flex gap-3 mt-3">
-                        <button onclick="saveRecipients()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                        <button onclick="saveRecipients()" class="bg-brand-primary hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
                             <i data-lucide="save" class="w-4 h-4"></i>
                             Save Recipients
                         </button>
@@ -468,7 +476,7 @@
             <div id="tab-settings" class="tab-content hidden space-y-6">
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="settings" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="settings" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">App Settings</h2>
                     </div>
 
@@ -483,7 +491,7 @@
                         </div>
 
                         <div class="flex gap-3">
-                            <button onclick="saveAppSettings()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                            <button onclick="saveAppSettings()" class="bg-brand-primary hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
                                 <i data-lucide="save" class="w-4 h-4"></i>
                                 Save Settings
                             </button>
@@ -494,7 +502,7 @@
 
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="download" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="download" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">Download Master Inventory File</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">Download the current Master.xlsx file used to build the inventory.</p>
@@ -506,7 +514,7 @@
 
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="bar-chart" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="bar-chart" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">Download Frequency Report</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">Export a spreadsheet showing how often each item has been ordered, with categories as tabs.</p>
@@ -529,7 +537,7 @@
             <div id="tab-security" class="tab-content hidden space-y-6">
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="lock" class="w-6 h-6 text-falcone-red"></i>
+                        <i data-lucide="lock" class="w-6 h-6 text-brand-primary"></i>
                         <h2 class="text-lg font-bold">Change Admin Password</h2>
                     </div>
                     <p class="text-[var(--color-text-secondary)] text-sm mb-4">The admin password is stored in <code class="bg-[var(--color-border)] px-1 rounded">config/admin_password.txt</code> on the server.</p>
@@ -542,7 +550,7 @@
                             <label class="admin-label">New Password</label>
                             <input type="password" id="newPassword" class="admin-input w-full">
                         </div>
-                        <button onclick="changePassword()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
+                        <button onclick="changePassword()" class="bg-brand-primary hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
                             <i data-lucide="lock" class="w-4 h-4"></i>
                             Update Password
                         </button>

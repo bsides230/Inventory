@@ -1,6 +1,6 @@
 const CACHE_VERSION = 'v7';
-const STATIC_CACHE = `falcones-static-${CACHE_VERSION}`;
-const API_CACHE = `falcones-api-${CACHE_VERSION}`;
+const STATIC_CACHE = `app-static-${CACHE_VERSION}`;
+const API_CACHE = `app-api-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
   '/',

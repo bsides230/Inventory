@@ -1,9 +1,9 @@
-/* Falcones Pizza Inventory Styles */
+/* Example Brand Pizza Inventory Styles */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root, [data-theme="dark"] {
-  /* Falcones Style Guide Variables */
+  /* Example Brand Style Guide Variables */
   --bg-core: #0c0c0c;
   --bg-panel: #151515;
   --brand-red: #8e1f1f;
@@ -32,7 +32,7 @@
 }
 
 [data-theme="light"] {
-  /* Falcones Style Guide Variables */
+  /* Example Brand Style Guide Variables */
   --bg-core: #f5f1eb;
   --bg-panel: #fffdfa;
   --brand-red: #8e1f1f;
@@ -90,7 +90,7 @@ body {
   display: block;
 }
 
-/* Falcones Buttons & Inputs Base */
+/* Example Brand Buttons & Inputs Base */
 .btn-primary {
   font-family: "JetBrains Mono", monospace;
   font-size: 11px;

@@ -78,9 +78,10 @@ async function loadAnalytics() {
             select.innerHTML = '<option value="">All Locations</option>' +
                 data.locations.map(loc => `<option value="${escapeHtml(loc.pin)}">${escapeHtml(loc.name)}</option>`).join('');
 
-            renderAnalyticsCategoryTabs();
+            renderAnalyticsCategoryDropdown();
             if (data.categories.length > 0) {
                 currentAnalyticsCategory = data.categories[0].id;
+                document.getElementById('analyticsCategorySelect').value = currentAnalyticsCategory;
             }
             renderAnalytics();
         }
@@ -89,30 +90,21 @@ async function loadAnalytics() {
     }
 }
 
-function renderAnalyticsCategoryTabs() {
+function renderAnalyticsCategoryDropdown() {
     if (!analyticsData) return;
-    const tabsContainer = document.getElementById('analyticsCategoryTabs');
-    tabsContainer.innerHTML = analyticsData.categories.map(cat => `
-        <button onclick="setAnalyticsCategory('${escapeHtml(cat.id)}')"
-                class="analytics-cat-tab px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
-                       ${cat.id === currentAnalyticsCategory ? 'border-falcone-red text-falcone-red' : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)]'}"
-                data-cat-id="${escapeHtml(cat.id)}">
-            ${escapeHtml(cat.label)}
-        </button>
-    `).join('');
+    const select = document.getElementById('analyticsCategorySelect');
+    if (analyticsData.categories.length === 0) {
+        select.innerHTML = '<option value="">No categories available</option>';
+        return;
+    }
+
+    select.innerHTML = analyticsData.categories.map(cat =>
+        `<option value="${escapeHtml(cat.id)}">${escapeHtml(cat.label)}</option>`
+    ).join('');
 }
 
 window.setAnalyticsCategory = function(catId) {
     currentAnalyticsCategory = catId;
-    document.querySelectorAll('.analytics-cat-tab').forEach(el => {
-        if (el.getAttribute('data-cat-id') === catId) {
-            el.classList.add('border-falcone-red', 'text-falcone-red');
-            el.classList.remove('border-transparent', 'text-[var(--color-text-secondary)]');
-        } else {
-            el.classList.remove('border-falcone-red', 'text-falcone-red');
-            el.classList.add('border-transparent', 'text-[var(--color-text-secondary)]');
-        }
-    });
     renderAnalytics();
 }
 
@@ -162,14 +154,39 @@ window.renderAnalytics = function() {
         ${sortedItems.map((item, i) => `
             <div class="grid grid-cols-[1fr_auto] gap-4 px-4 py-3 border-b border-[var(--color-border)] hover:bg-[var(--color-border)]/50 transition-colors ${i === sortedItems.length - 1 ? 'rounded-b-lg border-b-0' : ''}">
                 <div class="font-medium truncate" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
-                <div class="font-bold font-mono text-falcone-red text-right w-16">${item.freq}</div>
+                <div class="font-bold font-mono text-brand-primary text-right w-16">${item.freq}</div>
             </div>
         `).join('')}
     `;
 }
 
+// --- Dropdown Logic ---
+window.toggleAdminDropdown = function(btn) {
+    const parent = btn.closest('.dropdown-group');
+    const menu = parent.querySelector('.dropdown-menu');
+    const isHidden = menu.classList.contains('hidden');
+
+    // Close all other dropdowns
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+
+    if (isHidden) {
+        menu.classList.remove('hidden');
+    }
+};
+
+document.addEventListener('click', (e) => {
+    // Close dropdowns if click is outside any dropdown group
+    if (!e.target.closest('.dropdown-group')) {
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+    }
+});
+
+
 // --- Tab switching ---
 function switchTab(tabName) {
+    // Close dropdowns when a tab is selected
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('active'));
 
@@ -200,7 +217,7 @@ function handleMasterFileSelect(input) {
 
 function handleMasterDrop(event) {
     event.preventDefault();
-    document.getElementById('uploadDropZone').classList.remove('border-falcone-red', 'bg-falcone-red/5');
+    document.getElementById('uploadDropZone').classList.remove('border-brand-primary', 'bg-brand-primary/5');
     const file = event.dataTransfer.files[0];
     if (!file) return;
     if (!file.name.toLowerCase().endsWith('.xlsx')) {
@@ -240,12 +257,12 @@ async function uploadMasterFile() {
         });
         const data = await res.json();
         resultEl.textContent = data.message;
-        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
         resultEl.classList.remove('hidden');
         if (data.success) clearMasterFile();
     } catch (e) {
         resultEl.textContent = 'Upload failed. Check server logs.';
-        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
     } finally {
         btn.disabled = !_selectedMasterFile;
@@ -266,11 +283,11 @@ async function rebuildInventory() {
         const res = await adminApiFetch(`${API_BASE}/admin/rebuild-inventory`, { method: 'POST' });
         const data = await res.json();
         resultEl.textContent = data.message;
-        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
         resultEl.classList.remove('hidden');
     } catch (e) {
         resultEl.textContent = 'Request failed. Check server logs.';
-        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
     } finally {
         btn.disabled = false;
@@ -291,7 +308,7 @@ async function loadCategoryOrder() {
             renderCategoryOrderList(data.categories);
         }
     } catch (e) {
-        listEl.innerHTML = '<div class="text-falcone-red text-sm">Failed to load categories.</div>';
+        listEl.innerHTML = '<div class="text-brand-primary text-sm">Failed to load categories.</div>';
     }
 }
 
@@ -394,11 +411,11 @@ async function saveCategoryOrder() {
         });
         const data = await res.json();
         resultEl.textContent = data.success ? 'Category order saved.' : 'Failed to save.';
-        resultEl.className = `p-3 rounded-lg text-sm mt-4 ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.className = `p-3 rounded-lg text-sm mt-4 ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
         resultEl.classList.remove('hidden');
     } catch (e) {
         resultEl.textContent = 'Request failed.';
-        resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
     }
 }
@@ -445,11 +462,11 @@ async function saveUILabels() {
         });
         const data = await res.json();
         resultEl.textContent = data.success ? 'UI labels saved.' : 'Failed to save.';
-        resultEl.className = `p-3 rounded-lg text-sm mt-4 ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.className = `p-3 rounded-lg text-sm mt-4 ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
         resultEl.classList.remove('hidden');
     } catch (e) {
         resultEl.textContent = 'Request failed.';
-        resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
     }
 }
@@ -496,11 +513,11 @@ async function saveBranding() {
         });
         const data = await res.json();
         resultEl.textContent = data.success ? 'Branding settings saved.' : 'Failed to save.';
-        resultEl.className = `p-3 rounded-lg text-sm mt-4 ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.className = `p-3 rounded-lg text-sm mt-4 ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
         resultEl.classList.remove('hidden');
     } catch (e) {
         resultEl.textContent = 'Request failed.';
-        resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm mt-4 bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
     }
 }
@@ -564,7 +581,7 @@ async function uploadFavicon() {
 
         const data = await res.json();
         resultEl.textContent = data.success ? 'Favicon updated successfully. Reload page to see changes.' : 'Failed to update favicon.';
-        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
         resultEl.classList.remove('hidden');
 
         if (data.success) {
@@ -578,7 +595,7 @@ async function uploadFavicon() {
         }
     } catch (e) {
         resultEl.textContent = 'Upload failed. Check server logs.';
-        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
     } finally {
         btn.innerHTML = '<i data-lucide="upload" class="w-4 h-4"></i> Upload';
@@ -598,7 +615,7 @@ async function loadLocations() {
             renderLocationsList(data.locations);
         }
     } catch (e) {
-        listEl.innerHTML = '<div class="text-falcone-red text-sm">Failed to load locations.</div>';
+        listEl.innerHTML = '<div class="text-brand-primary text-sm">Failed to load locations.</div>';
     }
 }
 
@@ -611,13 +628,13 @@ function renderLocationsList(locations) {
     listEl.innerHTML = locations.map(loc => `
         <div class="flex items-center justify-between bg-[var(--color-bg-body)] rounded-lg border border-[var(--color-border)] px-4 py-3">
             <div class="flex items-center gap-4">
-                <div class="bg-falcone-red/10 border border-falcone-red/30 rounded-lg px-3 py-1.5 text-center">
+                <div class="bg-brand-primary/10 border border-brand-primary/30 rounded-lg px-3 py-1.5 text-center">
                     <div class="text-xs text-[var(--color-text-secondary)] mb-0.5">PIN</div>
-                    <div class="text-lg font-bold text-falcone-red font-mono tracking-widest">${escapeHtml(loc.pin)}</div>
+                    <div class="text-lg font-bold text-brand-primary font-mono tracking-widest">${escapeHtml(loc.pin)}</div>
                 </div>
                 <div class="font-medium">${escapeHtml(loc.name)}</div>
             </div>
-            <button onclick="deleteLocation('${escapeHtml(loc.pin)}')" class="p-2 text-[var(--color-text-secondary)] hover:text-falcone-red transition-colors rounded-lg">
+            <button onclick="deleteLocation('${escapeHtml(loc.pin)}')" class="p-2 text-[var(--color-text-secondary)] hover:text-brand-primary transition-colors rounded-lg">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
         </div>
@@ -713,11 +730,11 @@ async function saveEmailSettings() {
         });
         const data = await res.json();
         resultEl.textContent = data.success ? 'Email settings saved.' : 'Failed to save settings.';
-        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
         resultEl.classList.remove('hidden');
     } catch (e) {
         resultEl.textContent = 'Request failed.';
-        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
     }
 }
@@ -750,11 +767,11 @@ async function saveRecipients() {
         });
         const data = await res.json();
         resultEl.textContent = data.success ? `Saved ${recipients.length} recipient(s).` : 'Failed to save.';
-        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
         resultEl.classList.remove('hidden');
     } catch (e) {
         resultEl.textContent = 'Request failed.';
-        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
     }
 }
@@ -771,7 +788,7 @@ async function changePassword() {
 
     if (!body.new_password || body.new_password.length < 4) {
         resultEl.textContent = 'New password must be at least 4 characters.';
-        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
         return;
     }
@@ -784,7 +801,7 @@ async function changePassword() {
         });
         const data = await res.json();
         resultEl.textContent = data.success ? 'Password updated successfully.' : (data.detail || 'Failed to update password.');
-        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
         resultEl.classList.remove('hidden');
         if (data.success) {
             document.getElementById('currentPassword').value = '';
@@ -792,13 +809,53 @@ async function changePassword() {
         }
     } catch (e) {
         resultEl.textContent = 'Request failed.';
-        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
     }
 }
 
 function escapeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+
+function applyPreset(presetName) {
+    const form = document.getElementById('brandingForm');
+    const presets = {
+        'default': {
+            'primary_color': '#db594b',
+            'bg_core': '#0a0a0a',
+            'bg_panel': '#1f1f1f',
+            'text_color': '#ffffff'
+        },
+        'light': {
+            'primary_color': '#0284c7',
+            'bg_core': '#f7f3ee',
+            'bg_panel': '#ffffff',
+            'text_color': '#151515'
+        },
+        'ocean': {
+            'primary_color': '#0891b2',
+            'bg_core': '#0c0c0c',
+            'bg_panel': '#0891b2',
+            'text_color': '#ffffff'
+        },
+        'forest': {
+            'primary_color': '#059669',
+            'bg_core': '#151515',
+            'bg_panel': '#059669',
+            'text_color': '#ffffff'
+        }
+    };
+
+    if (presets[presetName]) {
+        for (const [key, value] of Object.entries(presets[presetName])) {
+            const input = form.querySelector(`[data-key="${key}"]`);
+            if (input) {
+                input.value = value;
+            }
+        }
+    }
 }
 
 
@@ -885,11 +942,11 @@ async function saveAppSettings() {
         });
         const data = await res.json();
         resultEl.textContent = data.success ? 'Settings saved.' : 'Failed to save.';
-        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-falcone-red border border-red-700'}`;
+        resultEl.className = `p-3 rounded-lg text-sm ${data.success ? 'bg-green-900/30 text-green-400 border border-green-700' : 'bg-red-900/30 text-brand-primary border border-red-700'}`;
         resultEl.classList.remove('hidden');
     } catch (e) {
         resultEl.textContent = 'Request failed.';
-        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-falcone-red border border-red-700';
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-900/30 text-brand-primary border border-red-700';
         resultEl.classList.remove('hidden');
     }
 }

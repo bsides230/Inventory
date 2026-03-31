@@ -1,6 +1,6 @@
 @echo off
 echo =======================================================
-echo Falcone's Pizza Inventory - Windows Installer
+echo brand's Pizza Inventory - Windows Installer
 echo =======================================================
 
 echo Checking for Python installation...

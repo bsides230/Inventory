@@ -1,6 +1,6 @@
-# Falcones Pizza Inventory
+# brands Pizza Inventory
 
-A Progressive Web Application (PWA) for managing inventory and submitting orders at Falcones Pizza restaurant locations.
+A Progressive Web Application (PWA) for managing inventory and submitting orders at brands Pizza restaurant locations.
 
 ## Architecture
 

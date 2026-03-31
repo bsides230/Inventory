@@ -2,7 +2,7 @@
 set -e
 
 echo "======================================================="
-echo "Falcones Pizza Inventory - macOS/Linux Installer"
+echo "Example Brand Inventory - macOS/Linux Installer"
 echo "======================================================="
 
 # Check if Python is installed
@@ -21,16 +21,16 @@ echo "Starting the application..."
 OS="$(uname -s)"
 if [ "$OS" = "Linux" ]; then
     echo ""
-    read -p "Do you want to install Falcones Pizza Inventory as a systemd service to start automatically on boot? (y/n): " INSTALL_SERVICE
+    read -p "Do you want to install Example Brand Inventory as a systemd service to start automatically on boot? (y/n): " INSTALL_SERVICE
     if [[ "$INSTALL_SERVICE" =~ ^[Yy]$ ]]; then
         echo "Installing systemd service..."
-        SERVICE_FILE="/etc/systemd/system/falcones-inventory.service"
+        SERVICE_FILE="/etc/systemd/system/example_brand-inventory.service"
         CURRENT_DIR="$(pwd)"
 
         # Create systemd service file
         sudo bash -c "cat > $SERVICE_FILE" <<EOF
 [Unit]
-Description=Falcones Pizza Inventory Service
+Description=Example Brand Inventory Service
 After=network.target
 
 [Service]
@@ -44,8 +44,8 @@ WantedBy=multi-user.target
 EOF
 
         sudo systemctl daemon-reload
-        sudo systemctl enable falcones-inventory.service
-        echo "Systemd service 'falcones-inventory' installed and enabled to start on boot."
+        sudo systemctl enable example_brand-inventory.service
+        echo "Systemd service 'example_brand-inventory' installed and enabled to start on boot."
     fi
 fi
 

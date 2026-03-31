@@ -259,7 +259,7 @@ def get_location_name():
     if LOCATION_FILE.exists():
         with open(LOCATION_FILE, "r", encoding="utf-8") as f:
             return f.read().strip()
-    return "Falcones Pizza"
+    return "Example Brand"
 
 
 app = FastAPI(title=f"{get_location_name()} Inventory")
@@ -587,6 +587,19 @@ async def get_ui_labels():
     return {"success": True, "labels": labels}
 
 
+@app.get("/api/ui-translations")
+async def get_ui_translations():
+    translations = {}
+    translations_file = Path("config/ui_translations.json")
+    if translations_file.exists():
+        try:
+            with open(translations_file, "r", encoding="utf-8") as f:
+                translations = json.load(f)
+        except Exception as exc:
+            logger.error("Error reading ui_translations.json: %s", exc, exc_info=True)
+    return {"success": True, "translations": translations}
+
+
 @app.get("/api/languages")
 async def get_languages():
     return {"success": True, "languages": get_available_languages()}
@@ -806,7 +819,7 @@ async def submit_order(
             filename = f"{location} URGENT ORDER by {request.needed_by}.xlsx"
         else:
             date_str = request.date.replace("/", "-")
-            filename = f"{location} Falcones Order {date_str}.xlsx"
+            filename = f"{location} Example Brand Order {date_str}.xlsx"
         filepath = ORDERS_DIR / filename
 
     try:
