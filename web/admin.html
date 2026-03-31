@@ -96,6 +96,9 @@
                         <button class="admin-tab active w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-border)] transition-colors flex items-center gap-2" data-tab="analytics" onclick="switchTab('analytics')">
                             <i data-lucide="bar-chart-2" class="w-4 h-4"></i> <span data-i18n="tab-analytics">Data Viewer</span>
                         </button>
+                        <button class="admin-tab w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-border)] transition-colors flex items-center gap-2" data-tab="orders" onclick="switchTab('orders')">
+                            <i data-lucide="shopping-cart" class="w-4 h-4"></i> <span data-i18n="tab-orders">Order Viewer</span>
+                        </button>
                         <button class="admin-tab w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-border)] transition-colors flex items-center gap-2" data-tab="inventory" onclick="switchTab('inventory')">
                             <i data-lucide="package" class="w-4 h-4"></i> <span data-i18n="tab-inventory">Inventory</span>
                         </button>
@@ -147,7 +150,21 @@
         <main class="max-w-4xl mx-auto p-6 space-y-6">
 
             <!-- Analytics Tab -->
-            <div id="tab-analytics" class="tab-content space-y-6">
+            <div id="tab-orders" class="tab-content hidden space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="shopping-cart" class="w-6 h-6 text-brand-primary"></i>
+                        <h2 class="text-lg font-bold">Order Viewer</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">View and track all submitted orders. Click on an order to view its items, check them off, and record amounts spent.</p>
+
+                    <div id="orderViewerList" class="space-y-4">
+                        <div class="text-center text-[var(--color-text-secondary)] py-8 text-sm">Loading orders...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-analytics" class="tab-content hidden space-y-6">
                 <div class="admin-card">
                     <div class="flex items-center gap-3 mb-4">
                         <i data-lucide="bar-chart-2" class="w-6 h-6 text-brand-primary"></i>

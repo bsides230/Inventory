@@ -1012,6 +1012,40 @@ async def admin_download_master(_=Depends(get_required_admin)):
     )
 
 
+@app.get("/api/admin/orders")
+async def get_admin_orders(_=Depends(get_required_admin)):
+    order_manager = FileOrderManager(ORDERS_DIR)
+    orders = order_manager.get_orders()
+    return {"success": True, "orders": orders}
+
+class UpdateOrderRequest(BaseModel):
+    items: list
+
+@app.put("/api/admin/orders/{user_id}/{order_id}")
+async def update_admin_order(
+    user_id: str,
+    order_id: str,
+    request: UpdateOrderRequest,
+    _=Depends(get_required_admin),
+):
+    order_manager = FileOrderManager(ORDERS_DIR)
+    updated_order = order_manager.update_order(user_id, order_id, request.items)
+    if updated_order:
+        return {"success": True, "order": updated_order}
+    raise HTTPException(status_code=404, detail="Order not found")
+
+@app.delete("/api/admin/orders/{user_id}/{order_id}")
+async def delete_admin_order(
+    user_id: str,
+    order_id: str,
+    _=Depends(get_required_admin),
+):
+    order_manager = FileOrderManager(ORDERS_DIR)
+    success = order_manager.delete_order(user_id, order_id)
+    if success:
+        return {"success": True, "message": "Order deleted"}
+    raise HTTPException(status_code=404, detail="Order not found")
+
 @app.get("/api/admin/download-frequency-report")
 async def admin_download_frequency_report(
     location_pin: str = "",
