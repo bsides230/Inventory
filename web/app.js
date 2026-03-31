@@ -478,11 +478,19 @@ async function initAppAfterAuth() {
         console.error("Failed to fetch status:", e);
     }
 
-    if (DOM.locationBadge && state.locationName) {
-        DOM.locationBadge.textContent = state.locationName;
+    if (DOM.locationBadge) {
+        // Location badge element is preserved but content is hidden/cleared if using it as title
+        DOM.locationBadge.textContent = '';
+        DOM.locationBadge.classList.add('hidden');
     }
 
     applyLanguage();
+
+    // Override the app title with the location name on login
+    if (state.locationName) {
+        const appTitleEl = document.getElementById('appTitle');
+        if (appTitleEl) appTitleEl.textContent = state.locationName;
+    }
 
     try {
         const res = await apiFetch(`${API_BASE}/categories`);
@@ -601,7 +609,11 @@ function applyLanguage() {
         }
     };
 
-    setEl('appTitle', t.appTitle);
+    if (state.locationName && state.token) {
+        setEl('appTitle', state.locationName);
+    } else {
+        setEl('appTitle', t.appTitle);
+    }
     setEl('labelSubmitOrder', t.labelSubmitOrder, 'btn_submit');
     setEl('labelOrderModalTitle', t.labelOrderModalTitle);
     setEl('labelOrderDate', t.labelOrderDate);
@@ -624,7 +636,7 @@ function applyLanguage() {
 
     if (state.currentCategory) {
         const catConfig = state.categories.find(c => c.id === state.currentCategory);
-        if (catConfig) DOM.categoryTitle.textContent = state.lang === 'es' ? catConfig.label_es : catConfig.label_en;
+        if (catConfig) DOM.categoryTitle.textContent = catConfig[`label_${state.lang}`] || catConfig.label_en;
         renderCategory(state.currentCategory);
     } else {
         renderDashboard();
@@ -641,7 +653,7 @@ function renderDashboard() {
     state.categories.forEach(cat => {
         const btn = document.createElement('button');
         btn.className = 'category-btn';
-        const displayLabel = state.lang === 'es' ? cat.label_es : cat.label_en;
+        const displayLabel = cat[`label_${state.lang}`] || cat.label_en;
         const isLucideIcon = /^[a-z][a-z0-9-]*$/.test(cat.icon || '');
         const iconHtml = isLucideIcon
             ? `<i data-lucide="${cat.icon}" class="category-icon text-${cat.color}-400"></i>`
@@ -667,7 +679,7 @@ async function loadCategory(categoryId) {
     DOM.btnBack.classList.remove('hidden');
 
     const catConfig = state.categories.find(c => c.id === categoryId);
-    DOM.categoryTitle.textContent = catConfig ? (state.lang === 'es' ? catConfig.label_es : catConfig.label_en) : categoryId;
+    DOM.categoryTitle.textContent = catConfig ? (catConfig[`label_${state.lang}`] || catConfig.label_en) : categoryId;
 
     DOM.itemList.innerHTML = '<div class="text-center py-8 text-[var(--text-dim)]"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i>Loading...</div>';
     if (window.lucide) lucide.createIcons();
@@ -702,7 +714,7 @@ function renderCategory(categoryId) {
         itemEl.className = 'item-card p-4 mb-3';
 
         const nameEl = document.createElement('span');
-        nameEl.textContent = state.lang === 'es' ? item.name_es : item.name_en;
+        nameEl.textContent = item[`name_${state.lang}`] || item.name_en;
         const nameSafe = nameEl.textContent;
 
         const isEachSelected = item.unit === 'each' ? 'selected' : '';

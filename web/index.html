@@ -32,6 +32,24 @@
 
     <!-- PIN Entry Screen -->
     <div id="pinScreen" class="hidden fixed inset-0 z-[100] bg-[var(--color-bg-body)] flex flex-col items-center justify-center p-6">
+        <div class="absolute top-4 right-4 flex items-center gap-2">
+            <div class="relative">
+                <button id="btnToggleLangLogin" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Language" aria-label="Language" onclick="document.getElementById('langDropdownLogin').classList.toggle('hidden')">
+                    <i data-lucide="languages" class="w-5 h-5"></i>
+                </button>
+                <div id="langDropdownLogin" class="hidden absolute right-0 top-full mt-1 bg-[var(--bg-panel)] border border-[var(--border-color)] rounded-xl shadow-xl z-50 min-w-[140px] py-1">
+                    <button onclick="setLanguage('en'); document.getElementById('langDropdownLogin').classList.add('hidden')" class="lang-option w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)] transition-colors flex items-center gap-2" data-lang="en">
+                        English
+                    </button>
+                    <button onclick="setLanguage('es'); document.getElementById('langDropdownLogin').classList.add('hidden')" class="lang-option w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)] transition-colors flex items-center gap-2" data-lang="es">
+                        Español
+                    </button>
+                </div>
+            </div>
+            <a href="/admin" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Admin Panel" aria-label="Admin Panel">
+                <i data-lucide="shield" class="w-5 h-5"></i>
+            </a>
+        </div>
         <div class="w-full max-w-sm">
             <div class="text-center mb-8">
                 <i data-lucide="pizza" class="w-16 h-16 text-[var(--brand-red)] mx-auto mb-4"></i>
@@ -70,9 +88,6 @@
                 </div>
             </div>
 
-            <p class="text-center text-[var(--text-dim)] text-xs mt-6">
-                <a href="/admin" class="hover:text-[var(--brand-red)] transition-colors meta-label">Admin Panel</a>
-            </p>
         </div>
     </div>
 
@@ -121,10 +136,10 @@
                     </button>
                     <div id="langDropdown" class="hidden absolute right-0 top-full mt-1 bg-[var(--bg-panel)] border border-[var(--border-color)] rounded-xl shadow-xl z-50 min-w-[140px] py-1">
                         <button onclick="setLanguage('en')" class="lang-option w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)] transition-colors flex items-center gap-2" data-lang="en">
-                            <span class="text-base">🇺🇸</span> English
+                            English
                         </button>
                         <button onclick="setLanguage('es')" class="lang-option w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)] transition-colors flex items-center gap-2" data-lang="es">
-                            <span class="text-base">🇲🇽</span> Español
+                            Español
                         </button>
                     </div>
                 </div>
@@ -132,6 +147,10 @@
                 <button id="btnToggleTheme" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Toggle Theme" aria-label="Toggle Theme">
                     <i data-lucide="moon" class="w-5 h-5"></i>
                 </button>
+
+                <a href="/admin" id="btnAdminPanel" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Admin Panel" aria-label="Admin Panel">
+                    <i data-lucide="shield" class="w-5 h-5"></i>
+                </a>
 
                 <button id="btnLogout" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--brand-red)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Log out" aria-label="Log out" onclick="logout()">
                     <i data-lucide="log-out" class="w-5 h-5"></i>

@@ -585,13 +585,17 @@ async def get_categories():
         cat_data = get_inventory_category(cat_id)
         if cat_data:
             cat_config = config.get(cat_id, {})
-            categories.append({
+            cat_obj = {
                 "id": cat_id,
-                "label_en": cat_config.get("label_en", cat_config.get("label", cat_data["label"])),
-                "label_es": cat_config.get("label_es", cat_config.get("label", cat_data["label"])),
                 "icon": cat_config.get("icon", "box"),
                 "color": cat_config.get("color", "gray"),
-            })
+            }
+            for k, v in cat_config.items():
+                if k.startswith("label_"):
+                    cat_obj[k] = v
+            if "label_en" not in cat_obj:
+                cat_obj["label_en"] = cat_config.get("label", cat_data.get("label", cat_id))
+            categories.append(cat_obj)
     return {"success": True, "categories": categories}
 
 
