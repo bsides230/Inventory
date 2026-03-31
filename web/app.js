@@ -177,7 +177,8 @@ async function submitPin(pin) {
             DOM.pinError.classList.add('hidden');
             await initAppAfterAuth();
         } else {
-            DOM.pinError.textContent = translations[state.lang].invalidPin;
+            const t = translations[state.lang] || translations.en;
+            DOM.pinError.textContent = t.invalidPin;
             DOM.pinError.classList.remove('hidden');
             pinBuffer = '';
             updatePinDots();
@@ -752,7 +753,7 @@ async function loadCategory(categoryId) {
 
 function renderCategory(categoryId) {
     const items = state.inventory[categoryId] || [];
-    const t = translations[state.lang];
+    const t = translations[state.lang] || translations.en;
     DOM.categoryCount.textContent = `${items.length} ${t.itemsCount}`;
     DOM.itemList.innerHTML = '';
 
