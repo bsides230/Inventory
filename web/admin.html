@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Falcones Pizza</title>
+    <title>Admin Panel - Ordering App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -26,7 +26,7 @@
             <div class="text-center mb-8">
                 <i data-lucide="shield" class="w-14 h-14 text-falcone-red mx-auto mb-4"></i>
                 <h1 class="text-2xl font-bold">Admin Panel</h1>
-                <p class="text-[var(--color-text-secondary)] mt-1 text-sm">Falcones Pizza Inventory</p>
+                <p class="text-[var(--color-text-secondary)] mt-1 text-sm">Ordering App</p>
             </div>
             <div class="bg-[var(--color-bg-nav)] rounded-2xl border border-[var(--color-border)] p-6">
                 <label class="block text-sm text-[var(--color-text-secondary)] mb-2">Admin Password</label>
@@ -299,11 +299,11 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="brandingForm">
                         <div>
                             <label class="admin-label">Business Name</label>
-                            <input type="text" id="brand_name" class="admin-input w-full branding-input" data-key="brand_name" placeholder="Falcones Pizza">
+                            <input type="text" id="brand_name" class="admin-input w-full branding-input" data-key="brand_name" placeholder="Ordering App">
                         </div>
                         <div>
                             <label class="admin-label">App Title</label>
-                            <input type="text" id="app_title" class="admin-input w-full branding-input" data-key="app_title" placeholder="Inventory">
+                            <input type="text" id="app_title" class="admin-input w-full branding-input" data-key="app_title" placeholder="Ordering App">
                         </div>
                         <div>
                             <label class="admin-label">Primary / Accent Color</label>
@@ -327,13 +327,39 @@
                         </div>
                     </div>
 
-                    <div class="flex gap-3">
+                    <div class="flex gap-3 mb-6 border-b border-[var(--color-border)] pb-6">
                         <button onclick="saveBranding()" class="bg-falcone-red hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm flex items-center gap-2">
                             <i data-lucide="save" class="w-4 h-4"></i>
                             Save Branding
                         </button>
+                        <div id="brandingResult" class="hidden p-2 rounded-lg text-sm"></div>
                     </div>
-                    <div id="brandingResult" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+
+                    <div class="mt-4">
+                        <label class="admin-label">App Logo / Favicon</label>
+                        <p class="text-[var(--color-text-secondary)] text-xs mb-3">Upload a square PNG image (max 500x500). It will be used as the app icon on home screens and browser tabs.</p>
+
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 bg-[var(--color-bg-body)] rounded-lg border border-[var(--color-border)] flex items-center justify-center overflow-hidden shrink-0">
+                                <img src="/assets/icon-192.png" id="currentFaviconPreview" class="w-full h-full object-cover" onerror="this.src=''; this.onerror=null;">
+                            </div>
+
+                            <div class="flex-1">
+                                <input type="file" id="faviconInput" accept="image/png" class="hidden" onchange="handleFaviconSelect(this)">
+                                <button onclick="document.getElementById('faviconInput').click()" class="bg-[var(--color-bg-body)] hover:bg-[var(--color-border)] border border-[var(--color-border)] text-[var(--color-text-primary)] font-bold py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm mb-2">
+                                    <i data-lucide="image" class="w-4 h-4"></i>
+                                    Select Image
+                                </button>
+                                <div id="faviconFileName" class="text-xs text-[var(--color-text-secondary)] hidden"></div>
+                            </div>
+
+                            <button id="btnUploadFavicon" onclick="uploadFavicon()" disabled class="bg-falcone-red hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2 text-sm shrink-0">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                                Upload
+                            </button>
+                        </div>
+                        <div id="faviconResult" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
+                    </div>
                 </div>
             </div>
 

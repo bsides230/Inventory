@@ -10,3 +10,7 @@
 {"timestamp": "2026-03-31T00:36:23.771916+00:00", "event_id": "8e39d02f-ddf7-4bb1-8855-357c1269e764", "order_id": "8dd86526-64e9-4ba7-b27b-16013401f233", "status": "failed", "attempts": 3, "error": "smtp down"}
 {"timestamp": "2026-03-31T00:40:25.498588+00:00", "event_id": "ec3eaf2f-6be9-4009-bf45-bb734508889f", "order_id": "31276105-2150-4bc0-a6ee-e105a32abd23", "status": "failed", "attempts": 3, "error": "[Errno 111] Connection refused"}
 {"timestamp": "2026-03-31T00:40:25.786036+00:00", "event_id": "5fcd6235-bf9d-496d-8de4-00595c67ac41", "order_id": "3b266bbe-d338-4de6-b438-16ca28645b86", "status": "failed", "attempts": 3, "error": "smtp down"}
+{"timestamp": "2026-03-31T01:28:15.309041+00:00", "event_id": "ff70dcf3-d8b1-42f7-934b-a91cdf7fbca1", "order_id": "27ea1967-e60e-43b0-9252-c1aecbdaf4cd", "status": "failed", "attempts": 3, "error": "[Errno 111] Connection refused"}
+{"timestamp": "2026-03-31T01:28:15.603387+00:00", "event_id": "f22fdf17-9c9b-418d-98a0-0ee3cb4b3a1f", "order_id": "dc44034f-3cfb-404f-9f1b-03476d51b042", "status": "failed", "attempts": 3, "error": "smtp down"}
+{"timestamp": "2026-03-31T01:29:32.029835+00:00", "event_id": "cb574030-c88f-488c-bb42-51d9d1028e78", "order_id": "842b99e4-f2ae-4486-bda5-199a492d58c0", "status": "failed", "attempts": 3, "error": "[Errno 111] Connection refused"}
+{"timestamp": "2026-03-31T01:29:32.303821+00:00", "event_id": "900ee90c-0f87-4be8-9c0e-4537855b1213", "order_id": "c5882943-1184-46cc-a13e-dcd5e1b1d467", "status": "failed", "attempts": 3, "error": "smtp down"}

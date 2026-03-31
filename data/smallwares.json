@@ -3,18 +3,8 @@
     "items": [
         {
             "id": "smallwares_0",
-            "name_en": "l1: English",
-            "name_es": "l2: Español"
-        },
-        {
-            "id": "smallwares_1",
-            "name_en": "@category: Smallwares",
-            "name_es": "@category: Utensilios"
-        },
-        {
-            "id": "smallwares_2",
-            "name_en": "Cheese shakers",
-            "name_es": "Agitadores para queso"
+            "name_english": "Cheese shakers",
+            "name_espa_ol": "Agitadores para queso"
         }
     ]
 }

@@ -434,6 +434,25 @@ document.addEventListener('click', () => closeDraftDropdown());
 // --- App Init ---
 async function initApp() {
     applyTheme();
+
+    try {
+        const res = await apiFetch(`${API_BASE}/languages`);
+        const data = await res.json();
+        if (data.success && data.languages) {
+            state.availableLanguages = data.languages;
+
+            // Set default language if not saved or invalid
+            if (!state.lang || !state.availableLanguages.find(l => l.code === state.lang)) {
+                state.lang = state.availableLanguages.length > 0 ? state.availableLanguages[0].code : 'english';
+            }
+
+            // Render Language dropdowns
+            renderLanguageDropdowns();
+        }
+    } catch (e) {
+        console.error("Failed to fetch languages:", e);
+    }
+
     applyLanguage();
 
     try {
@@ -470,10 +489,15 @@ async function initAppAfterAuth() {
     try {
         const res = await apiFetch(`${API_BASE}/status`);
         const data = await res.json();
-        const loc = data.location || "Falcones Pizza";
-        document.getElementById('htmlTitle').textContent = `${loc} Inventory`;
-        translations.en.appTitle = `${loc} Inventory`;
-        translations.es.appTitle = `Inventario ${loc}`;
+        const loc = data.location || (state.branding.brand_name || "Ordering App");
+        const titleText = `${loc} ${state.branding.app_title || "Ordering"}`;
+
+        document.getElementById('htmlTitle').textContent = titleText;
+        const metaTitle = document.getElementById('metaAppleTitle');
+        if (metaTitle) metaTitle.setAttribute("content", titleText);
+
+        translations.en.appTitle = titleText;
+        if (translations.es) translations.es.appTitle = titleText;
     } catch (e) {
         console.error("Failed to fetch status:", e);
     }
@@ -523,15 +547,20 @@ function applyBranding() {
     }
 
     if (b.app_title) {
-        translations.en.appTitle = b.app_title;
-        translations.es.appTitle = b.app_title;
+        if (translations.en) translations.en.appTitle = b.app_title;
+        if (translations.es) translations.es.appTitle = b.app_title;
         const appTitleEl = document.getElementById('appTitle');
         if (appTitleEl) appTitleEl.textContent = b.app_title;
-        document.getElementById('htmlTitle').textContent = b.app_title;
+
+        const htmlTitle = document.getElementById('htmlTitle');
+        if (htmlTitle) htmlTitle.textContent = b.app_title;
+
+        const metaTitle = document.getElementById('metaAppleTitle');
+        if (metaTitle) metaTitle.setAttribute("content", b.app_title);
     }
 
     if (b.icon_reference) {
-        const iconEl = document.querySelector('#pinScreen i');
+        const iconEl = document.getElementById('brandIcon');
         if (iconEl) {
             iconEl.setAttribute('data-lucide', b.icon_reference);
             if (window.lucide) lucide.createIcons();
@@ -563,16 +592,19 @@ function applyBranding() {
     }
 }
 
-function toggleLanguage() {
-    const dd = document.getElementById('langDropdown');
+function toggleLanguage(context) {
+    const dd = document.getElementById(context === 'login' ? 'langDropdownLogin' : 'langDropdown');
     if (dd) dd.classList.toggle('hidden');
 }
 
 window.setLanguage = function(lang) {
     state.lang = lang;
     localStorage.setItem('falcone_lang', state.lang);
-    const dd = document.getElementById('langDropdown');
-    if (dd) dd.classList.add('hidden');
+    const ddLogin = document.getElementById('langDropdownLogin');
+    if (ddLogin) ddLogin.classList.add('hidden');
+    const ddApp = document.getElementById('langDropdown');
+    if (ddApp) ddApp.classList.add('hidden');
+
     updateLangDropdownHighlight();
     applyLanguage();
 };
@@ -601,7 +633,7 @@ function applyTheme() {
 }
 
 function applyLanguage() {
-    const t = translations[state.lang];
+    const t = translations[state.lang] || translations.en;
     const setEl = (id, text, uiKey = null) => {
         const el = document.getElementById(id);
         if (el) {
@@ -636,7 +668,7 @@ function applyLanguage() {
 
     if (state.currentCategory) {
         const catConfig = state.categories.find(c => c.id === state.currentCategory);
-        if (catConfig) DOM.categoryTitle.textContent = catConfig[`label_${state.lang}`] || catConfig.label_en;
+        if (catConfig) DOM.categoryTitle.textContent = catConfig[`label_${state.lang}`] || catConfig.label || state.currentCategory;
         renderCategory(state.currentCategory);
     } else {
         renderDashboard();
@@ -653,7 +685,7 @@ function renderDashboard() {
     state.categories.forEach(cat => {
         const btn = document.createElement('button');
         btn.className = 'category-btn';
-        const displayLabel = cat[`label_${state.lang}`] || cat.label_en;
+        const displayLabel = cat[`label_${state.lang}`] || cat.label || cat.id;
         const isLucideIcon = /^[a-z][a-z0-9-]*$/.test(cat.icon || '');
         const iconHtml = isLucideIcon
             ? `<i data-lucide="${cat.icon}" class="category-icon text-${cat.color}-400"></i>`
@@ -679,7 +711,7 @@ async function loadCategory(categoryId) {
     DOM.btnBack.classList.remove('hidden');
 
     const catConfig = state.categories.find(c => c.id === categoryId);
-    DOM.categoryTitle.textContent = catConfig ? (catConfig[`label_${state.lang}`] || catConfig.label_en) : categoryId;
+    DOM.categoryTitle.textContent = catConfig ? (catConfig[`label_${state.lang}`] || catConfig.label || categoryId) : categoryId;
 
     DOM.itemList.innerHTML = '<div class="text-center py-8 text-[var(--text-dim)]"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i>Loading...</div>';
     if (window.lucide) lucide.createIcons();
@@ -714,7 +746,7 @@ function renderCategory(categoryId) {
         itemEl.className = 'item-card p-4 mb-3';
 
         const nameEl = document.createElement('span');
-        nameEl.textContent = item[`name_${state.lang}`] || item.name_en;
+        nameEl.textContent = item[`name_${state.lang}`] || item.name || "Unknown Item";
         const nameSafe = nameEl.textContent;
 
         const isEachSelected = item.unit === 'each' ? 'selected' : '';
@@ -906,8 +938,44 @@ DOM.btnConfirmOrder?.addEventListener('click', () => submitOrderPayload(false));
 DOM.btnSaveOrder?.addEventListener('click', () => submitOrderPayload(true));
 
 DOM.btnBack?.addEventListener('click', renderDashboard);
-DOM.btnToggleLangApp?.addEventListener('click', toggleLanguage);
+DOM.btnToggleLangApp?.addEventListener('click', () => toggleLanguage('app'));
 DOM.btnToggleTheme?.addEventListener('click', toggleTheme);
+
+function renderLanguageDropdowns() {
+    const langs = state.availableLanguages;
+    const btnToggleLangLogin = document.getElementById('btnToggleLangLogin');
+    const ddLogin = document.getElementById('langDropdownLogin');
+    const btnToggleLangApp = document.getElementById('btnToggleLangApp');
+    const ddApp = document.getElementById('langDropdown');
+
+    if (!langs || langs.length <= 1) {
+        if (btnToggleLangLogin) btnToggleLangLogin.classList.add('hidden');
+        if (btnToggleLangApp) btnToggleLangApp.classList.add('hidden');
+        return;
+    }
+
+    if (btnToggleLangLogin) btnToggleLangLogin.classList.remove('hidden');
+    if (btnToggleLangApp) btnToggleLangApp.classList.remove('hidden');
+
+    const renderOptions = (containerId) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = langs.map(l => `
+            <button onclick="setLanguage('${l.code}')" class="lang-option w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)] transition-colors flex items-center gap-2" data-lang="${l.code}">
+                ${escapeHtml(l.name)}
+            </button>
+        `).join('');
+    };
+
+    renderOptions('langDropdownLogin');
+    renderOptions('langDropdown');
+
+    // Bind toggle to login button inline because it's defined in html for login
+    if (btnToggleLangLogin) {
+        btnToggleLangLogin.onclick = () => toggleLanguage('login');
+    }
+}
+
 
 // --- Connectivity & PWA ---
 function updateConnectivityBanner() {
@@ -983,8 +1051,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
         const langDd = document.getElementById('langDropdown');
         const langBtn = document.getElementById('btnToggleLangApp');
-        if (langDd && !langDd.contains(e.target) && !langBtn.contains(e.target)) {
+        if (langDd && langBtn && !langDd.contains(e.target) && !langBtn.contains(e.target)) {
             langDd.classList.add('hidden');
+        }
+
+        const langDdLogin = document.getElementById('langDropdownLogin');
+        const langBtnLogin = document.getElementById('btnToggleLangLogin');
+        if (langDdLogin && langBtnLogin && !langDdLogin.contains(e.target) && !langBtnLogin.contains(e.target)) {
+            langDdLogin.classList.add('hidden');
         }
     });
 });

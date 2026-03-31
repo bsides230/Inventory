@@ -3,103 +3,93 @@
     "items": [
         {
             "id": "dairy_0",
-            "name_en": "l1: English",
-            "name_es": "l2: Español"
+            "name_english": "American Cheese Sliced White pkg.",
+            "name_espa_ol": "Queso americano blanco en rebanadas, paquete"
         },
         {
             "id": "dairy_1",
-            "name_en": "@category: Dairy",
-            "name_es": "@category: Lácteos"
+            "name_english": "American Cheese Sliced Yellow pkg.",
+            "name_espa_ol": "Queso americano amarillo en rebanadas, paquete"
         },
         {
             "id": "dairy_2",
-            "name_en": "American Cheese Sliced White pkg.",
-            "name_es": "Queso americano blanco en rebanadas, paquete"
+            "name_english": "Butter European 36/1lb.",
+            "name_espa_ol": "Mantequilla europea 36/1 lb."
         },
         {
             "id": "dairy_3",
-            "name_en": "American Cheese Sliced Yellow pkg.",
-            "name_es": "Queso americano amarillo en rebanadas, paquete"
+            "name_english": "Butter Unsalted 36/1lb.",
+            "name_espa_ol": "Mantequilla sin sal 36/1 lb."
         },
         {
             "id": "dairy_4",
-            "name_en": "Butter European 36/1lb.",
-            "name_es": "Mantequilla europea 36/1 lb."
+            "name_english": "Buttermilk 1cs.",
+            "name_espa_ol": "Suero de leche 1 caja"
         },
         {
             "id": "dairy_5",
-            "name_en": "Butter Unsalted 36/1lb.",
-            "name_es": "Mantequilla sin sal 36/1 lb."
+            "name_english": "Cream Cheese 10/3lb.",
+            "name_espa_ol": "Queso crema 10/3 lb."
         },
         {
             "id": "dairy_6",
-            "name_en": "Buttermilk 1cs.",
-            "name_es": "Suero de leche 1 caja"
+            "name_english": "Eggs 15 doz.",
+            "name_espa_ol": "Huevos 15 docenas"
         },
         {
             "id": "dairy_7",
-            "name_en": "Cream Cheese 10/3lb.",
-            "name_es": "Queso crema 10/3 lb."
+            "name_english": "Heavy Cream cs.",
+            "name_espa_ol": "Crema espesa (caja)"
         },
         {
             "id": "dairy_8",
-            "name_en": "Eggs 15 doz.",
-            "name_es": "Huevos 15 docenas"
+            "name_english": "Mozzarella BelGioioso Fresh 2/1lb.",
+            "name_espa_ol": "Mozzarella fresca BelGioioso 2/1 lb."
         },
         {
             "id": "dairy_9",
-            "name_en": "Heavy Cream cs.",
-            "name_es": "Crema espesa (caja)"
+            "name_english": "Mozzarella Loaf 8/6lb.",
+            "name_espa_ol": "Mozzarella tipo loaf 8/6 lb."
         },
         {
             "id": "dairy_10",
-            "name_en": "Mozzarella BelGioioso Fresh 2/1lb.",
-            "name_es": "Mozzarella fresca BelGioioso 2/1 lb."
+            "name_english": "Mozzarella Shredded 5lb.",
+            "name_espa_ol": "Mozzarella rallada 5 lb."
         },
         {
             "id": "dairy_11",
-            "name_en": "Mozzarella Loaf 8/6lb.",
-            "name_es": "Mozzarella tipo loaf 8/6 lb."
+            "name_english": "Parmesan Grated 5lb.",
+            "name_espa_ol": "Parmesano rallado 5 lb."
         },
         {
             "id": "dairy_12",
-            "name_en": "Mozzarella Shredded 5lb.",
-            "name_es": "Mozzarella rallada 5 lb."
+            "name_english": "Parmesan Shredded 5lb.",
+            "name_espa_ol": "Parmesano deshebrado 5 lb."
         },
         {
             "id": "dairy_13",
-            "name_en": "Parmesan Grated 5lb.",
-            "name_es": "Parmesano rallado 5 lb."
+            "name_english": "Provolone sliced pkg.",
+            "name_espa_ol": "Provolone en rebanadas, paquete"
         },
         {
             "id": "dairy_14",
-            "name_en": "Parmesan Shredded 5lb.",
-            "name_es": "Parmesano deshebrado 5 lb."
+            "name_english": "Ricotta Cheese 6/3lb.",
+            "name_espa_ol": "Queso ricotta 6/3 lb."
         },
         {
             "id": "dairy_15",
-            "name_en": "Provolone sliced pkg.",
-            "name_es": "Provolone en rebanadas, paquete"
+            "name_english": "Sour Cream 4/5lb.",
+            "name_espa_ol": "Crema agria 4/5 lb."
         },
         {
             "id": "dairy_16",
-            "name_en": "Ricotta Cheese 6/3lb.",
-            "name_es": "Queso ricotta 6/3 lb."
+            "name_english": "Sour Cream packets",
+            "name_espa_ol": "Sobres de crema agria"
         },
         {
             "id": "dairy_17",
-            "name_en": "Sour Cream 4/5lb.",
-            "name_es": "Crema agria 4/5 lb."
-        },
-        {
-            "id": "dairy_18",
-            "name_en": "Sour Cream packets",
-            "name_es": "Sobres de crema agria"
-        },
-        {
-            "id": "dairy_19",
-            "name_en": "Cheddar Cheese Shredded 5lb.",
-            "name_es": "Queso cheddar rallado 5 lb."
+            "name_english": "Cheddar Cheese Shredded 5lb.",
+            "name_espa_ol": "Queso cheddar rallado 5 lb."
         }
     ]
 }
