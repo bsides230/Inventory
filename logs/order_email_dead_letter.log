@@ -8,3 +8,4 @@
 {"timestamp": "2026-03-31T01:29:32.248117+00:00", "order_id": "842b99e4-f2ae-4486-bda5-199a492d58c0", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
 {"timestamp": "2026-03-31T03:43:06.046176+00:00", "order_id": "f6df0807-8fce-4db3-8956-6312eacd3cba", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
 {"timestamp": "2026-03-31T03:49:44.272356+00:00", "order_id": "7c0b2928-a2cf-4cb8-8f1e-64795867e9c0", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
+{"timestamp": "2026-03-31T06:55:26.202430+00:00", "order_id": "c7aaef40-0891-42df-806e-a007a78c20fd", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}

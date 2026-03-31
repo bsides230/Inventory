@@ -60,6 +60,66 @@ class FileOrderManager:
             self._write_json(path, order)
             return order
 
+    def get_orders(self) -> list:
+        orders = []
+        for file in self.orders_dir.glob("*.json"):
+            order = self._read_json(file)
+            if order:
+                orders.append(order)
+        orders.sort(key=lambda x: x.get("submitted_at", ""), reverse=True)
+        return orders
+
+    def update_order(self, user_id: str, order_id: str, items: list) -> dict:
+        path = self._get_order_path(user_id, order_id)
+        lock_path = self.orders_dir / f".{user_id}_{order_id}.lock"
+        with with_lock(lock_path):
+            order = self._read_json(path)
+            if not order:
+                return None
+            order["items"] = items
+            # Recalculate total if amounts are present
+            total_amount = sum(float(item.get("amount", 0.0) or 0.0) for item in items)
+            order["total_amount"] = total_amount
+            self._write_json(path, order)
+            return order
+
+    def delete_order(self, user_id: str, order_id: str) -> bool:
+        path = self._get_order_path(user_id, order_id)
+        lock_path = self.orders_dir / f".{user_id}_{order_id}.lock"
+        with with_lock(lock_path):
+            order = self._read_json(path)
+            if not order:
+                return False
+
+            # Remove the JSON file
+            try:
+                path.unlink(missing_ok=True)
+            except Exception:
+                pass
+
+            # Remove the export filename if it exists
+            export_filename = order.get("export_filename")
+            if export_filename:
+                # Could be in orders or orders/saved
+                parent_dir = self.orders_dir.parent
+                export_path = parent_dir / export_filename
+                saved_path = parent_dir / "saved" / export_filename
+                try:
+                    export_path.unlink(missing_ok=True)
+                    saved_path.unlink(missing_ok=True)
+                except Exception:
+                    pass
+
+            # Remove the state flag file
+            flags_dir = self.orders_dir.parent / "flags"
+            flag_path = flags_dir / f"{order_id}.state"
+            try:
+                flag_path.unlink(missing_ok=True)
+            except Exception:
+                pass
+
+            return True
+
     def get_item_frequencies(self, user_id: str = None) -> dict:
         frequencies = {}
         # Simple scan
