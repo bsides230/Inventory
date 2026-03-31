@@ -36,7 +36,7 @@ from rich.panel import Panel
 console = Console()
 
 ENV_FILE = ".env"
-SERVICE_FILE = "/etc/systemd/system/falcones-inventory.service"
+SERVICE_FILE = "/etc/systemd/system/example_brand-inventory.service"
 
 def generate_secret_key(length=32):
     alphabet = string.ascii_letters + string.digits
@@ -105,13 +105,13 @@ def setup_systemd():
         console.print("[yellow]Systemd setup is only supported on Linux.[/yellow]\n")
         return
 
-    install_service = Confirm.ask("Do you want to install Falcones Pizza Inventory as a systemd service (auto-start on boot)?", default=True)
+    install_service = Confirm.ask("Do you want to install Example Brand Inventory as a systemd service (auto-start on boot)?", default=True)
 
     if install_service:
         current_dir = os.path.abspath(os.getcwd())
         service_content = textwrap.dedent(f"""\
             [Unit]
-            Description=Falcones Pizza Inventory Service
+            Description=Example Brand Inventory Service
             After=network.target
 
             [Service]
@@ -126,13 +126,13 @@ def setup_systemd():
 
         try:
             # Create a temporary file and sudo cp it
-            tmp_service = "/tmp/falcones-inventory.service"
+            tmp_service = "/tmp/example_brand-inventory.service"
             with open(tmp_service, "w") as f:
                 f.write(service_content)
 
             subprocess.check_call(["sudo", "cp", tmp_service, SERVICE_FILE])
             subprocess.check_call(["sudo", "systemctl", "daemon-reload"])
-            subprocess.check_call(["sudo", "systemctl", "enable", "falcones-inventory.service"])
+            subprocess.check_call(["sudo", "systemctl", "enable", "example_brand-inventory.service"])
             os.remove(tmp_service)
             console.print("[green]Systemd service installed and enabled successfully.[/green]\n")
         except subprocess.CalledProcessError as e:
@@ -152,7 +152,7 @@ def start_application():
         console.print(f"[red]Failed to start application: {e}[/red]")
 
 def main():
-    console.print(Panel.fit("Falcones Pizza Inventory Deployment Wizard", style="bold green"))
+    console.print(Panel.fit("Example Brand Inventory Deployment Wizard", style="bold green"))
 
     setup_env()
     setup_systemd()

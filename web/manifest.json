@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Falcones Pizza Inventory",
+  "name": "Example Brand Pizza Inventory",
   "short_name": "Inventory",
-  "description": "Inventory management app for Falcones Pizza",
+  "description": "Inventory management app for Example Brand Pizza",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",

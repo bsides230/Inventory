@@ -1,6 +1,6 @@
 @echo off
 echo =======================================================
-echo Starting Falcone's Pizza Inventory
+echo Starting brand's Pizza Inventory
 echo =======================================================
 
 if not exist logs mkdir logs

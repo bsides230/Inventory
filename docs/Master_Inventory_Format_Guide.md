@@ -1,5 +1,5 @@
 # Master Inventory Format Guide
-## For Use with Falcones Pizza Inventory System
+## For Use with Example Brand Inventory System
 
 This document explains how to create the `Master.xlsx` file that powers the inventory app. It is written for humans and AI assistants that need to generate or update inventory data.
 

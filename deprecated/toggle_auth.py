@@ -7,7 +7,7 @@ def main():
 
     flag_file = flags_dir / "no_auth"
 
-    print("--- Falcone's Inventory Authentication Toggle ---")
+    print("--- brand's Inventory Authentication Toggle ---")
 
     if flag_file.exists():
         try:

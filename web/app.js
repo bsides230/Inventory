@@ -1,4 +1,4 @@
-// Falcone's Pizza Inventory - Frontend App Logic
+// Example Brand Inventory - Frontend App Logic
 
 const API_BASE = '/api';
 
@@ -58,17 +58,17 @@ const translations = {
 
 // --- State ---
 const state = {
-    lang: localStorage.getItem('falcone_lang') || 'en',
-    theme: localStorage.getItem('falcone_theme') || 'dark',
+    lang: localStorage.getItem('app_lang') || 'en',
+    theme: localStorage.getItem('app_theme') || 'dark',
     currentCategory: null,
     inventory: {},
     categories: [],
     deferredInstallPrompt: null,
-    token: localStorage.getItem('falcone_token') || null,
-    locationName: localStorage.getItem('falcone_location') || null,
-    locationPin: localStorage.getItem('falcone_pin') || null,
-    currentDraftId: parseInt(localStorage.getItem('falcone_draft_id') || '0') || null,
-    currentDraftName: localStorage.getItem('falcone_draft_name') || 'Draft',
+    token: localStorage.getItem('app_token') || null,
+    locationName: localStorage.getItem('app_location') || null,
+    locationPin: localStorage.getItem('app_pin') || null,
+    currentDraftId: parseInt(localStorage.getItem('app_draft_id') || '0') || null,
+    currentDraftName: localStorage.getItem('app_draft_name') || 'Draft',
     drafts: [],
     pinBuffer: '',
     uiLabels: {},
@@ -149,9 +149,9 @@ function updatePinDots() {
         const dot = document.getElementById(`pinDot${i}`);
         if (i < pinBuffer.length) {
             dot.classList.remove('border-[var(--color-border)]');
-            dot.classList.add('bg-falcone-red', 'border-falcone-red');
+            dot.classList.add('bg-brand-primary', 'border-brand-primary');
         } else {
-            dot.classList.remove('bg-falcone-red', 'border-falcone-red');
+            dot.classList.remove('bg-brand-primary', 'border-brand-primary');
             dot.classList.add('border-[var(--color-border)]');
         }
     }
@@ -169,9 +169,9 @@ async function submitPin(pin) {
             state.token = data.token;
             state.locationName = data.location_name;
             state.locationPin = data.pin;
-            localStorage.setItem('falcone_token', data.token);
-            localStorage.setItem('falcone_location', data.location_name);
-            localStorage.setItem('falcone_pin', data.pin);
+            localStorage.setItem('app_token', data.token);
+            localStorage.setItem('app_location', data.location_name);
+            localStorage.setItem('app_pin', data.pin);
             pinBuffer = '';
             updatePinDots();
             DOM.pinError.classList.add('hidden');
@@ -195,11 +195,11 @@ window.logout = function() {
     state.locationName = null;
     state.locationPin = null;
     state.currentDraftId = null;
-    localStorage.removeItem('falcone_token');
-    localStorage.removeItem('falcone_location');
-    localStorage.removeItem('falcone_pin');
-    localStorage.removeItem('falcone_draft_id');
-    localStorage.removeItem('falcone_draft_name');
+    localStorage.removeItem('app_token');
+    localStorage.removeItem('app_location');
+    localStorage.removeItem('app_pin');
+    localStorage.removeItem('app_draft_id');
+    localStorage.removeItem('app_draft_name');
     showPinScreen();
 };
 
@@ -294,8 +294,8 @@ function renderDraftDropdown() {
 window.selectDraft = async function(draftId, draftName) {
     state.currentDraftId = draftId;
     state.currentDraftName = draftName;
-    localStorage.setItem('falcone_draft_id', String(draftId));
-    localStorage.setItem('falcone_draft_name', draftName);
+    localStorage.setItem('app_draft_id', String(draftId));
+    localStorage.setItem('app_draft_name', draftName);
     DOM.currentDraftName.textContent = draftName;
     closeDraftDropdown();
     renderDraftDropdown();
@@ -372,7 +372,7 @@ window.confirmDraftName = async function() {
             });
             if (draftId === state.currentDraftId) {
                 state.currentDraftName = name;
-                localStorage.setItem('falcone_draft_name', name);
+                localStorage.setItem('app_draft_name', name);
                 DOM.currentDraftName.textContent = name;
             }
             await loadDrafts();
@@ -451,6 +451,22 @@ async function initApp() {
         }
     } catch (e) {
         console.error("Failed to fetch languages:", e);
+    }
+
+    try {
+        const uiTranslationsRes = await apiFetch(`${API_BASE}/ui-translations`);
+        const uiTranslationsData = await uiTranslationsRes.json();
+        if (uiTranslationsData.success && uiTranslationsData.translations) {
+            // Merge custom translations into frontend translations
+            for (const [langCode, customTranslations] of Object.entries(uiTranslationsData.translations)) {
+                if (!translations[langCode]) {
+                    translations[langCode] = {};
+                }
+                Object.assign(translations[langCode], customTranslations);
+            }
+        }
+    } catch (e) {
+        console.error("Failed to fetch ui-translations:", e);
     }
 
     applyLanguage();
@@ -599,7 +615,7 @@ function toggleLanguage(context) {
 
 window.setLanguage = function(lang) {
     state.lang = lang;
-    localStorage.setItem('falcone_lang', state.lang);
+    localStorage.setItem('app_lang', state.lang);
     const ddLogin = document.getElementById('langDropdownLogin');
     if (ddLogin) ddLogin.classList.add('hidden');
     const ddApp = document.getElementById('langDropdown');
@@ -619,7 +635,7 @@ function updateLangDropdownHighlight() {
 
 function toggleTheme() {
     state.theme = state.theme === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('falcone_theme', state.theme);
+    localStorage.setItem('app_theme', state.theme);
     applyTheme();
 }
 
@@ -910,7 +926,7 @@ async function submitOrderPayload(saveOnly = false) {
 
             // Submitted draft is now closed — reload drafts and pick a new one
             state.currentDraftId = null;
-            localStorage.removeItem('falcone_draft_id');
+            localStorage.removeItem('app_draft_id');
             await loadDrafts();
             if (state.drafts.length === 0) {
                 await window.createNewDraft();

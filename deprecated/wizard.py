@@ -53,7 +53,7 @@ def configure_port():
 
 def configure_auth():
     print("\n--- Authentication ---")
-    print("Falcone's Pizza Inventory uses username and 4-digit PIN for authentication.")
+    print("brand's Pizza Inventory uses username and 4-digit PIN for authentication.")
     print("By default, authentication is ON.")
     print("Run `toggle_auth.py` manually to turn it on/off anytime.")
     print("Or you can toggle it now.")
@@ -77,7 +77,7 @@ def configure_auth():
 
 def start_server():
     print("\n--- Launch ---")
-    choice = input("Start Falcone's Server now? (Y/n): ").strip().lower()
+    choice = input("Start brand's Server now? (Y/n): ").strip().lower()
     if choice in ['y', 'yes', '']:
         print("\nStarting Server...")
         try:
@@ -88,7 +88,7 @@ def start_server():
             print(f"Error starting server: {e}")
 
 def main():
-    print_header("FALCONE'S PIZZA WIZARD")
+    print_header("brand'S PIZZA WIZARD")
 
     if not install_dependencies():
         print("Dependency installation failed. Continuing, but app may not work.")

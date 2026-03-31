@@ -39,7 +39,7 @@ def test_email_delivery_retries_and_succeeds(tmp_path):
     export = tmp_path / "order.xlsx"
     result = service.send_order_email(
         order_id=10,
-        location="Falcones Pizza",
+        location="Example Brand",
         date="2026-03-25",
         is_rush=False,
         needed_by=None,
@@ -58,7 +58,7 @@ def test_email_delivery_logs_dead_letter_after_final_failure(tmp_path):
     export = tmp_path / "order.xlsx"
     result = service.send_order_email(
         order_id=11,
-        location="Falcones Pizza",
+        location="Example Brand",
         date="2026-03-25",
         is_rush=True,
         needed_by="8AM",

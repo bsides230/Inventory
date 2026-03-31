@@ -272,6 +272,54 @@ def convert_excel_to_json():
             logging.info("Updating categories.json")
             save_categories_config(config)
 
+        # --- Process UI Translations if UI_Translations.xlsx exists ---
+        ui_translations_file = ITEM_MASTER_DIR / "UI_Translations.xlsx"
+        if ui_translations_file.exists():
+            logging.info("Found UI_Translations.xlsx, processing...")
+            try:
+                xls_ui = pd.ExcelFile(ui_translations_file)
+                if len(xls_ui.sheet_names) > 0:
+                    df_ui = pd.read_excel(xls_ui, sheet_name=xls_ui.sheet_names[0], header=None)
+
+                    if not df_ui.empty and len(df_ui.columns) >= 2 and len(df_ui) >= 2:
+                        ui_translations = {}
+
+                        # Row 0: Headers (Languages)
+                        # Column 0: UI Keys
+                        row0_raw = df_ui.iloc[0].astype(str).str.strip().tolist()
+                        ui_lang_cols = {}
+
+                        for i, val in enumerate(row0_raw):
+                            if i == 0:
+                                continue # Column 0 is for keys
+                            if not val or val.lower() == 'nan':
+                                continue
+                            name = re.sub(r'^l\d+:\s*', '', val, flags=re.IGNORECASE).strip()
+                            code = re.sub(r'[^a-z0-9]', '_', name.lower())
+                            ui_lang_cols[code] = i
+                            ui_translations[code] = {}
+
+                        # Start from Row 1 for actual translations
+                        for row_idx in range(1, len(df_ui)):
+                            key = str(df_ui.iloc[row_idx, 0]).strip()
+                            if not key or key.lower() == 'nan':
+                                continue
+
+                            for lang_code, col_idx in ui_lang_cols.items():
+                                if col_idx < len(df_ui.columns):
+                                    val = df_ui.iloc[row_idx, col_idx]
+                                    if pd.notna(val) and str(val).lower() != 'nan' and str(val).strip():
+                                        ui_translations[lang_code][key] = str(val).strip()
+
+                        # Save UI translations
+                        ui_config_path = Path("config/ui_translations.json")
+                        ui_config_path.parent.mkdir(parents=True, exist_ok=True)
+                        with open(ui_config_path, "w", encoding="utf-8") as f:
+                            json.dump(ui_translations, f, indent=4, ensure_ascii=False)
+                        logging.info("Successfully processed UI_Translations.xlsx")
+            except Exception as e:
+                logging.error(f"Error processing UI_Translations.xlsx: {e}")
+
         # --- Cleanup: remove categories/data files not in the new master ---
         if use_master:
             processed_ids = set()

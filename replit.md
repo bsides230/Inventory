@@ -1,8 +1,8 @@
-# Falcones Pizza Inventory & Ordering System
+# Example Brand Inventory & Ordering System
 
 ## Overview
 
-A Progressive Web Application (PWA) for managing restaurant inventory and submitting orders at Falcones Pizza locations. Staff members browse inventory categories, add items to a draft order, and submit the order (which is emailed to configured recipients as an Excel attachment).
+A Progressive Web Application (PWA) for managing restaurant inventory and submitting orders at Example Brand locations. Staff members browse inventory categories, add items to a draft order, and submit the order (which is emailed to configured recipients as an Excel attachment).
 
 The system is currently in an active migration from a database-backed architecture to a fully file-backed runtime. The backend is FastAPI (Python), the frontend is a vanilla JS SPA served as static files, and all persistent state lives in local files (JSON drafts, JSONL event logs, XLSX order exports).
 
