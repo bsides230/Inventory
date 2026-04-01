@@ -1360,6 +1360,16 @@ async def admin_panel():
     return FileResponse("web/admin.html")
 
 
+@app.get("/viewer.html")
+async def get_viewer_html():
+    return FileResponse("web/viewer.html")
+
+
+@app.get("/viewer")
+async def get_viewer_alias():
+    return FileResponse("web/viewer.html")
+
+
 app.mount("/", StaticFiles(directory="web", html=True), name="web")
 
 
