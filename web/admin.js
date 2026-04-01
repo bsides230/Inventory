@@ -1,7 +1,7 @@
 // Admin Panel Logic
 
 const API_BASE = '/api';
-let adminToken = sessionStorage.getItem('admin_token') || null;
+let adminToken = localStorage.getItem('admin_token') || null;
 
 // --- Admin Language ---
 const adminTranslations = {
@@ -140,7 +140,7 @@ async function adminLogin() {
         const data = await res.json();
         if (res.ok && data.token) {
             adminToken = data.token;
-            sessionStorage.setItem('admin_token', data.token);
+            localStorage.setItem('admin_token', data.token);
             showAdminApp();
         } else {
             errEl.textContent = data.detail || 'Incorrect password.';
@@ -154,7 +154,7 @@ async function adminLogin() {
 
 function adminLogout() {
     adminToken = null;
-    sessionStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_token');
     document.getElementById('adminLoginScreen').classList.remove('hidden');
     document.getElementById('adminApp').classList.add('hidden');
 }

@@ -1,5 +1,5 @@
 const API_BASE = '/api';
-let adminToken = sessionStorage.getItem('admin_token') || null;
+let adminToken = localStorage.getItem('admin_token') || null;
 
 // --- Authentication & Theme ---
 if (!adminToken) {
@@ -42,7 +42,7 @@ async function loadOrders() {
             headers: { 'Authorization': `Bearer ${getAdminToken()}` }
         });
         if (res.status === 401 || res.status === 403) {
-            sessionStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_token');
             window.location.href = '/admin';
             return;
         }
