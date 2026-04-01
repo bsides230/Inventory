@@ -50,6 +50,7 @@ async function loadOrders() {
             const data = await res.json();
             ordersData = data.orders || [];
             renderOrderDropdown();
+            renderAllOrdersList();
         } else {
             console.error("Failed to load orders");
         }
@@ -93,6 +94,61 @@ function renderOrderDropdown() {
             </button>
         `;
     }).join('');
+}
+
+function renderAllOrdersList() {
+    const listEl = document.getElementById('allOrdersList');
+
+    if (ordersData.length === 0) {
+        listEl.innerHTML = `
+            <div class="text-center text-[var(--color-text-secondary)] py-12">
+                <i data-lucide="clipboard-list" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                <p>No orders found.</p>
+            </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+    }
+
+    listEl.innerHTML = ordersData.map(order => {
+        const locName = escapeHtml(order.location_name || order.location_pin);
+        const dateStr = new Date(order.submitted_at).toLocaleString();
+        const isRush = order.is_rush;
+        const totalAmount = order.total_amount || 0;
+
+        let totalItemsCount = 0;
+        (order.items || []).forEach(item => {
+            totalItemsCount += (parseFloat(item.quantity) || 0);
+        });
+
+        return `
+            <div class="bg-[var(--bg-panel)] rounded-lg border border-[var(--color-border)] p-4 hover:border-brand-primary transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm" onclick="selectOrder('${order.id}')">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-bold text-[var(--color-text-primary)]">${locName}</span>
+                        ${isRush ? `<span class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">Rush Order</span>` : ''}
+                    </div>
+                    <div class="text-xs text-[var(--color-text-secondary)] flex items-center gap-3">
+                        <span><i data-lucide="clock" class="w-3 h-3 inline"></i> ${dateStr}</span>
+                        <span><i data-lucide="package" class="w-3 h-3 inline"></i> ${totalItemsCount} items</span>
+                        ${order.needed_by ? `<span><i data-lucide="calendar" class="w-3 h-3 inline"></i> Needed by: <span class="text-[var(--color-text-primary)]">${escapeHtml(order.needed_by)}</span></span>` : ''}
+                    </div>
+                </div>
+                <div class="text-right flex items-center gap-4 sm:flex-col sm:gap-1 sm:items-end">
+                    <div class="text-xs text-[var(--color-text-secondary)] uppercase font-bold tracking-wider hidden sm:block">Total</div>
+                    <div class="text-lg font-bold text-green-500">$${totalAmount.toFixed(2)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+}
+
+function clearSelectedOrder() {
+    currentSelectedOrderId = null;
+    document.getElementById('currentOrderName').textContent = "Select Order...";
+    renderSelectedOrder();
 }
 
 function selectOrder(orderId) {
@@ -258,6 +314,7 @@ async function deleteOrder(userId, orderId) {
             ordersData = ordersData.filter(o => o.id !== orderId);
             currentSelectedOrderId = null;
             renderOrderDropdown();
+            renderAllOrdersList();
             renderSelectedOrder();
         } else {
             alert("Failed to delete order.");
