@@ -8,9 +8,13 @@ from file_safety import write_json_atomic, with_lock
 class FileOrderManager:
     def __init__(self, orders_dir: Path):
         self.orders_dir = orders_dir / "submitted"
+        self.inventory_dir = orders_dir / "inventory_counts" / "submitted"
         self.orders_dir.mkdir(parents=True, exist_ok=True)
+        self.inventory_dir.mkdir(parents=True, exist_ok=True)
 
-    def _get_order_path(self, user_id: str, order_id: str) -> Path:
+    def _get_order_path(self, user_id: str, order_id: str, type: str = "order") -> Path:
+        if type == "inventory":
+            return self.inventory_dir / f"{user_id}_{order_id}.json"
         return self.orders_dir / f"{user_id}_{order_id}.json"
 
     def _read_json(self, path: Path) -> dict:
@@ -22,7 +26,7 @@ class FileOrderManager:
     def _write_json(self, path: Path, data: dict):
         write_json_atomic(path, data)
 
-    def create_order(self, user_id: str, draft: dict, export_filename: str = None, location_pin: str = None, location_name: str = None) -> dict:
+    def create_order(self, user_id: str, draft: dict, export_filename: str = None, location_pin: str = None, location_name: str = None, type: str = "order") -> dict:
         order_id = str(uuid.uuid4())
         now = datetime.now(timezone.utc).isoformat()
         order = {
@@ -30,6 +34,7 @@ class FileOrderManager:
             "user_id": user_id,
             "location_pin": location_pin,
             "location_name": location_name,
+            "type": type,
             "is_rush": draft.get("is_rush", False),
             "needed_by": draft.get("needed_by"),
             "export_filename": export_filename,
@@ -41,13 +46,18 @@ class FileOrderManager:
             "submitted_at": now
         }
 
-        path = self._get_order_path(user_id, order_id)
+        path = self._get_order_path(user_id, order_id, type)
         self._write_json(path, order)
         return order
 
     def update_delivery_status(self, user_id: str, order_id: str, status: str, attempts: int, error: str = None) -> dict:
-        path = self._get_order_path(user_id, order_id)
-        lock_path = self.orders_dir / f".{user_id}_{order_id}.lock"
+        path = self._get_order_path(user_id, order_id, "order")
+        if not path.exists():
+            path = self._get_order_path(user_id, order_id, "inventory")
+            lock_path = self.inventory_dir / f".{user_id}_{order_id}.lock"
+        else:
+            lock_path = self.orders_dir / f".{user_id}_{order_id}.lock"
+
         with with_lock(lock_path):
             order = self._read_json(path)
             if not order:
@@ -64,28 +74,45 @@ class FileOrderManager:
         orders = []
         for file in self.orders_dir.glob("*.json"):
             order = self._read_json(file)
-            if order:
+            if order and not order.get("archived", False):
+                orders.append(order)
+        for file in self.inventory_dir.glob("*.json"):
+            order = self._read_json(file)
+            if order and not order.get("archived", False):
                 orders.append(order)
         orders.sort(key=lambda x: x.get("submitted_at", ""), reverse=True)
         return orders
 
-    def update_order(self, user_id: str, order_id: str, items: list) -> dict:
-        path = self._get_order_path(user_id, order_id)
-        lock_path = self.orders_dir / f".{user_id}_{order_id}.lock"
+    def update_order(self, user_id: str, order_id: str, items: list = None, archived: bool = None) -> dict:
+        path = self._get_order_path(user_id, order_id, "order")
+        if not path.exists():
+            path = self._get_order_path(user_id, order_id, "inventory")
+            lock_path = self.inventory_dir / f".{user_id}_{order_id}.lock"
+        else:
+            lock_path = self.orders_dir / f".{user_id}_{order_id}.lock"
+
         with with_lock(lock_path):
             order = self._read_json(path)
             if not order:
                 return None
-            order["items"] = items
-            # Recalculate total if amounts are present
-            total_amount = sum(float(item.get("amount", 0.0) or 0.0) for item in items)
-            order["total_amount"] = total_amount
+            if items is not None:
+                order["items"] = items
+                # Recalculate total if amounts are present
+                total_amount = sum(float(item.get("amount", 0.0) or 0.0) for item in items)
+                order["total_amount"] = total_amount
+            if archived is not None:
+                order["archived"] = archived
             self._write_json(path, order)
             return order
 
     def delete_order(self, user_id: str, order_id: str) -> bool:
-        path = self._get_order_path(user_id, order_id)
-        lock_path = self.orders_dir / f".{user_id}_{order_id}.lock"
+        path = self._get_order_path(user_id, order_id, "order")
+        if not path.exists():
+            path = self._get_order_path(user_id, order_id, "inventory")
+            lock_path = self.inventory_dir / f".{user_id}_{order_id}.lock"
+        else:
+            lock_path = self.orders_dir / f".{user_id}_{order_id}.lock"
+
         with with_lock(lock_path):
             order = self._read_json(path)
             if not order:
@@ -100,10 +127,15 @@ class FileOrderManager:
             # Remove the export filename if it exists
             export_filename = order.get("export_filename")
             if export_filename:
-                # Could be in orders or orders/saved
+                # Could be in orders or orders/saved or orders/inventory_counts
                 parent_dir = self.orders_dir.parent
-                export_path = parent_dir / export_filename
-                saved_path = parent_dir / "saved" / export_filename
+                if order.get("type") == "inventory":
+                    export_path = parent_dir / "inventory_counts" / export_filename
+                    saved_path = parent_dir / "inventory_counts" / "saved" / export_filename
+                else:
+                    export_path = parent_dir / export_filename
+                    saved_path = parent_dir / "saved" / export_filename
+
                 try:
                     export_path.unlink(missing_ok=True)
                     saved_path.unlink(missing_ok=True)

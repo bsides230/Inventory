@@ -28,6 +28,13 @@ const translations = {
         refreshCta: "Refresh",
         pinPrompt: "Enter your location PIN to continue",
         invalidPin: "Invalid PIN. Please try again.",
+        suggestItem: "Suggest New Item",
+        suggestItemSubtitle: "Suggest an item to be added to this category.",
+        suggestItemPlaceholder: "Item name...",
+        btnSubmit: "Submit",
+        btnCancel: "Cancel",
+        count: "Count",
+        par: "Par",
     },
     es: {
         appTitle: "Inventario",
@@ -53,12 +60,20 @@ const translations = {
         refreshCta: "Actualizar",
         pinPrompt: "Ingresa el PIN de tu ubicación para continuar",
         invalidPin: "PIN inválido. Inténtalo de nuevo.",
+        suggestItem: "Sugerir Nuevo Artículo",
+        suggestItemSubtitle: "Sugerir un artículo para agregar a esta categoría.",
+        suggestItemPlaceholder: "Nombre del artículo...",
+        btnSubmit: "Enviar",
+        btnCancel: "Cancelar",
+        count: "Contar",
+        par: "Par",
     }
 };
 
 // --- State ---
 const state = {
     lang: localStorage.getItem('app_lang') || 'en',
+    appMode: localStorage.getItem('app_mode') || 'ordering', // 'ordering' or 'inventory'
     theme: localStorage.getItem('app_theme') || 'dark',
     currentCategory: null,
     inventory: {},
@@ -123,6 +138,12 @@ const DOM = {
     draftNameModal: document.getElementById('draftNameModal'),
     draftNameModalTitle: document.getElementById('draftNameModalTitle'),
     draftNameInput: document.getElementById('draftNameInput'),
+    pendingItemModal: document.getElementById('pendingItemModal'),
+    pendingItemInput: document.getElementById('pendingItemInput'),
+    pendingItemError: document.getElementById('pendingItemError'),
+    pendingItemModalTitle: document.getElementById('pendingItemModalTitle'),
+    pendingItemModalSubtitle: document.getElementById('pendingItemModalSubtitle'),
+    btnToggleMode: document.getElementById('btnToggleMode'),
 };
 
 // --- PIN Auth ---
@@ -637,6 +658,34 @@ function updateLangDropdownHighlight() {
     });
 }
 
+function toggleAppMode() {
+    state.appMode = state.appMode === 'ordering' ? 'inventory' : 'ordering';
+    localStorage.setItem('app_mode', state.appMode);
+
+    // Update button visual
+    updateAppModeVisual();
+
+    // Re-render current category to show different inputs
+    if (state.currentCategory) {
+        renderCategory(state.currentCategory);
+    }
+}
+
+function updateAppModeVisual() {
+    if (DOM.btnToggleMode) {
+        if (state.appMode === 'inventory') {
+            DOM.btnToggleMode.classList.add('text-[var(--brand-red)]', 'bg-[var(--brand-red-dim)]');
+            DOM.btnToggleMode.classList.remove('text-[var(--color-text-secondary)]');
+            DOM.btnToggleMode.innerHTML = `<i data-lucide="clipboard-check" class="w-5 h-5"></i>`;
+        } else {
+            DOM.btnToggleMode.classList.remove('text-[var(--brand-red)]', 'bg-[var(--brand-red-dim)]');
+            DOM.btnToggleMode.classList.add('text-[var(--color-text-secondary)]');
+            DOM.btnToggleMode.innerHTML = `<i data-lucide="clipboard-list" class="w-5 h-5"></i>`;
+        }
+        if (window.lucide) lucide.createIcons();
+    }
+}
+
 function toggleTheme() {
     state.theme = state.theme === 'dark' ? 'light' : 'dark';
     localStorage.setItem('app_theme', state.theme);
@@ -685,7 +734,17 @@ function applyLanguage() {
     if (DOM.btnDismissIosInstall) DOM.btnDismissIosInstall.textContent = t.gotItCta;
     if (DOM.btnRefreshApp) DOM.btnRefreshApp.textContent = t.refreshCta;
 
+    if (DOM.pendingItemModalTitle) DOM.pendingItemModalTitle.textContent = t.suggestItem;
+    if (DOM.pendingItemModalSubtitle) DOM.pendingItemModalSubtitle.textContent = t.suggestItemSubtitle;
+    if (DOM.pendingItemInput) DOM.pendingItemInput.placeholder = t.suggestItemPlaceholder;
+
+    const btnSubmitPI = document.getElementById('btnSubmitPendingItem');
+    const btnCancelPI = document.getElementById('btnCancelPendingItem');
+    if (btnSubmitPI) btnSubmitPI.textContent = t.btnSubmit;
+    if (btnCancelPI) btnCancelPI.textContent = t.btnCancel;
+
     updateLangDropdownHighlight();
+    updateAppModeVisual();
 
     if (state.currentCategory) {
         const catConfig = state.categories.find(c => c.id === state.currentCategory);
@@ -770,31 +829,54 @@ function renderCategory(categoryId) {
         nameEl.textContent = item[`name_${state.lang}`] || item.name || "Unknown Item";
         const nameSafe = nameEl.textContent;
 
-        const isEachSelected = item.unit === 'each' ? 'selected' : '';
-        const isCaseSelected = item.unit === 'case' ? 'selected' : '';
-
-        itemEl.innerHTML = `
-            <div class="flex-1 pr-4">
-                <h3 class="text-lg font-bold text-[var(--text-head)] leading-tight">${escapeHtml(nameSafe)}</h3>
-                <div class="mt-2">
-                    <select onchange="updateUnit('${categoryId}', ${index}, this.value)" class="bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-body)] py-1 px-2 focus:ring-1 focus:ring-[var(--brand-red)] outline-none mono">
-                        <option value="each" ${isEachSelected}>${t.each}</option>
-                        <option value="case" ${isCaseSelected}>${t.case}</option>
-                    </select>
+        if (state.appMode === 'inventory') {
+            itemEl.innerHTML = `
+                <div class="flex-1 pr-4 mb-2 sm:mb-0">
+                    <h3 class="text-lg font-bold text-[var(--text-head)] leading-tight mb-2">${escapeHtml(nameSafe)}</h3>
                 </div>
-            </div>
-            <div class="item-controls flex items-center gap-3 shrink-0">
-                <button class="qty-btn w-10 h-10 flex items-center justify-center hover:bg-[var(--border-color)] rounded-lg transition-colors mono" onclick="updateQty('${categoryId}', ${index}, -1)">
-                    <i data-lucide="minus" class="w-5 h-5"></i>
-                </button>
-                <input type="number" class="qty-input w-16 text-center bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg py-2 font-bold mono" value="${item.qty}" min="0"
-                    onchange="setQty('${categoryId}', ${index}, this.value)"
-                    onfocus="this.select()">
-                <button class="qty-btn w-10 h-10 flex items-center justify-center hover:bg-[var(--border-color)] rounded-lg transition-colors mono" onclick="updateQty('${categoryId}', ${index}, 1)">
-                    <i data-lucide="plus" class="w-5 h-5"></i>
-                </button>
-            </div>
-        `;
+                <div class="flex flex-row gap-4 shrink-0 mt-2 sm:mt-0 items-center w-full sm:w-auto justify-end">
+                    <div class="flex flex-col items-center">
+                        <label class="text-[10px] uppercase text-[var(--text-dim)] font-bold mb-1">${t.count}</label>
+                        <input type="number" class="w-16 text-center bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg py-2 font-bold mono" value="${item.count || 0}" min="0"
+                            onchange="setInventoryValue('${categoryId}', ${index}, 'count', this.value)"
+                            onfocus="this.select()">
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <label class="text-[10px] uppercase text-[var(--text-dim)] font-bold mb-1">${t.par}</label>
+                        <input type="number" class="w-16 text-center bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg py-2 font-bold mono" value="${item.par || 0}" min="0"
+                            onchange="setInventoryValue('${categoryId}', ${index}, 'par', this.value)"
+                            onfocus="this.select()">
+                    </div>
+                </div>
+            `;
+            itemEl.classList.add('flex-col', 'sm:flex-row');
+        } else {
+            const isEachSelected = item.unit === 'each' ? 'selected' : '';
+            const isCaseSelected = item.unit === 'case' ? 'selected' : '';
+
+            itemEl.innerHTML = `
+                <div class="flex-1 pr-4">
+                    <h3 class="text-lg font-bold text-[var(--text-head)] leading-tight">${escapeHtml(nameSafe)}</h3>
+                    <div class="mt-2">
+                        <select onchange="updateUnit('${categoryId}', ${index}, this.value)" class="bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-body)] py-1 px-2 focus:ring-1 focus:ring-[var(--brand-red)] outline-none mono">
+                            <option value="each" ${isEachSelected}>${t.each}</option>
+                            <option value="case" ${isCaseSelected}>${t.case}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="item-controls flex items-center gap-3 shrink-0">
+                    <button class="qty-btn w-10 h-10 flex items-center justify-center hover:bg-[var(--border-color)] rounded-lg transition-colors mono" onclick="updateQty('${categoryId}', ${index}, -1)">
+                        <i data-lucide="minus" class="w-5 h-5"></i>
+                    </button>
+                    <input type="number" class="qty-input w-16 text-center bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg py-2 font-bold mono" value="${item.qty}" min="0"
+                        onchange="setQty('${categoryId}', ${index}, this.value)"
+                        onfocus="this.select()">
+                    <button class="qty-btn w-10 h-10 flex items-center justify-center hover:bg-[var(--border-color)] rounded-lg transition-colors mono" onclick="updateQty('${categoryId}', ${index}, 1)">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `;
+        }
         DOM.itemList.appendChild(itemEl);
     });
 
@@ -812,7 +894,13 @@ async function syncItemUpdate(item) {
         await apiFetch(`${API_BASE}/inventory/${state.currentCategory}/update${draftParam}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: item.id, qty: item.qty, unit: item.unit }),
+            body: JSON.stringify({
+                id: item.id,
+                qty: item.qty || 0,
+                unit: item.unit || 'each',
+                count: item.count || 0,
+                par: item.par || 0
+            }),
         });
         // Refresh draft item count in background
         loadDrafts();
@@ -843,6 +931,56 @@ window.updateUnit = function(categoryId, itemIndex, value) {
     const item = state.inventory[categoryId][itemIndex];
     item.unit = value;
     syncItemUpdate(item);
+};
+
+window.setInventoryValue = function(categoryId, itemIndex, field, value) {
+    const item = state.inventory[categoryId][itemIndex];
+    let val = parseInt(value);
+    if (isNaN(val) || val < 0) val = 0;
+    item[field] = val;
+    syncItemUpdate(item);
+};
+
+// --- Pending Item Logic ---
+window.openPendingItemModal = function() {
+    DOM.pendingItemInput.value = '';
+    DOM.pendingItemError.classList.add('hidden');
+    DOM.pendingItemModal.classList.remove('hidden');
+    setTimeout(() => DOM.pendingItemInput.focus(), 50);
+};
+
+window.closePendingItemModal = function() {
+    DOM.pendingItemModal.classList.add('hidden');
+};
+
+window.submitPendingItem = async function() {
+    const name = DOM.pendingItemInput.value.trim();
+    if (!name) return;
+
+    const btnSubmit = document.getElementById('btnSubmitPendingItem');
+    btnSubmit.disabled = true;
+
+    try {
+        const res = await apiFetch(`${API_BASE}/inventory/pending`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name, category_id: state.currentCategory }),
+        });
+        const data = await res.json();
+        if (data.success) {
+            closePendingItemModal();
+            alert("Item suggestion submitted successfully!");
+        } else {
+            DOM.pendingItemError.textContent = "Error submitting item.";
+            DOM.pendingItemError.classList.remove('hidden');
+        }
+    } catch (e) {
+        console.error("Failed to submit pending item:", e);
+        DOM.pendingItemError.textContent = "Network error.";
+        DOM.pendingItemError.classList.remove('hidden');
+    } finally {
+        btnSubmit.disabled = false;
+    }
 };
 
 // --- Order Submission ---
@@ -898,6 +1036,7 @@ async function submitOrderPayload(saveOnly = false) {
                 needed_by: neededBy || null,
                 draft_id: state.currentDraftId || null,
                 save_only: saveOnly,
+                mode: state.appMode,
             }),
         });
         const data = await res.json();

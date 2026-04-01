@@ -423,9 +423,16 @@ class AdminLoginRequest(BaseModel):
 
 class UpdateItemRequest(BaseModel):
     id: str
-    qty: int
-    unit: str
+    qty: Optional[int] = 0
+    unit: Optional[str] = "each"
+    count: Optional[int] = 0
+    par: Optional[int] = 0
     version: Optional[int] = None
+
+
+class PendingItemRequest(BaseModel):
+    name: str
+    category_id: str
 
 
 class SubmitOrderRequest(BaseModel):
@@ -434,6 +441,7 @@ class SubmitOrderRequest(BaseModel):
     needed_by: Optional[str] = None
     draft_id: Optional[int] = None
     save_only: bool = False
+    mode: Optional[str] = "ordering"
 
 
 class NewDraftRequest(BaseModel):
@@ -615,7 +623,7 @@ async def get_categories():
 
     for cat_id in cat_ids:
         cat_data = get_inventory_category(cat_id)
-        if cat_data:
+        if cat_data and isinstance(cat_data, dict):
             cat_config = config.get(cat_id, {})
             cat_obj = {
                 "id": cat_id,
@@ -642,7 +650,7 @@ async def get_inventory(
 
     if cat_data:
         items = cat_data["items"]
-        draft_quantities: dict[str, tuple[int, str]] = {}
+        draft_quantities: dict[str, tuple[int, str, int, int]] = {}
         item_frequencies: dict[str, int] = {}
         if user:
             draft_manager = FileDraftManager(DRAFTS_DIR)
@@ -654,15 +662,28 @@ async def get_inventory(
                 draft = draft_manager.get_active_draft(user.external_id)
 
             if draft:
-                draft_quantities = {item["item_id"]: (item["quantity"], item["unit"]) for item in draft.get("items", [])}
+                draft_quantities = {
+                    item["item_id"]: (
+                        item.get("quantity", 0),
+                        item.get("unit", "each"),
+                        item.get("count", 0),
+                        item.get("par", 0)
+                    ) for item in draft.get("items", [])
+                }
 
             user_frequencies = order_manager.get_item_frequencies(user.external_id)
             item_frequencies = user_frequencies.get(user.external_id, {})
 
         response_items = []
         for item in items:
-            quantity, unit = draft_quantities.get(item["id"], (0, "each"))
-            response_items.append({**item, "qty": quantity, "unit": unit})
+            quantity, unit, count, par = draft_quantities.get(item["id"], (0, "each", 0, 0))
+            response_items.append({
+                **item,
+                "qty": quantity,
+                "unit": unit,
+                "count": count,
+                "par": par
+            })
 
         if user:
             response_items.sort(key=lambda x: item_frequencies.get(x["id"], 0), reverse=True)
@@ -705,7 +726,7 @@ async def update_inventory(
     items = draft.get("items", [])
     item_idx = next((i for i, v in enumerate(items) if v["item_id"] == request.id), None)
 
-    if request.qty <= 0:
+    if request.qty <= 0 and request.count <= 0 and request.par <= 0:
         if item_idx is not None:
             items.pop(item_idx)
     else:
@@ -714,6 +735,8 @@ async def update_inventory(
             "category_id": category_lower,
             "quantity": request.qty,
             "unit": request.unit,
+            "count": request.count,
+            "par": request.par,
         }
         # Copy over name translations dynamically
         for k, v in target_item.items():
@@ -722,6 +745,7 @@ async def update_inventory(
         # Fallback item_name for backwards compatibility
         primary_lang = get_available_languages()[0]["code"] if get_available_languages() else "english"
         new_item["item_name"] = target_item.get(f"name_{primary_lang}", target_item.get("name", request.id))
+
         if item_idx is not None:
             items[item_idx] = new_item
         else:
@@ -739,6 +763,36 @@ async def update_inventory(
 
     return {"success": True}
 
+
+@app.post("/api/inventory/pending")
+async def add_pending_item(
+    request: PendingItemRequest,
+    user: AuthenticatedUser = Depends(get_required_authenticated_user),
+):
+    pending_file = DATA_DIR / "pending_items.json"
+
+    # Read existing
+    pending_items = []
+    if pending_file.exists():
+        try:
+            with open(pending_file, "r", encoding="utf-8") as f:
+                pending_items = json.load(f)
+        except Exception:
+            pass
+
+    # Append new item
+    new_item = {
+        "id": str(uuid.uuid4()),
+        "name": request.name,
+        "category_id": request.category_id,
+        "submitted_by": user.external_id,
+        "submitted_at": datetime.now(timezone.utc).isoformat()
+    }
+    pending_items.append(new_item)
+
+    # Save back atomic
+    write_json_atomic(pending_file, pending_items)
+    return {"success": True, "item": new_item}
 
 # --- Draft Management Endpoints ---
 @app.get("/api/drafts")
@@ -808,19 +862,31 @@ async def submit_order(
     location_pin = getattr(user, "external_id", "").replace("pin_", "") if user.external_id.startswith("pin_") else None
     location_name = user.display_name
 
-    if request.save_only:
-        ts = datetime.now().strftime("%Y-%m-%d_%H-%M")
-        filename = f"order_{ts}.xlsx"
-        saved_dir = ORDERS_DIR / "saved"
-        saved_dir.mkdir(parents=True, exist_ok=True)
-        filepath = saved_dir / filename
-    else:
-        if request.is_rush and request.needed_by:
-            filename = f"{location} URGENT ORDER by {request.needed_by}.xlsx"
+    if request.mode == "inventory":
+        date_str = request.date.replace("/", "-")
+        filename = f"{location} Inventory Count {date_str}.xlsx"
+        if request.save_only:
+            saved_dir = ORDERS_DIR / "inventory_counts" / "saved"
+            saved_dir.mkdir(parents=True, exist_ok=True)
+            filepath = saved_dir / filename
         else:
-            date_str = request.date.replace("/", "-")
-            filename = f"{location} Example Brand Order {date_str}.xlsx"
-        filepath = ORDERS_DIR / filename
+            counts_dir = ORDERS_DIR / "inventory_counts"
+            counts_dir.mkdir(parents=True, exist_ok=True)
+            filepath = counts_dir / filename
+    else:
+        if request.save_only:
+            ts = datetime.now().strftime("%Y-%m-%d_%H-%M")
+            filename = f"order_{ts}.xlsx"
+            saved_dir = ORDERS_DIR / "saved"
+            saved_dir.mkdir(parents=True, exist_ok=True)
+            filepath = saved_dir / filename
+        else:
+            if request.is_rush and request.needed_by:
+                filename = f"{location} URGENT ORDER by {request.needed_by}.xlsx"
+            else:
+                date_str = request.date.replace("/", "-")
+                filename = f"{location} Example Brand Order {date_str}.xlsx"
+            filepath = ORDERS_DIR / filename
 
     try:
         draft_manager = FileDraftManager(DRAFTS_DIR)
@@ -850,11 +916,19 @@ async def submit_order(
             item_name = draft_item.get("item_name", "")
             if output_lang == "es":
                 item_name = draft_item.get("item_name_es") or draft_item.get("item_name", "")
-            items_by_category.setdefault(category_label, []).append({
-                "Item": item_name,
-                "Quantity": draft_item["quantity"],
-                "Unit": draft_item["unit"],
-            })
+
+            if request.mode == "inventory":
+                items_by_category.setdefault(category_label, []).append({
+                    "Item": item_name,
+                    "Count": draft_item.get("count", 0),
+                    "Par": draft_item.get("par", 0),
+                })
+            else:
+                items_by_category.setdefault(category_label, []).append({
+                    "Item": item_name,
+                    "Quantity": draft_item.get("quantity", 0),
+                    "Unit": draft_item.get("unit", "each"),
+                })
 
         with pd.ExcelWriter(filepath, engine="openpyxl") as writer:
             for cat_label in sorted(items_by_category.keys()):
@@ -883,6 +957,7 @@ async def submit_order(
             export_filename=filename,
             location_pin=location_pin,
             location_name=location_name,
+            type=request.mode
         )
 
         # Write orders/flags/<order_id>.state as submitted
@@ -1034,6 +1109,18 @@ async def update_admin_order(
         return {"success": True, "order": updated_order}
     raise HTTPException(status_code=404, detail="Order not found")
 
+@app.post("/api/admin/orders/{user_id}/{order_id}/archive")
+async def archive_admin_order(
+    user_id: str,
+    order_id: str,
+    _=Depends(get_required_admin),
+):
+    order_manager = FileOrderManager(ORDERS_DIR)
+    updated_order = order_manager.update_order(user_id, order_id, archived=True)
+    if updated_order:
+        return {"success": True, "message": "Order archived"}
+    raise HTTPException(status_code=404, detail="Order not found")
+
 @app.delete("/api/admin/orders/{user_id}/{order_id}")
 async def delete_admin_order(
     user_id: str,
@@ -1102,6 +1189,35 @@ async def admin_download_frequency_report(
 
 
 # --- Admin Endpoints ---
+@app.get("/api/admin/pending_items")
+async def admin_get_pending_items(_=Depends(get_required_admin)):
+    pending_file = DATA_DIR / "pending_items.json"
+    pending_items = []
+    if pending_file.exists():
+        try:
+            with open(pending_file, "r", encoding="utf-8") as f:
+                pending_items = json.load(f)
+        except Exception as exc:
+            logger.error("Error reading pending_items.json: %s", exc, exc_info=True)
+    return {"success": True, "items": pending_items}
+
+@app.delete("/api/admin/pending_items/{item_id}")
+async def admin_delete_pending_item(item_id: str, _=Depends(get_required_admin)):
+    pending_file = DATA_DIR / "pending_items.json"
+    if pending_file.exists():
+        try:
+            with open(pending_file, "r", encoding="utf-8") as f:
+                pending_items = json.load(f)
+
+            pending_items = [item for item in pending_items if item["id"] != item_id]
+            write_json_atomic(pending_file, pending_items)
+            return {"success": True}
+        except Exception as exc:
+            logger.error("Error updating pending_items.json: %s", exc, exc_info=True)
+            raise HTTPException(status_code=500, detail="Internal error")
+    raise HTTPException(status_code=404, detail="Pending items file not found")
+
+
 @app.get("/api/admin/aggregation")
 async def admin_get_aggregation(_=Depends(get_required_admin)):
     locations = load_locations()

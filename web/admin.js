@@ -21,6 +21,7 @@ const adminTranslations = {
         'hdr-smtp': 'SMTP Settings',
         'hdr-recipients': 'Order Recipients',
         'hdr-settings': 'App Settings',
+        'tab-pending-items': 'Pending Items',
         'hdr-download-master': 'Download Master Inventory File',
         'hdr-frequency': 'Download Frequency Report',
         'hdr-reset': 'Reset Inventory Data',
@@ -60,6 +61,7 @@ const adminTranslations = {
         'hdr-smtp': 'Configuración SMTP',
         'hdr-recipients': 'Destinatarios de Pedidos',
         'hdr-settings': 'Ajustes de la Aplicación',
+        'tab-pending-items': 'Artículos Pendientes',
         'hdr-download-master': 'Descargar Archivo Maestro',
         'hdr-frequency': 'Descargar Reporte de Frecuencia',
         'hdr-reset': 'Restablecer Datos de Inventario',
@@ -305,8 +307,61 @@ function switchTab(tabName) {
     if (tabEl) tabEl.classList.remove('hidden');
     document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
 
+    if (tabName === 'pending-items') loadPendingItems();
+
     if (window.lucide) lucide.createIcons();
 }
+
+// --- Pending Items ---
+async function loadPendingItems() {
+    const listEl = document.getElementById('pendingItemsList');
+    listEl.innerHTML = '<div class="text-[var(--color-text-secondary)] text-sm text-center py-4">Loading...</div>';
+
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/pending_items`);
+        const data = await res.json();
+
+        if (data.success) {
+            if (data.items.length === 0) {
+                listEl.innerHTML = '<div class="text-[var(--color-text-secondary)] text-sm text-center py-4">No pending items.</div>';
+                return;
+            }
+
+            listEl.innerHTML = data.items.map(item => `
+                <div class="flex items-center justify-between gap-4 bg-[var(--color-bg-body)] border border-[var(--color-border)] p-4 rounded-lg">
+                    <div>
+                        <div class="font-bold text-[var(--color-text-primary)] text-lg">${escapeHtml(item.name)}</div>
+                        <div class="text-sm text-[var(--color-text-secondary)]">Category: <span class="text-[var(--color-text-primary)]">${escapeHtml(item.category_id)}</span></div>
+                        <div class="text-xs text-[var(--color-text-secondary)] mt-1">Suggested by: ${escapeHtml(item.submitted_by)} &bull; ${new Date(item.submitted_at).toLocaleDateString()}</div>
+                    </div>
+                    <button onclick="deletePendingItem('${item.id}')" class="p-2 text-[var(--color-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors rounded-lg border border-[var(--color-border)] hover:border-red-500" title="Delete">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `).join('');
+            if (window.lucide) lucide.createIcons();
+        }
+    } catch (e) {
+        console.error("Failed to load pending items", e);
+        listEl.innerHTML = '<div class="text-red-500 text-sm text-center py-4">Failed to load items.</div>';
+    }
+}
+
+async function deletePendingItem(id) {
+    if (!confirm('Are you sure you want to delete this pending item?')) return;
+    try {
+        const res = await adminApiFetch(`${API_BASE}/admin/pending_items/${id}`, {
+            method: 'DELETE',
+        });
+        if (res.ok) {
+            loadPendingItems();
+        }
+    } catch (e) {
+        console.error("Failed to delete pending item", e);
+        alert("Failed to delete item.");
+    }
+}
+
 
 // --- Inventory / Upload ---
 let _selectedMasterFile = null;

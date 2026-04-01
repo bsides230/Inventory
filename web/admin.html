@@ -103,6 +103,9 @@
                         <button class="admin-tab w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-border)] transition-colors flex items-center gap-2" data-tab="inventory" onclick="switchTab('inventory')">
                             <i data-lucide="package" class="w-4 h-4"></i> <span data-i18n="tab-inventory">Inventory</span>
                         </button>
+                        <button class="admin-tab w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-border)] transition-colors flex items-center gap-2" data-tab="pending-items" onclick="switchTab('pending-items')">
+                            <i data-lucide="inbox" class="w-4 h-4"></i> <span data-i18n="tab-pending-items">Pending Items</span>
+                        </button>
                     </div>
                 </div>
 
@@ -178,6 +181,23 @@
                     <div id="analyticsContent" class="space-y-2">
                         <!-- Items and frequencies will be rendered here -->
                         <div class="text-[var(--color-text-secondary)] text-sm text-center py-4">Select a location to view data.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Items Tab -->
+            <div id="tab-pending-items" class="tab-content hidden space-y-6">
+                <div class="admin-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="inbox" class="w-6 h-6 text-brand-primary"></i>
+                        <h2 class="text-lg font-bold">Suggested New Items</h2>
+                    </div>
+                    <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                        Items suggested by users to be added to the inventory. Verify translations and add them to your Master.xlsx file, then delete them here once processed.
+                    </p>
+
+                    <div id="pendingItemsList" class="space-y-3">
+                        <div class="text-[var(--color-text-secondary)] text-sm text-center py-4">Loading...</div>
                     </div>
                 </div>
             </div>
