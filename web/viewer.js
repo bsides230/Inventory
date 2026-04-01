@@ -84,10 +84,13 @@ function renderOrderDropdown() {
         const dateStr = new Date(order.submitted_at).toLocaleString();
         const locName = escapeHtml(order.location_name || order.location_pin);
 
+        const isInventory = order.type === 'inventory';
+
         return `
             <button onclick="selectOrder('${order.id}')" class="w-full text-left px-4 py-3 hover:bg-[var(--color-border)] transition-colors border-b border-[var(--color-border)] last:border-0">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="font-bold text-sm text-[var(--color-text-primary)] truncate">${locName}</span>
+                    ${isInventory ? `<span class="bg-brand-primary text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide shrink-0">Inv</span>` : ''}
                     ${isRush ? `<span class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide shrink-0">Rush</span>` : ''}
                 </div>
                 <div class="text-xs text-[var(--color-text-secondary)]">${dateStr}</div>
@@ -114,11 +117,16 @@ function renderAllOrdersList() {
         const locName = escapeHtml(order.location_name || order.location_pin);
         const dateStr = new Date(order.submitted_at).toLocaleString();
         const isRush = order.is_rush;
+        const isInventory = order.type === 'inventory';
         const totalAmount = order.total_amount || 0;
 
         let totalItemsCount = 0;
         (order.items || []).forEach(item => {
-            totalItemsCount += (parseFloat(item.quantity) || 0);
+            if (isInventory) {
+                totalItemsCount++; // Just count unique items for inventory
+            } else {
+                totalItemsCount += (parseFloat(item.quantity) || 0);
+            }
         });
 
         return `
@@ -126,6 +134,7 @@ function renderAllOrdersList() {
                 <div>
                     <div class="flex items-center gap-2 mb-1">
                         <span class="font-bold text-[var(--color-text-primary)]">${locName}</span>
+                        ${isInventory ? `<span class="bg-brand-primary text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">Inventory Count</span>` : ''}
                         ${isRush ? `<span class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">Rush Order</span>` : ''}
                     </div>
                     <div class="text-xs text-[var(--color-text-secondary)] flex items-center gap-3">
@@ -134,10 +143,12 @@ function renderAllOrdersList() {
                         ${order.needed_by ? `<span><i data-lucide="calendar" class="w-3 h-3 inline"></i> Needed by: <span class="text-[var(--color-text-primary)]">${escapeHtml(order.needed_by)}</span></span>` : ''}
                     </div>
                 </div>
+                ${!isInventory ? `
                 <div class="text-right flex items-center gap-4 sm:flex-col sm:gap-1 sm:items-end">
                     <div class="text-xs text-[var(--color-text-secondary)] uppercase font-bold tracking-wider hidden sm:block">Total</div>
                     <div class="text-lg font-bold text-green-500">$${totalAmount.toFixed(2)}</div>
                 </div>
+                ` : ''}
             </div>
         `;
     }).join('');
@@ -180,9 +191,15 @@ function renderSelectedOrder() {
 
     // Header info
     document.getElementById('viewOrderLocation').textContent = locName;
-    const badge = document.getElementById('viewOrderRushBadge');
-    if (order.is_rush) badge.classList.remove('hidden');
-    else badge.classList.add('hidden');
+
+    const isInventory = order.type === 'inventory';
+    const invBadge = document.getElementById('viewOrderTypeBadge');
+    if (isInventory) invBadge.classList.remove('hidden');
+    else invBadge.classList.add('hidden');
+
+    const rushBadge = document.getElementById('viewOrderRushBadge');
+    if (order.is_rush) rushBadge.classList.remove('hidden');
+    else rushBadge.classList.add('hidden');
 
     document.getElementById('viewOrderDate').textContent = dateStr;
 
@@ -194,38 +211,71 @@ function renderSelectedOrder() {
         neededByContainer.classList.add('hidden');
     }
 
-    const totalAmount = order.total_amount || 0;
-    document.getElementById('viewOrderTotal').textContent = `$${totalAmount.toFixed(2)}`;
+    const totalContainer = document.getElementById('viewOrderTotalContainer');
+    if (isInventory) {
+        totalContainer.classList.add('hidden');
+    } else {
+        totalContainer.classList.remove('hidden');
+        const totalAmount = order.total_amount || 0;
+        document.getElementById('viewOrderTotal').textContent = `$${totalAmount.toFixed(2)}`;
+    }
 
     // Items
     const itemsContainer = document.getElementById('viewOrderItems');
     let itemsHtml = '';
 
-    (order.items || []).forEach((item, itemIdx) => {
-        const isChecked = item.checked || false;
-        const amount = item.amount || '';
-        itemsHtml += `
-            <div class="flex items-center justify-between gap-3 p-3 bg-[var(--color-bg-body)] rounded border border-[var(--color-border)] hover:border-brand-primary transition-colors">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <input type="checkbox" id="check-${order.id}-${itemIdx}" class="w-5 h-5 rounded border-[var(--color-border)] text-brand-primary focus:ring-brand-primary bg-transparent accent-brand-primary cursor-pointer shrink-0" ${isChecked ? 'checked' : ''} onchange="updateOrderItem('${order.id}', ${itemIdx}, 'check', this.checked)">
-                    <label for="check-${order.id}-${itemIdx}" class="flex-1 min-w-0 cursor-pointer ${isChecked ? 'line-through text-[var(--color-text-secondary)]' : 'text-[var(--color-text-primary)]'}">
-                        <div class="font-medium text-sm truncate">${escapeHtml(item.item_name)}</div>
-                        <div class="text-xs text-[var(--color-text-secondary)]">${item.quantity} ${item.unit} &bull; ${escapeHtml(item.category_id)}</div>
-                    </label>
+    if (isInventory) {
+        (order.items || []).forEach((item, itemIdx) => {
+            itemsHtml += `
+                <div class="flex items-center justify-between gap-3 p-3 bg-[var(--color-bg-body)] rounded border border-[var(--color-border)] hover:border-brand-primary transition-colors">
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-sm truncate text-[var(--color-text-primary)]">${escapeHtml(item.item_name)}</div>
+                        <div class="text-xs text-[var(--color-text-secondary)]">${escapeHtml(item.category_id)}</div>
+                    </div>
+                    <div class="flex items-center gap-6 shrink-0 font-mono">
+                        <div class="text-center">
+                            <div class="text-[10px] text-[var(--text-dim)] uppercase">Count</div>
+                            <div class="text-lg font-bold text-[var(--brand-red)]">${item.count || 0}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-[10px] text-[var(--text-dim)] uppercase">Par</div>
+                            <div class="text-lg font-bold">${item.par || 0}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    <span class="text-sm font-medium text-[var(--color-text-secondary)]">$</span>
-                    <input type="number" step="0.01" min="0" placeholder="0.00" class="bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:border-brand-primary outline-none w-24 text-right py-1 px-2 font-mono text-sm" value="${amount}" oninput="debounceUpdateOrderItem('${order.id}', ${itemIdx}, 'amount', this.value)">
+            `;
+        });
+    } else {
+        (order.items || []).forEach((item, itemIdx) => {
+            const isChecked = item.checked || false;
+            const amount = item.amount || '';
+            itemsHtml += `
+                <div class="flex items-center justify-between gap-3 p-3 bg-[var(--color-bg-body)] rounded border border-[var(--color-border)] hover:border-brand-primary transition-colors">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <input type="checkbox" id="check-${order.id}-${itemIdx}" class="w-5 h-5 rounded border-[var(--color-border)] text-brand-primary focus:ring-brand-primary bg-transparent accent-brand-primary cursor-pointer shrink-0" ${isChecked ? 'checked' : ''} onchange="updateOrderItem('${order.id}', ${itemIdx}, 'check', this.checked)">
+                        <label for="check-${order.id}-${itemIdx}" class="flex-1 min-w-0 cursor-pointer ${isChecked ? 'line-through text-[var(--color-text-secondary)]' : 'text-[var(--color-text-primary)]'}">
+                            <div class="font-medium text-sm truncate">${escapeHtml(item.item_name)}</div>
+                            <div class="text-xs text-[var(--color-text-secondary)]">${item.quantity} ${item.unit} &bull; ${escapeHtml(item.category_id)}</div>
+                        </label>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-sm font-medium text-[var(--color-text-secondary)]">$</span>
+                        <input type="number" step="0.01" min="0" placeholder="0.00" class="bg-[var(--color-bg-body)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:border-brand-primary outline-none w-24 text-right py-1 px-2 font-mono text-sm" value="${amount}" oninput="debounceUpdateOrderItem('${order.id}', ${itemIdx}, 'amount', this.value)">
+                    </div>
                 </div>
-            </div>
-        `;
-    });
+            `;
+        });
+    }
 
     itemsContainer.innerHTML = itemsHtml;
 
     // Set up delete button
     const deleteBtn = document.getElementById('btnDeleteOrder');
     deleteBtn.onclick = () => deleteOrder(order.user_id, order.id);
+
+    // Set up archive button
+    const archiveBtn = document.getElementById('btnArchiveOrder');
+    archiveBtn.onclick = () => archiveOrder(order.user_id, order.id);
 
     if (window.lucide) lucide.createIcons();
 }
@@ -300,7 +350,7 @@ async function saveOrderState(orderId) {
 }
 
 async function deleteOrder(userId, orderId) {
-    if (!confirm("Are you sure you want to delete this order? This will delete all instances of that order in the history.")) {
+    if (!confirm("Are you sure you want to delete this? This will delete all instances of it in the history.")) {
         return;
     }
 
@@ -317,11 +367,37 @@ async function deleteOrder(userId, orderId) {
             renderAllOrdersList();
             renderSelectedOrder();
         } else {
-            alert("Failed to delete order.");
+            alert("Failed to delete.");
         }
     } catch (e) {
-        console.error("Error deleting order", e);
-        alert("Error deleting order.");
+        console.error("Error deleting", e);
+        alert("Error deleting.");
+    }
+}
+
+async function archiveOrder(userId, orderId) {
+    if (!confirm("Are you sure you want to archive this? It will be removed from this view but remain in the backend files.")) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/admin/orders/${userId}/${orderId}/archive`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getAdminToken()}` }
+        });
+
+        if (res.ok) {
+            ordersData = ordersData.filter(o => o.id !== orderId);
+            currentSelectedOrderId = null;
+            renderOrderDropdown();
+            renderAllOrdersList();
+            renderSelectedOrder();
+        } else {
+            alert("Failed to archive.");
+        }
+    } catch (e) {
+        console.error("Error archiving", e);
+        alert("Error archiving.");
     }
 }
 

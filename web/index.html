@@ -131,6 +131,12 @@
                 </button>
 
                 <div class="relative">
+                    <button id="btnToggleMode" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--brand-red)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Toggle Mode" aria-label="Toggle Mode" onclick="toggleAppMode()">
+                        <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="relative">
                     <button id="btnToggleLangApp" class="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors rounded-lg active:bg-[var(--color-border)]" title="Language" aria-label="Language">
                         <i data-lucide="languages" class="w-5 h-5"></i>
                     </button>
@@ -192,7 +198,12 @@
                     </button>
                     <div class="flex justify-between items-center flex-1 min-w-0">
                         <h2 id="categoryTitle" class="display-serif text-2xl font-bold text-[var(--brand-red)] capitalize truncate">Category Name</h2>
-                        <span id="categoryCount" class="tag shrink-0 ml-2">0 items</span>
+                        <div class="flex items-center gap-2">
+                            <span id="categoryCount" class="tag shrink-0 ml-2">0 items</span>
+                            <button id="btnAddPendingItem" onclick="openPendingItemModal()" class="p-1 text-[var(--color-text-secondary)] hover:text-[var(--brand-red)] transition-colors rounded-lg border border-[var(--color-border)] hover:border-[var(--brand-red-dim)]" title="Suggest New Item">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div id="itemList" class="space-y-3"></div>
@@ -238,6 +249,23 @@
                         <span id="labelConfirm">Confirm Order</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Pending Item Modal -->
+    <div id="pendingItemModal" class="absolute inset-0 z-50 bg-black/80 flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-sm bg-[var(--bg-panel)] rounded-2xl shadow-2xl border border-[var(--border-color)] p-6">
+            <h2 id="pendingItemModalTitle" class="display-serif text-lg font-bold mb-2">Suggest New Item</h2>
+            <p id="pendingItemModalSubtitle" class="text-sm text-[var(--text-dim)] mb-4">Suggest an item to be added to this category.</p>
+            <input type="text" id="pendingItemInput" maxlength="64"
+                placeholder="Item name..."
+                class="w-full bg-[var(--bg-core)] border border-[var(--border-color)] rounded-lg p-3 text-[var(--text-body)] focus:border-[var(--brand-red)] outline-none mb-4 mono"
+                onkeydown="if(event.key==='Enter')submitPendingItem();if(event.key==='Escape')closePendingItemModal();">
+            <div id="pendingItemError" class="hidden text-[var(--brand-red)] text-sm text-center mb-4"></div>
+            <div class="flex justify-end gap-3">
+                <button onclick="closePendingItemModal()" class="btn-secondary" id="btnCancelPendingItem">Cancel</button>
+                <button onclick="submitPendingItem()" class="btn-primary" id="btnSubmitPendingItem">Submit</button>
             </div>
         </div>
     </div>

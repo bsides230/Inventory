@@ -9,3 +9,7 @@
 {"timestamp": "2026-03-31T03:43:06.046176+00:00", "order_id": "f6df0807-8fce-4db3-8956-6312eacd3cba", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
 {"timestamp": "2026-03-31T03:49:44.272356+00:00", "order_id": "7c0b2928-a2cf-4cb8-8f1e-64795867e9c0", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
 {"timestamp": "2026-03-31T06:55:26.202430+00:00", "order_id": "c7aaef40-0891-42df-806e-a007a78c20fd", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
+{"timestamp": "2026-04-01T07:19:37.426943+00:00", "order_id": "d660ccca-3cf2-43e5-835b-fd0dea5546b2", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
+{"timestamp": "2026-04-01T07:20:30.244405+00:00", "order_id": "25f5dbd1-bb81-47e7-89b6-ea1b35e9de6f", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
+{"timestamp": "2026-04-01T07:20:59.436434+00:00", "order_id": "f8a3ac2f-25b3-4a71-b0d7-44c53221790b", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
+{"timestamp": "2026-04-01T07:31:59.033890+00:00", "order_id": "dce3a003-8f6f-4231-98b4-9062f18b3fe7", "recipients": ["ops@example.com"], "error": "[Errno 111] Connection refused"}
