@@ -905,24 +905,6 @@ async function submitOrderPayload(saveOnly = false) {
         if (data.success) {
             DOM.orderModal.classList.add('hidden');
 
-            if (data.filename) {
-                try {
-                    const dlRes = await apiFetch(`${API_BASE}/download/order/${encodeURIComponent(data.filename)}`);
-                    if (!dlRes.ok) throw new Error(`Download failed: ${dlRes.status}`);
-                    const blob = await dlRes.blob();
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = data.filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                } catch (dlErr) {
-                    console.error("Download failed:", dlErr);
-                }
-            }
-
             if (saveOnly) {
                 alert(`Order saved!\nLocation: ${state.locationName}\nFile: ${data.filename}`);
             } else {
