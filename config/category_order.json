@@ -1,0 +1,16 @@
+{
+    "order": [
+        "beverages",
+        "alcohol",
+        "cleaning",
+        "dairy",
+        "disposables",
+        "dry_grocery",
+        "fountain_bib",
+        "frozen_&_refrigerated",
+        "meats",
+        "prepared",
+        "produce",
+        "smallwares"
+    ]
+}

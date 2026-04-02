@@ -1346,12 +1346,13 @@ async def admin_get_category_order(_=Depends(get_required_admin)):
     categories = []
     for cat_id in cat_ids:
         cat_data = get_inventory_category(cat_id)
-        if cat_data:
+        if cat_data and isinstance(cat_data, dict):
             cat_config = config.get(cat_id, {})
             categories.append({
                 "id": cat_id,
-                "label_en": cat_config.get("label_en", cat_config.get("label", cat_data["label"])),
-                "label_es": cat_config.get("label_es", cat_config.get("label", cat_data["label"])),
+                "label": cat_config.get("label", cat_data.get("label", cat_id)),
+                "icon": cat_config.get("icon", "box"),
+                "color": cat_config.get("color", "gray"),
             })
     return {"success": True, "categories": categories}
 

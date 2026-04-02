@@ -463,7 +463,6 @@ async function rebuildInventory() {
 }
 
 // --- Category Order ---
-let draggedCategory = null;
 
 async function loadCategoryOrder() {
     const listEl = document.getElementById('categoryOrderList');
@@ -491,7 +490,6 @@ function renderCategoryOrderList(categories) {
             : `<span class="category-icon" style="line-height:1; display:flex; align-items:center; justify-content:center;">${cat.icon || '📦'}</span>`;
         return `
         <div class="category-drag-item category-btn cursor-move relative"
-             draggable="true"
              data-id="${escapeHtml(cat.id)}">
             <div class="pointer-events-none w-full h-full flex flex-col">
                 ${iconHtml}
@@ -504,61 +502,23 @@ function renderCategoryOrderList(categories) {
         `;
     }).join('');
 
-    // Add drag and drop event listeners
-    const items = listEl.querySelectorAll('.category-drag-item');
-    items.forEach(item => {
-        item.addEventListener('dragstart', handleDragStart);
-        item.addEventListener('dragover', handleDragOver);
-        item.addEventListener('drop', handleDrop);
-        item.addEventListener('dragend', handleDragEnd);
-    });
-
-    if (window.lucide) lucide.createIcons();
-}
-
-function handleDragStart(e) {
-    draggedCategory = this;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.innerHTML);
-    this.classList.add('opacity-50');
-}
-
-function handleDragOver(e) {
-    if (e.preventDefault) {
-        e.preventDefault(); // Necessary. Allows us to drop.
-    }
-    e.dataTransfer.dropEffect = 'move';
-    return false;
-}
-
-function handleDrop(e) {
-    if (e.stopPropagation) {
-        e.stopPropagation(); // Stops the browser from redirecting.
-    }
-    if (draggedCategory !== this) {
-        const list = document.getElementById('categoryOrderList');
-        const items = Array.from(list.querySelectorAll('.category-drag-item'));
-        const draggedIdx = items.indexOf(draggedCategory);
-        const droppedIdx = items.indexOf(this);
-
-        if (draggedIdx < droppedIdx) {
-            this.parentNode.insertBefore(draggedCategory, this.nextSibling);
-        } else {
-            this.parentNode.insertBefore(draggedCategory, this);
-        }
-
-        // Update numbers
-        const newItems = Array.from(list.querySelectorAll('.category-drag-item'));
-        newItems.forEach((item, idx) => {
-            const badge = item.querySelector('.index-badge');
-            if (badge) badge.textContent = idx + 1;
+    // Initialize SortableJS
+    if (window.Sortable) {
+        Sortable.create(listEl, {
+            animation: 150,
+            ghostClass: 'opacity-50',
+            onEnd: function () {
+                // Update numbers
+                const newItems = Array.from(listEl.querySelectorAll('.category-drag-item'));
+                newItems.forEach((item, idx) => {
+                    const badge = item.querySelector('.index-badge');
+                    if (badge) badge.textContent = idx + 1;
+                });
+            }
         });
     }
-    return false;
-}
 
-function handleDragEnd(e) {
-    this.classList.remove('opacity-50');
+    if (window.lucide) lucide.createIcons();
 }
 
 async function saveCategoryOrder() {
